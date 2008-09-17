@@ -1,0 +1,15 @@
+DumpRake
+========
+
+Tasks to dump and restore.
+
+Example
+=======
+
+db:dump:create
+db:dump:restore
+db:dump:restore V=12345678901234
+db:dump:restore:last
+db:dump:restore:first
+
+Copyright (c) 2008 [name of plugin creator], released under the MIT license
