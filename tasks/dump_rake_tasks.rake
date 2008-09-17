@@ -5,24 +5,22 @@ namespace :db do
       Dump.create
     end
 
-    # desc 'Restore db dump, use V=xxxxxxxxxxxxxx to select which dump to use (last is the default)'
-    desc 'Restore last db dump'
+    desc 'Restore db dump, use V=xxxxxxxxxxxxxx to select which dump to use (last is the default)'
     task :restore => [:environment, 'db:schema:load'] do
-      Dump.restore
-      # (ENV['V'] ? ENV['V'] : :last)
+      Dump.restore(ENV['V'] ? ENV['V'] : :last)
     end
 
-    # namespace :restore do
-    #   desc 'Restore to last dump'
-    #   task :last => :environment do
-    #     Dump.restore(:last)
-    #   end
-    # 
-    #   desc 'Restore to first dump'
-    #   task :first => :environment do
-    #     Dump.restore(:first)
-    #   end
-    # end
+    namespace :restore do
+      desc 'Restore to last dump'
+      task :last => [:environment, 'db:schema:load'] do
+        Dump.restore(:last)
+      end
+
+      desc 'Restore to first dump'
+      task :first => [:environment, 'db:schema:load'] do
+        Dump.restore(:first)
+      end
+    end
   end
 end
 
@@ -45,8 +43,26 @@ class Dump
     end
   end
 
-  def self.restore
-    path = Dir.glob(File.join(RAILS_ROOT, 'db', 'dump', '*')).sort.last
+  def self.restore(version)
+    path_mask = File.join(RAILS_ROOT, 'db', 'dump', '%s')
+    pathes = Dir.glob(path_mask % '*').sort
+
+    path = case version
+      when :last
+        pathes.last
+      when :first
+        pathes.first
+      else
+        if File.directory?(path_mask % version.to_s)
+          path_mask % version.to_s
+        else
+          versions = pathes.map{ |p| File.basename(p) }
+          puts "Avaliable versions: #{versions.join(', ')}"
+          return
+        end
+    end
+    
+    puts "Restoring version #{File.basename(path)}"
 
     interesting_tables.each do |table|
       ActiveRecord::Base.transaction do
