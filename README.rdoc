@@ -4,8 +4,8 @@ Tasks to dump and restore.
 
 == Examples
 
-db:dump:create
-db:dump:restore
-db:dump:restore V=12345678901234
-db:dump:restore:last
-db:dump:restore:first
+  db:dump:create
+  db:dump:restore
+  db:dump:restore V=12345678901234
+  db:dump:restore:last
+  db:dump:restore:first
