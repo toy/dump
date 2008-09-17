@@ -47,29 +47,31 @@ class Dump
     path_mask = File.join(RAILS_ROOT, 'db', 'dump', '%s')
     pathes = Dir.glob(path_mask % '*').sort
 
-    path = case version
-      when :last
-        pathes.last
-      when :first
-        pathes.first
-      else
-        if File.directory?(path_mask % version.to_s)
-          path_mask % version.to_s
-        else
-          versions = pathes.map{ |p| File.basename(p) }
-          puts "Avaliable versions: #{versions.join(', ')}"
-          return
-        end
+    path = if version == :last
+      pathes.last
+    elsif version == :first
+      pathes.first
+    elsif File.directory?(path_mask % version.to_s)
+      path_mask % version.to_s
     end
-    
-    puts "Restoring version #{File.basename(path)}"
 
-    interesting_tables.each do |table|
-      ActiveRecord::Base.transaction do
-        puts "Loading #{table}"
-        YAML.load_file(File.join(path, "#{table}.yml")).each do |fixture|
-          ActiveRecord::Base.connection.execute "INSERT INTO #{table} (#{fixture.keys.join(",")}) VALUES (#{fixture.values.collect { |value| ActiveRecord::Base.connection.quote(value) }.join(",")})", 'Fixture Insert'
+    if path
+      puts "Restoring version #{File.basename(path)}"
+
+      interesting_tables.each do |table|
+        ActiveRecord::Base.transaction do
+          puts "Loading #{table}"
+          YAML.load_file(File.join(path, "#{table}.yml")).each do |fixture|
+            ActiveRecord::Base.connection.execute "INSERT INTO #{table} (#{fixture.keys.join(",")}) VALUES (#{fixture.values.collect { |value| ActiveRecord::Base.connection.quote(value) }.join(",")})", 'Fixture Insert'
+          end
         end
+      end
+    else
+      if pathes.length > 0
+        versions = pathes.map{ |p| File.basename(p) }
+        puts "Avaliable versions: #{versions.join(', ')}"
+      else
+        puts "No versions avaliable"
       end
     end
   end
