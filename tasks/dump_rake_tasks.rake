@@ -62,8 +62,8 @@ class Dump
         ActiveRecord::Base.transaction do
           puts "Loading #{table}"
           YAML.load_file(File.join(path, "#{table}.yml")).each do |fixture|
-            keys = fixture.keys.join(',')
-            values = fixture.values.collect { |value| ActiveRecord::Base.connection.quote(value) }.join(',')
+            keys = fixture.keys.collect{ |key| "`#{key}`" }.join(',')
+            values = fixture.values.collect{ |value| ActiveRecord::Base.connection.quote(value) }.join(',')
             ActiveRecord::Base.connection.execute "INSERT INTO #{table} (#{keys}) VALUES (#{values})", 'Fixture Insert'
           end
         end
