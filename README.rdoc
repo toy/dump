@@ -5,6 +5,7 @@ Tasks to dump and restore.
 == Examples
 
   db:dump:create
+  db:dump:create COMMENT="first try" # Note that all symbols except a-z and 0-9 will be changed to -
   db:dump:restore
   db:dump:restore V=12345678901234
   db:dump:restore:last
