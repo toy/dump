@@ -129,8 +129,11 @@ class DumpRake
         unless rows.empty?
           Progress.start('Writing dump', rows.length) do
             tar.create_file("#{table}.dump") do |f|
+              columns = rows.first.keys
+              Marshal.dump(columns, f)
               rows.each_slice(1000) do |slice|
-                Marshal.dump(slice, f)
+                slice_values = slice.collect{ |row| row.values_at(*columns) }
+                Marshal.dump(slice_values, f)
                 Progress.step(slice.length)
               end
             end
@@ -176,35 +179,32 @@ class DumpRake
         Progress.start('Tables', config[:tables].length) do
           tar.entries_like(/\.dump$/) do |entry|
             table = entry.full_name[/^(.*)\.dump$/, 1]
+            table_sql = ActiveRecord::Base.connection.quote_table_name(table)
             Progress.start('Loading', config[:tables][table]) do
+              columns = Marshal.load(entry)
+              columns_sql = "(#{columns.collect{ |column| ActiveRecord::Base.connection.quote_column_name(column) } * ','})"
               until entry.eof?
-                rows = Marshal.load(entry)
-                rows.each do |row|
-                  ActiveRecord::Base.connection.execute(
-                    'INSERT INTO %s (%s) VALUES (%s)' % [
-                      ActiveRecord::Base.connection.quote_table_name(table),
-                      row.keys.collect{ |column| ActiveRecord::Base.connection.quote_column_name(column) } * ',',
-                      row.values.collect{ |value| ActiveRecord::Base.connection.quote(value) } * ',',
-                    ],
-                    'Load dump'
-                  )
-                end
-                Progress.step(rows.length)
+                slice_values = Marshal.load(entry)
+                slice_values_sql = slice_values.collect{ |row| "(#{row.collect{ |value| ActiveRecord::Base.connection.quote(value) } * ','})"  } * ','
+                ActiveRecord::Base.connection.execute("INSERT INTO #{table_sql} #{columns_sql} VALUES #{slice_values_sql}", 'Load dump')
+                Progress.step(slice_values.length)
               end
             end
             Progress.step
           end
         end
-        Progress.start('Assets') do
-          config[:assets].each do |asset|
-            Dir.glob(File.join(RAILS_ROOT, asset, '*')) do |path|
-              FileUtils.remove_entry_secure(path)
+        if config[:assets]
+          Progress.start('Assets') do
+            config[:assets].each do |asset|
+              Dir.glob(File.join(RAILS_ROOT, asset, '*')) do |path|
+                FileUtils.remove_entry_secure(path)
+              end
             end
+            tar.read_to_file('assets.tar') do |f|
+              Archive::Tar::Minitar.unpack(f, RAILS_ROOT)
+            end
+            Progress.step
           end
-          tar.read_to_file('assets.tar') do |f|
-            Archive::Tar::Minitar.unpack(f, RAILS_ROOT)
-          end
-          Progress.step
         end
       end
     else
