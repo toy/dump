@@ -1,5 +1,12 @@
-require 'progress'
+require 'pathname'
 require 'find'
+
+require 'rake'
+require 'rubygems'
+
+$:.unshift(*Dir[Pathname.new(__FILE__).dirname.join(*%w(.. gems * lib))])
+
+require 'progress'
 require 'archive/tar/minitar'
 
 class DumpRake

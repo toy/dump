@@ -1,0 +1,27 @@
+== 0.0.6 2009-02-19
+
+* printing messages to stderr
+
+== 0.0.5 2008-11-07
+
+* piping result of block execution
+* changed default step count to 1 (from 100)
+
+== 0.0.4 2008-11-06
+
+* step now accept count of steps made
+
+== 0.0.3 2008-11-01
+
+* recreated with newgem
+* created specs
+* autospec now runs well
+* created documentation
+
+== 0.0.2 2008-10-31
+
+* added enclosed progress possibility
+
+== 0.0.1
+
+* initial release
