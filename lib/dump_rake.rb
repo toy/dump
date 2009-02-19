@@ -3,7 +3,7 @@ require 'find'
 require 'archive/tar/minitar'
 
 class DumpRake
-  class GzippedTar # :nodoc:
+  class Dump # :nodoc:
     class Writer # :nodoc:
       def self.create(path)
         Zlib::GzipWriter.open(path) do |gzip|
@@ -69,40 +69,42 @@ class DumpRake
     end
 
     def self.list
-      Dir.glob(File.join(RAILS_ROOT, 'db', 'dump', '*.tgz')).sort.map{ |path| new(path) }
+      Dir.glob(File.join(RAILS_ROOT, 'dump', '*.tgz')).sort.map{ |path| new(path) }
     end
 
     def initialize(path)
       @path = path
     end
-    
+
     def path
       @path
     end
-    
+
     def name
-      @name ||= File.basename(path, '.tgz')
+      @name ||= File.basename(path)
     end
-    
+
     def name_parts
       @name_parts ||= name.split('-', 2)
     end
-    
+
     def =~(version)
       name_parts.any?{ |part| part.index(version) == 0 }
     end
   end
 
-  def self.create
+  def self.versions
+    puts Dump.list.map(&:name)
+  end
+
+  def self.create(options = {})
     ActiveRecord::Base.establish_connection
 
     time = Time.now.utc.strftime("%Y%m%d%H%M%S")
-    path = File.join(RAILS_ROOT, 'db', 'dump')
+    path = File.join(RAILS_ROOT, 'dump')
     FileUtils.mkdir_p(path)
 
-    comment = if ENV['COMMENT']
-      ENV['COMMENT'].downcase.gsub(/[^a-z0-9]+/, ' ').lstrip[0, 30].rstrip.gsub(/ /, '-')
-    end
+    comment = options[:comment] && options[:comment].downcase.gsub(/[^a-z0-9]+/, ' ').lstrip[0, 30].rstrip.gsub(/ /, '-')
     name = [time, comment].compact * '-'
 
     assets = begin
@@ -116,7 +118,7 @@ class DumpRake
     tgz_name = File.join(path, "#{name}.tgz")
 
     config = {:tables => {}, :assets => assets}
-    GzippedTar::Writer.create(tmp_name) do |tar|
+    Dump::Writer.create(tmp_name) do |tar|
       tar.create_file('schema.rb') do |f|
         set_env_temporary('SCHEMA', f.path) do
           Rake::Task['db:schema:dump'].invoke
@@ -155,11 +157,12 @@ class DumpRake
     end
 
     FileUtils.mv(tmp_name, tgz_name)
+    puts tgz_name
   end
 
   def self.restore(version)
-    dumps = GzippedTar.list
-    
+    dumps = Dump.list
+
     dump = if version == :last
       dumps.last
     elsif version == :first
@@ -169,7 +172,7 @@ class DumpRake
     end
 
     if dump
-      GzippedTar::Reader.open(dump.path) do |tar|
+      Dump::Reader.open(dump.path) do |tar|
         config = Marshal.load(tar.read('config').first)
         tar.read_to_file('schema.rb') do |f|
           set_env_temporary('SCHEMA', f.path) do
@@ -185,9 +188,16 @@ class DumpRake
               columns_sql = "(#{columns.collect{ |column| ActiveRecord::Base.connection.quote_column_name(column) } * ','})"
               until entry.eof?
                 slice_values = Marshal.load(entry)
-                slice_values_sql = slice_values.collect{ |row| "(#{row.collect{ |value| ActiveRecord::Base.connection.quote(value) } * ','})"  } * ','
-                ActiveRecord::Base.connection.execute("INSERT INTO #{table_sql} #{columns_sql} VALUES #{slice_values_sql}", 'Load dump')
-                Progress.step(slice_values.length)
+                slice_values_sqls = slice_values.collect{ |row| "(#{row.collect{ |value| ActiveRecord::Base.connection.quote(value) } * ','})"  }
+                begin
+                  ActiveRecord::Base.connection.insert("INSERT INTO #{table_sql} #{columns_sql} VALUES #{slice_values_sqls * ','}", 'Load dump')
+                  Progress.step(slice_values_sqls.length)
+                rescue
+                  slice_values_sqls.each do |slice_values_sql|
+                    ActiveRecord::Base.connection.insert("INSERT INTO #{table_sql} #{columns_sql} VALUES #{slice_values_sql}", 'Load dump')
+                    Progress.step
+                  end
+                end
               end
             end
             Progress.step
@@ -208,21 +218,15 @@ class DumpRake
         end
       end
     else
-      if dumps.length > 0
-        puts "Avaliable versions:"
-        dumps.map(&:name).each do |name|
-          puts "  #{name}"
-        end
-      else
-        puts "No dumps avaliable"
-      end
+      puts "Avaliable versions:"
+      versions
     end
   end
 
 protected
 
   def self.interesting_tables
-    ActiveRecord::Base.connection.tables - %w(schema_info schema_migrations sessions public_exceptions)
+    ActiveRecord::Base.connection.tables - %w(schema_info schema_migrations sessions)
   end
 
   def self.set_env_temporary(key, value)

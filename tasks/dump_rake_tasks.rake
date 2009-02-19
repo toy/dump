@@ -1,24 +1,35 @@
-namespace :db do
-  namespace :dump do
-    desc 'Create db dump'
-    task :create => :environment do
-      DumpRake.create
-    end
+desc 'Create dump DESC[RIPTION]="meaningfull description"'
+task :versions => 'dump:create'
 
-    desc "Restore db dump, use VERSION=yyyymmddhhmmss to select which dump to use (last is the default)"
-    task :restore => :environment do
-      DumpRake.restore(ENV['VERSION'] || :last)
-    end
-    
-    namespace :restore do
-      desc 'Restore to last dump'
-      task :last => :environment do
-        DumpRake.restore(:last)
-      end
-    
-      desc 'Restore to first dump'
-      task :first => :environment do
-        DumpRake.restore(:first)
+namespace :dump do
+  desc 'Show avaliable versions'
+  task :versions => :environment do
+    DumpRake.versions
+  end
+
+  desc 'Create dump DESC[RIPTION]="meaningfull description"'
+  task :create => :environment do
+    DumpRake.create(:comment => ENV['DESC'] || ENV['DESCRIPTION'])
+  end
+
+  desc "Restore dump, use VER[SION]=uniq part of yyyymmddhhmmss or description to select which dump to use (last is the default)"
+  task :restore => :environment do
+    DumpRake.restore(ENV['VER'] || ENV['VERSION'] || :last)
+  end
+end
+
+unless Rake::Task.task_defined?('assets')
+  task :assets do
+    ENV['ASSETS'] = File.readlines(File.join(RAILS_ROOT, 'config', 'assets')).map(&:strip).join(':')
+  end
+
+  namespace :assets do
+    desc 'Delete assets'
+    task :delete => :assets do
+      ENV['ASSETS'].split(':').each do |asset|
+        Dir.glob(File.join(RAILS_ROOT, asset, '*')) do |path|
+          FileUtils.remove_entry_secure(path)
+        end
       end
     end
   end
