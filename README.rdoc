@@ -1,12 +1,49 @@
 = DumpRake
 
-Tasks to dump and restore.
+Tasks to create and restore dumps of selected files and database.
+
+== Install
+
+Create file config/assets and place there pathes of files you want to dump
+
+  public/audios
+  public/flash
+  public/images/upload
+  public/videos
+
+When using cap tasks - be sure to link dump folder to persistent place on deploy, or you will lose all dumps every deploy
 
 == Examples
 
-  db:dump:create
-  db:dump:create COMMENT="first try" # Note that all symbols except a-z and 0-9 will be changed to -
-  db:dump:restore
-  db:dump:restore V=12345678901234
-  db:dump:restore:last
-  db:dump:restore:first
+  # show dump versions
+  rake dump:versions
+  # show dump versions where 1234 is in name
+  rake dump:versions VER[SION]=1234
+
+  # create dump
+  rake dump:create
+  # create dump with name like DATE-some-text
+  rake dump:create DESC[RIPTION]="Some text"
+
+  # restore last dump
+  rake dump:restore
+  # restore dump with 1234 in its name (such dump must be uniq)
+  rake dump:restore VER[SION]=1234
+
+For all cap commands parameters are same as for rake tasks
+
+  cap dump:local:create
+  cap dump:local:restore
+  cap dump:local:versions
+
+  cap dump:remote:create
+  cap dump:remote:restore
+  cap dump:remote:versions
+
+  # use VER[SION] to select dump
+  cap dump:local:upload # transfer last dump to remote server
+  cap dump:remote:download # transfer last dump to local
+
+  # use DESC[RIPTION] to add prefix to dump name
+  cap dump:mirror:up # mirror local to remote (create local dump, upload it to remote and restore it there)
+  cap dump:mirror:down # mirror remote to local  (create remote dump, download it from remote and restore on local)
