@@ -91,17 +91,17 @@ class DumpRake
       @name ||= File.basename(path)
     end
 
-    def name_parts
-      @name_parts ||= name.split('-', 2)
-    end
-
     def =~(version)
-      name_parts.any?{ |part| part.index(version) == 0 }
+      name[version]
     end
   end
 
-  def self.versions
-    puts Dump.list.map(&:name)
+  def self.versions(version)
+    if version
+      puts Dump.list.select{ |dump| dump =~ version }.map(&:name)
+    else
+      puts Dump.list.map(&:name)
+    end
   end
 
   def self.create(options = {})
@@ -112,7 +112,7 @@ class DumpRake
     FileUtils.mkdir_p(path)
 
     comment = options[:comment] && options[:comment].downcase.gsub(/[^a-z0-9]+/, ' ').lstrip[0, 30].rstrip.gsub(/ /, '-')
-    name = [time, comment].compact * '-'
+    name = comment.blank? ? time : "#{time}-#{comment}"
 
     assets = begin
       Rake::Task['assets'].invoke
@@ -164,7 +164,8 @@ class DumpRake
     end
 
     FileUtils.mv(tmp_name, tgz_name)
-    puts tgz_name
+
+    puts Dump.new(tgz_name).name
   end
 
   def self.restore(version)

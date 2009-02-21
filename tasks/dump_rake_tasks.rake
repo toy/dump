@@ -1,10 +1,7 @@
-desc 'Create dump DESC[RIPTION]="meaningfull description"'
-task :versions => 'dump:create'
-
 namespace :dump do
-  desc 'Show avaliable versions'
+  desc 'Show avaliable versions, use version as for restore to show only matching dumps'
   task :versions => :environment do
-    DumpRake.versions
+    DumpRake.versions(ENV['VER'] || ENV['VERSION'])
   end
 
   desc 'Create dump DESC[RIPTION]="meaningfull description"'
@@ -12,7 +9,7 @@ namespace :dump do
     DumpRake.create(:comment => ENV['DESC'] || ENV['DESCRIPTION'])
   end
 
-  desc "Restore dump, use VER[SION]=uniq part of yyyymmddhhmmss or description to select which dump to use (last is the default)"
+  desc "Restore dump, use VER[SION]=uniq part of dump name to select which dump to use (last dump is the default)"
   task :restore => :environment do
     DumpRake.restore(ENV['VER'] || ENV['VERSION'] || :last)
   end
