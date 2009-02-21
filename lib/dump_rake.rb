@@ -127,7 +127,7 @@ class DumpRake
     config = {:tables => {}, :assets => assets}
     Dump::Writer.create(tmp_name) do |tar|
       tar.create_file('schema.rb') do |f|
-        set_env_temporary('SCHEMA', f.path) do
+        with_env('SCHEMA', f.path) do
           Rake::Task['db:schema:dump'].invoke
         end
       end
@@ -182,7 +182,7 @@ class DumpRake
       Dump::Reader.open(dump.path) do |tar|
         config = Marshal.load(tar.read('config').first)
         tar.read_to_file('schema.rb') do |f|
-          set_env_temporary('SCHEMA', f.path) do
+          with_env('SCHEMA', f.path) do
             Rake::Task['db:schema:load'].invoke
           end
         end
@@ -236,11 +236,10 @@ protected
     ActiveRecord::Base.connection.tables - %w(schema_info schema_migrations sessions)
   end
 
-  def self.set_env_temporary(key, value)
-    old_value = ENV[key]
-    ENV[key] = value
-    result = yield
+  def self.with_env(key, value)
+    old_value, ENV[key] = ENV[key], value
+    yield
+  ensure
     ENV[key] = old_value
-    result
   end
 end
