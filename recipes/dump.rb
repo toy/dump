@@ -1,3 +1,7 @@
+def run_local(cmd)
+  `#{cmd}`
+end
+
 namespace :dump do
   def dump_command(command)
     cmd = "rake -s dump:#{command}"
@@ -15,24 +19,24 @@ namespace :dump do
   namespace :local do
     desc "Create local dump"
     task :create, :roles => :db, :only => {:primary => true} do
-      out = `#{dump_command(:create)}`
+      out = run_local(dump_command(:create))
       print out
       out.strip
     end
 
     desc "Restore local dump"
     task :restore, :roles => :db, :only => {:primary => true} do
-      `#{dump_command(:restore)}`
+      run_local(dump_command(:restore))
     end
 
     desc "Versions of local dumps"
     task :versions, :roles => :db, :only => {:primary => true} do
-      print `#{dump_command(:versions)}`
+      print run_local(dump_command(:versions))
     end
 
     desc "Upload dump"
     task :upload, :roles => :db, :only => {:primary => true} do
-      files = `#{dump_command(:versions)}`.split("\n")
+      files = run_local(dump_command(:versions)).split("\n")
       if file = files.last
         transfer :up, "dump/#{file}", "#{current_path}/dump/#{file}", :via => :scp
       end
@@ -69,7 +73,8 @@ namespace :dump do
   namespace :mirror do
     desc "Creates local dump, uploads and restores on remote"
     task :up, :roles => :db, :only => {:primary => true} do
-      if file = local.create
+      file = local.create
+      unless file.blank?
         with_env('VER', file) do
           local.upload
           remote.restore
@@ -79,7 +84,8 @@ namespace :dump do
 
     desc "Creates remote dump, downloads and restores on local"
     task :down, :roles => :db, :only => {:primary => true} do
-      if file = remote.create
+      file = remote.create
+      unless file.blank?
         with_env('VER', file) do
           remote.download
           local.restore
