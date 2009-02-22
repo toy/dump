@@ -1,13 +1,6 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 require "rake"
 
-def with_env(key, value)
-  old_value, ENV[key] = ENV[key], value
-  yield
-ensure
-  ENV[key] = old_value
-end
-
 describe "rake dump" do
   before do
     @rake = Rake::Application.new

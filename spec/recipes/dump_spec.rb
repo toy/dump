@@ -1,21 +1,6 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 require 'capistrano'
 
-def with_env(key, value)
-  old_value, ENV[key] = ENV[key], value
-  yield
-ensure
-  ENV[key] = old_value
-end
-
-def grab_output
-  old_value, $stdout = $stdout, StringIO.new
-  yield
-  $stdout.string
-ensure
-  $stdout = old_value
-end
-
 describe "cap dump" do
   before do
     @cap = Capistrano::Configuration.new
