@@ -1,7 +1,5 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 require 'capistrano'
-require 'capistrano/cli'
-require 'capistrano/cli'
 
 def with_env(key, value)
   old_value, ENV[key] = ENV[key], value
