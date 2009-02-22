@@ -111,8 +111,8 @@ class DumpRake
     path = File.join(RAILS_ROOT, 'dump')
     FileUtils.mkdir_p(path)
 
-    comment = options[:comment] && options[:comment].downcase.gsub(/[^a-z0-9]+/, ' ').lstrip[0, 30].rstrip.gsub(/ /, '-')
-    name = comment.blank? ? time : "#{time}-#{comment}"
+    description = options[:description] && options[:description].downcase.gsub(/[^a-z0-9]+/, ' ').lstrip[0, 30].rstrip.gsub(/ /, '-')
+    name = description.blank? ? time : "#{time}-#{description}"
 
     assets = begin
       Rake::Task['assets'].invoke

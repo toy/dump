@@ -6,7 +6,7 @@ namespace :dump do
 
   desc 'Create dump DESC[RIPTION]="meaningfull description"'
   task :create => :environment do
-    DumpRake.create(:comment => ENV['DESC'] || ENV['DESCRIPTION'])
+    DumpRake.create(:description => ENV['DESC'] || ENV['DESCRIPTION'])
   end
 
   desc "Restore dump, use VER[SION]=uniq part of dump name to select which dump to use (last dump is the default)"
