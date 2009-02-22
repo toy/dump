@@ -11,7 +11,7 @@ namespace :dump do
 
   desc "Restore dump, use VER[SION]=uniq part of dump name to select which dump to use (last dump is the default)"
   task :restore => :environment do
-    DumpRake.restore(ENV['VER'] || ENV['VERSION'] || :last)
+    DumpRake.restore(ENV['VER'] || ENV['VERSION'])
   end
 end
 

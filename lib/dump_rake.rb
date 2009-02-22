@@ -4,7 +4,7 @@ require 'find'
 require 'rake'
 require 'rubygems'
 
-$:.unshift(*Dir[Pathname.new(__FILE__).dirname.join(*%w(.. gems * lib))])
+$:.push(*Dir[Pathname.new(__FILE__).dirname.join(*%w(.. gems * lib))])
 
 require 'progress'
 require 'archive/tar/minitar'
@@ -79,6 +79,14 @@ class DumpRake
       Dir.glob(File.join(RAILS_ROOT, 'dump', '*.tgz')).sort.map{ |path| new(path) }
     end
 
+    def self.like(version)
+      list.select{ |dump| dump.name[version] }
+    end
+
+    def self.last
+      list.last
+    end
+
     def initialize(path)
       @path = path
     end
@@ -90,17 +98,14 @@ class DumpRake
     def name
       @name ||= File.basename(path)
     end
-
-    def =~(version)
-      name[version]
-    end
+    alias to_s name
   end
 
-  def self.versions(version)
+  def self.versions(version = nil)
     if version
-      puts Dump.list.select{ |dump| dump =~ version }.map(&:name)
+      puts Dump.like(version)
     else
-      puts Dump.list.map(&:name)
+      puts Dump.list
     end
   end
 
@@ -171,11 +176,9 @@ class DumpRake
   def self.restore(version)
     dumps = Dump.list
 
-    dump = if version == :last
-      dumps.last
-    elsif version == :first
-      dumps.first
-    elsif (found = dumps.select{ |dump| dump =~ version }).length == 1
+    dump = if version.nil?
+      Dump.last
+    elsif (found = Dump.like(version)).length == 1
       found.first
     end
 
