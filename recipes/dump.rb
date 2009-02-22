@@ -38,7 +38,7 @@ namespace :dump do
     task :upload, :roles => :db, :only => {:primary => true} do
       files = run_local(dump_command(:versions)).split("\n")
       if file = files.last
-        transfer :up, "dump/#{file}", "#{current_path}/dump/#{file}", :via => :scp
+        transfer :up, "#{RAILS_ROOT}/dump/#{file}", "#{current_path}/dump/#{file}", :via => :scp
       end
     end
   end
@@ -65,7 +65,7 @@ namespace :dump do
     task :download, :roles => :db, :only => {:primary => true} do
       files = capture("cd #{current_path}; #{dump_command(:versions)}").split("\n")
       if file = files.last
-        transfer :down, "#{current_path}/dump/#{file}", "dump/#{file}", :via => :scp
+        transfer :down, "#{current_path}/dump/#{file}", "#{RAILS_ROOT}/dump/#{file}", :via => :scp
       end
     end
   end
