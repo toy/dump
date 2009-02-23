@@ -5,7 +5,7 @@ describe "rake dump" do
   before do
     @rake = Rake::Application.new
     Rake.application = @rake
-    load File.dirname(__FILE__) + '/../../tasks/dump.rake.rb'
+    load File.dirname(__FILE__) + '/../../tasks/dump.rake'
     Rake::Task.define_task(:environment)
   end
 
