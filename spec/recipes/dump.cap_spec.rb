@@ -4,7 +4,7 @@ require 'capistrano'
 describe "cap dump" do
   before do
     @cap = Capistrano::Configuration.new
-    @cap.load File.dirname(__FILE__) + '/../../recipes/dump.rb'
+    @cap.load File.dirname(__FILE__) + '/../../recipes/dump.cap.rb'
     @remote_path = "/home/test/apps/dummy"
     @cap.set(:current_path, @remote_path)
   end
