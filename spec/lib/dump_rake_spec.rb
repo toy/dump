@@ -84,4 +84,82 @@ describe DumpRake do
       end
     end
   end
+
+  describe "restore" do
+    describe "without version" do
+      it "should call Dump.last" do
+        DumpRake::Dump.should_receive(:last)
+        grab_output{
+          DumpRake.restore
+        }
+      end
+
+      it "should not call DumpReader.restore and should call versions if there are no versions at all" do
+        DumpRake::Dump.stub!(:last)
+        DumpRake::DumpReader.should_not_receive(:restore)
+        DumpRake.should_receive(:versions)
+        grab_output{
+          DumpRake.restore('213')
+        }
+      end
+
+      it "should call DumpReader.restore if there are versions" do
+        @dump = mock('dump', :path => 'dump/213.tgz')
+        DumpRake::Dump.stub!(:last).and_return(@dump)
+        DumpRake::DumpReader.should_receive(:restore).with('dump/213.tgz')
+        DumpRake.should_not_receive(:versions)
+        grab_output{
+          DumpRake.restore
+        }
+      end
+    end
+
+    describe "with version" do
+      it "should call Dump.like" do
+        DumpRake::Dump.should_receive(:like).and_return([])
+        grab_output{
+          DumpRake.restore('213')
+        }
+      end
+
+      it "should not call DumpReader.restore and should call versions if desired version not found" do
+        DumpRake::Dump.stub!(:like).and_return([])
+        DumpRake::DumpReader.should_not_receive(:restore)
+        DumpRake.should_receive(:versions)
+        grab_output{
+          DumpRake.restore('213')
+        }
+      end
+
+      it "should not call DumpReader.restore and should call versions if found multiple matching versions" do
+        DumpRake::Dump.stub!(:like).and_return([mock('dump'), mock('dump')])
+        DumpRake::DumpReader.should_not_receive(:restore)
+        DumpRake.should_receive(:versions)
+        grab_output{
+          DumpRake.restore('213')
+        }
+      end
+
+      it "should call DumpReader.restore if there is desired version" do
+        @dump = mock('dump', :path => 'dump/213.tgz')
+        DumpRake::Dump.stub!(:like).and_return([@dump])
+        DumpRake::DumpReader.should_receive(:restore).with('dump/213.tgz')
+        DumpRake.should_not_receive(:versions)
+        grab_output{
+          DumpRake.restore('213')
+        }
+      end
+    end
+  end
+
+  describe "clean_description" do
+    it "should shorten string to 30 chars and replace all symbols except a-z and 0-9 with '-'" do
+      DumpRake.clean_description('aenarhts ENHENH 12837192837 #$@#^%%^^%*&(*& arsth *&^*&^ ahrenst haenr sheanrs heran t').should == 'aenarhts-enhenh-12837192837-ar'
+    end
+
+    it "should accept non string" do
+      DumpRake.clean_description(nil).should == ''
+    end
+  end
+
 end

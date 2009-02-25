@@ -22,6 +22,7 @@ class DumpRake
     description = clean_description(options[:description])
     name += "-#{description}" unless description.blank?
 
+    #TODO - send tgz name to writer and rename there
     path = File.join(RAILS_ROOT, 'dump')
     tmp_name = File.join(path, "#{name}.tmp")
     tgz_name = File.join(path, "#{name}.tgz")
@@ -32,59 +33,15 @@ class DumpRake
     puts File.basename(tgz_name)
   end
 
-  def self.restore(version)
+  def self.restore(version = nil)
     dump = if version.nil?
       Dump.last
     elsif (found = Dump.like(version)).length == 1
       found.first
     end
-    
+
     if dump
-      # DumpReader.open(dump.path) do |dump|
-      #   config = Marshal.load(tar.read('config').first)
-      #   tar.read_to_file('schema.rb') do |f|
-      #     with_env('SCHEMA', f.path) do
-      #       Rake::Task['db:schema:load'].invoke
-      #     end
-      #   end
-      #   Progress.start('Tables', config[:tables].length) do
-      #     tar.grep(/\.dump$/) do |entry|
-      #       table = entry.full_name[/^(.*)\.dump$/, 1]
-      #       table_sql = ActiveRecord::Base.connection.quote_table_name(table)
-      #       Progress.start('Loading', config[:tables][table]) do
-      #         columns = Marshal.load(entry)
-      #         columns_sql = "(#{columns.collect{ |column| ActiveRecord::Base.connection.quote_column_name(column) } * ','})"
-      #         until entry.eof?
-      #           slice_values = Marshal.load(entry)
-      #           slice_values_sqls = slice_values.collect{ |row| "(#{row.collect{ |value| ActiveRecord::Base.connection.quote(value) } * ','})"  }
-      #           begin
-      #             ActiveRecord::Base.connection.insert("INSERT INTO #{table_sql} #{columns_sql} VALUES #{slice_values_sqls * ','}", 'Load dump')
-      #             Progress.step(slice_values_sqls.length)
-      #           rescue
-      #             slice_values_sqls.each do |slice_values_sql|
-      #               ActiveRecord::Base.connection.insert("INSERT INTO #{table_sql} #{columns_sql} VALUES #{slice_values_sql}", 'Load dump')
-      #               Progress.step
-      #             end
-      #           end
-      #         end
-      #       end
-      #       Progress.step
-      #     end
-      #   end
-      #   if config[:assets]
-      #     Progress.start('Assets') do
-      #       config[:assets].each do |asset|
-      #         Dir.glob(File.join(RAILS_ROOT, asset, '*')) do |path|
-      #           FileUtils.remove_entry_secure(path)
-      #         end
-      #       end
-      #       tar.read_to_file('assets.tar') do |f|
-      #         Archive::Tar::Minitar.unpack(f, RAILS_ROOT)
-      #       end
-      #       Progress.step
-      #     end
-      #   end
-      # end
+      DumpReader.restore(dump.path)
     else
       puts "Avaliable versions:"
       versions
