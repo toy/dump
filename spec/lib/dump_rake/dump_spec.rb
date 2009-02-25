@@ -39,4 +39,30 @@ describe Dump do
       Dump.new(File.join(RAILS_ROOT, 'dump', "123.tgz")).name.should == '123.tgz'
     end
   end
+
+  describe "establish_connection" do
+    it "should return result of ActiveRecord::Base.establish_connection" do
+      ActiveRecord::Base.should_receive(:establish_connection).and_return(:result)
+      Dump.new('').send(:establish_connection).should == :result
+    end
+  end
+
+  describe "quote_table_name" do
+    it "should return result of ActiveRecord::Base.connection.quote_table_name" do
+      ActiveRecord::Base.connection.should_receive(:quote_table_name).with('first').and_return('`first`')
+      Dump.new('').send(:quote_table_name, 'first').should == '`first`'
+    end
+  end
+
+  describe "with_env" do
+    it "should set env to new_value for duration of block" do
+      ENV['TESTING'] = 'old_value'
+      
+      ENV['TESTING'].should == 'old_value'
+      Dump.new('').send(:with_env, 'TESTING', 'new_value') do
+        ENV['TESTING'].should == 'new_value'
+      end
+      ENV['TESTING'].should == 'old_value'
+    end
+  end
 end
