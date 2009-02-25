@@ -15,10 +15,10 @@ describe DumpWriter do
       @dump.stub!(:open).and_yield(@dump)
       DumpWriter.stub!(:new).and_return(@dump)
 
-      @dump.should_receive(:write_schema)
-      @dump.should_receive(:write_tables)
-      @dump.should_receive(:write_assets)
-      @dump.should_receive(:write_config)
+      @dump.should_receive(:write_schema).ordered
+      @dump.should_receive(:write_tables).ordered
+      @dump.should_receive(:write_assets).ordered
+      @dump.should_receive(:write_config).ordered
 
       DumpWriter.create('/abc/123.tmp')
     end
@@ -31,7 +31,7 @@ describe DumpWriter do
       DumpWriter.new('/abc/def/ghi/123.tgz').open
     end
 
-    it "should set stream to gzipped tar and call dump subroutines" do
+    it "should set stream to gzipped tar writer" do
       FileUtils.stub!(:mkpath)
       @gzip = mock('gzip')
       @stream = mock('stream')
@@ -46,29 +46,6 @@ describe DumpWriter do
     end
   end
 
-  describe "create_file" do
-    it "should create temp file, yield it for writing, create file in tar and write it there" do
-      @temp = mock('temp', :open => true, :length => 6, :read => 'qwfpgj')
-      @temp.should_receive(:write).with('qwfpgj')
-      @temp.stub!(:eof?).and_return(false, true)
-      Tempfile.should_receive(:open).and_yield(@temp)
-
-      @file = mock('file')
-      @file.should_receive(:write).with('qwfpgj')
-
-      @tar = mock('tar')
-      @stream = mock('stream', :tar => @tar)
-      @stream.tar.should_receive(:add_file_simple).with('abc/def.txt', :mode => 0100444, :size => 6).and_yield(@file)
-
-      @dump = DumpWriter.new('123.tgz')
-      @dump.stub!(:stream).and_return(@stream)
-      @dump.create_file('abc/def.txt') do |file|
-        file.should == @temp
-        file.write('qwfpgj')
-      end
-    end
-  end
-
   describe "subroutines" do
     before do
       @tar = mock('tar')
@@ -78,6 +55,25 @@ describe DumpWriter do
       @dump.stub!(:stream).and_return(@stream)
       @dump.stub!(:config).and_return(@config)
       Progress.io = StringIO.new
+    end
+
+    describe "create_file" do
+      it "should create temp file, yield it for writing, create file in tar and write it there" do
+        @temp = mock('temp', :open => true, :length => 6, :read => 'qwfpgj')
+        @temp.should_receive(:write).with('qwfpgj')
+        @temp.stub!(:eof?).and_return(false, true)
+        Tempfile.should_receive(:open).and_yield(@temp)
+
+        @file = mock('file')
+        @file.should_receive(:write).with('qwfpgj')
+
+        @stream.tar.should_receive(:add_file_simple).with('abc/def.txt', :mode => 0100444, :size => 6).and_yield(@file)
+
+        @dump.create_file('abc/def.txt') do |file|
+          file.should == @temp
+          file.write('qwfpgj')
+        end
+      end
     end
 
     describe "write_schema" do

@@ -7,8 +7,10 @@ class DumpRake
     def self.create(path)
       new(path).open do |dump|
         dump.write_schema
+
         dump.write_tables
         dump.write_assets
+
         dump.write_config
       end
     end
@@ -51,7 +53,7 @@ class DumpRake
 
     def write_table(table)
       rows = table_rows(table)
-      unless rows.empty?
+      unless rows.blank?
         config[:tables][table] = rows.length
         Progress.start('Writing dump', 1 + rows.length) do
           create_file("#{table}.dump") do |f|
@@ -70,7 +72,7 @@ class DumpRake
 
     def write_assets
       assets = assets_to_dump
-      unless assets.empty?
+      unless assets.blank?
         config[:assets] = assets
         create_file('assets.tar') do |f|
           Dir.chdir(RAILS_ROOT) do
