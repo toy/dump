@@ -4,14 +4,20 @@ Tasks to create and restore dumps of selected files and database.
 
 == Install
 
-Create file config/assets and place there pathes of files you want to dump
+  script/plugin install git://github.com/toy/dump.git
+
+Create file config/assets and place there pathes of files you want to dump.
 
   public/audios
   public/flash
   public/images/upload
   public/videos
 
-When using cap tasks - be sure to link dump folder to persistent place on deploy, or you will lose all dumps every deploy
+When using cap tasks — be sure to link dump folder to persistent place on deploy, or you will lose all dumps every deploy.
+
+== Capistrano integration
+
+You can use cap dump:* tasks to control dumps on remote server. Don't forget to deploy application to remote server before using dump:remote tasks.
 
 == Examples
 
