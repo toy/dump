@@ -202,14 +202,46 @@ describe DumpWriter do
         @dump.write_assets
       end
 
-      it "should pack each asset" do
+      it "should open assets.tar with tar writer" do
         @file = mock('file')
         @dump.stub!(:assets_to_dump).and_return(%w(images videos))
         @dump.stub!(:create_file).and_yield(@file)
         Dir.stub!(:chdir).and_yield
+        
+        Archive::Tar::Minitar::Output.should_receive(:open).with(@file)
+        @dump.write_assets
+      end
 
-        Archive::Tar::Minitar.should_receive(:pack).with('images', @file)
-        Archive::Tar::Minitar.should_receive(:pack).with('videos', @file)
+      it "should use find to find files" do
+        @file = mock('file')
+        @dump.stub!(:assets_to_dump).and_return(%w(images videos))
+        @dump.stub!(:create_file).and_yield(@file)
+        Dir.stub!(:chdir).and_yield
+        @tar = mock('tar_writer')
+        Archive::Tar::Minitar::Output.stub!(:open).and_yield(@tar)
+        
+        Find.should_receive(:find).with('images')
+        Find.should_receive(:find).with('videos')
+        
+        @dump.write_assets
+      end
+      
+      it "should pack each file" do
+        @file = mock('file')
+        @dump.stub!(:assets_to_dump).and_return(%w(images videos))
+        @dump.stub!(:create_file).and_yield(@file)
+        Dir.stub!(:chdir).and_yield
+        @tar = mock('tar_writer')
+        Archive::Tar::Minitar::Output.stub!(:open).and_yield(@tar)
+        
+        Find.stub!(:find).with('images').and_yield('a.jpg').and_yield('b.jpg')
+        Find.stub!(:find).with('videos').and_yield('a.mov').and_yield('b.mov')
+
+        Archive::Tar::Minitar.should_receive(:pack_file).with('a.jpg', @tar)
+        Archive::Tar::Minitar.should_receive(:pack_file).with('b.jpg', @tar)
+        Archive::Tar::Minitar.should_receive(:pack_file).with('a.mov', @tar)
+        Archive::Tar::Minitar.should_receive(:pack_file).with('b.mov', @tar)
+        
         @dump.write_assets
       end
     end

@@ -76,10 +76,15 @@ class DumpRake
         config[:assets] = assets
         create_file('assets.tar') do |f|
           Dir.chdir(RAILS_ROOT) do
-            assets.each_with_progress('Assets') do |asset|
-              Archive::Tar::Minitar.pack(asset, f)
+            Archive::Tar::Minitar.open(f, 'w') do |outp|
+              assets.each_with_progress('Assets') do |asset|
+                Find.find(asset) do |entry|
+                  Archive::Tar::Minitar.pack_file(entry, outp)
+                end
+              end
             end
           end
+          Progress.start("Putting assets into dump", 1){}
         end
       end
     end
