@@ -66,7 +66,7 @@ class DumpRake
     end
 
     def read_table(table, rows_count)
-      if entry = find_entry("#{table}.dump")
+      find_entry("#{table}.dump") do |entry|
         columns = Marshal.load(entry)
 
         table_sql = quote_table_name(table)

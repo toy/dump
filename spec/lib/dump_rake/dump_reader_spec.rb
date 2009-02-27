@@ -190,7 +190,7 @@ describe DumpReader do
 
       it "should read table if entry found for table" do
         @entry = mock('entry', :to_str => Marshal.dump('data'), :eof? => true)
-        @dump.should_receive(:find_entry).with('first.dump').and_return(@entry)
+        @dump.should_receive(:find_entry).with('first.dump').and_yield(@entry)
         @dump.should_receive(:quote_table_name).with('first')
         @dump.read_table('first', 10)
       end
@@ -209,7 +209,7 @@ describe DumpReader do
           end
           @entry.rewind
 
-          @dump.stub!(:find_entry).and_return(@entry)
+          @dump.stub!(:find_entry).and_yield(@entry)
         end
         it "should read to eof" do
           create_entry(2500)
