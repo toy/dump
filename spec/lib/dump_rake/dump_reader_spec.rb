@@ -248,6 +248,12 @@ describe DumpReader do
     end
 
     describe "read_assets" do
+      before do
+        @task = mock('task')
+        Rake::Task.stub!(:[]).with('assets:delete').and_return(@task)
+        @task.stub!(:invoke)
+      end
+      
       it "should not read assets if config[:assets] is nil" do
         @dump.stub!(:config).and_return({})
         @dump.should_not_receive(:find_entry)
@@ -260,47 +266,25 @@ describe DumpReader do
         @dump.read_assets
       end
 
-      it "should go through each asset from config" do
-        @assets = %w(images videos)
-        @dump.stub!(:config).and_return({:assets => @assets})
-        @dump.stub!(:find_entry)
-
-        @assets.should_receive(:each)
-        @dump.read_assets
-      end
-
       describe "deleting existing assets" do
-        it "should go through each asset from config" do
+        it "should call assets:delete" do
           @assets = %w(images videos)
           @dump.stub!(:config).and_return({:assets => @assets})
           @dump.stub!(:find_entry)
 
-          @assets.should_receive(:each)
+          @task.should_receive(:invoke)
+
           @dump.read_assets
         end
 
-        it "should glob all assets and delete content" do
+        it "should call assets:delete with ASSETS set to config[:assets] joined with :" do
           @assets = %w(images videos)
           @dump.stub!(:config).and_return({:assets => @assets})
           @dump.stub!(:find_entry)
-          @assets.each do |asset|
-            mask = File.join(RAILS_ROOT, asset, '*')
-            pathes = %w(file1 file2 dir).map{ |file| File.join(RAILS_ROOT, asset, file) }
-            Dir.should_receive(:glob).with(mask).and_yield(pathes[0]).and_yield(pathes[1]).and_yield(pathes[2])
-            pathes.each do |path|
-              FileUtils.should_receive(:remove_entry_secure).with(path)
-            end
+
+          def @task.invoke
+            ENV['ASSETS'].should == 'images:videos'
           end
-
-          @dump.read_assets
-        end
-
-        it "should not glob risky pathes" do
-          @assets = %w(images / /private ../ ../.. ./../ dir/.. dir/../..)
-          @dump.stub!(:config).and_return({:assets => @assets})
-          @dump.stub!(:find_entry)
-          Dir.should_receive(:glob).with(File.join(RAILS_ROOT, 'images', '*'))
-          FileUtils.should_not_receive(:remove_entry_secure)
 
           @dump.read_assets
         end
@@ -311,21 +295,21 @@ describe DumpReader do
         @dump.stub!(:config).and_return({:assets => @assets})
         Dir.stub!(:glob).and_return([])
         FileUtils.stub!(:remove_entry_secure)
-
+      
         @dump.should_receive(:find_entry).with('assets.tar')
         @dump.read_assets
       end
-
+      
       it "should rewrite rewind method to empty method - to not raise exception and call Archive::Tar::Minitar.unpack" do
         @assets = %w(images videos)
         @dump.stub!(:config).and_return({:assets => @assets})
         Dir.stub!(:glob).and_return([])
         FileUtils.stub!(:remove_entry_secure)
-
+      
         @entry = mock('entry')
         @entry.stub!(:rewind).and_raise('hehe - we want to rewind to center of gzip')
         @dump.stub!(:find_entry).and_yield(@entry)
-
+      
         Archive::Tar::Minitar.should_receive(:unpack).and_return do |entry, path|
           entry.rewind
           path.should == RAILS_ROOT
