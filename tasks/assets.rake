@@ -1,13 +1,14 @@
-unless Rake::Task.task_defined?('assets')
-  task :assets do
-    ENV['ASSETS'] = File.readlines(File.join(RAILS_ROOT, 'config', 'assets')).map(&:strip).join(':')
-  end
+task :assets do
+  ENV['ASSETS'] ||= File.readlines(File.join(RAILS_ROOT, 'config', 'assets')).map(&:strip).reject{ |path| path[0,1] == '#' }.join(':')
+end
 
-  namespace :assets do
-    desc 'Delete assets'
-    task :delete => :assets do
-      ENV['ASSETS'].split(':').each do |asset|
-        Dir.glob(File.join(RAILS_ROOT, asset, '*')) do |path|
+namespace :assets do
+  desc 'Delete assets'
+  task :delete => :assets do
+    ENV['ASSETS'].split(':').each do |asset|
+      path = File.expand_path(asset, RAILS_ROOT)
+      if File.dirname(path)[0, RAILS_ROOT.length] == RAILS_ROOT # asset must be in RAILS_ROOT
+        Dir.glob(File.join(path, '*')) do |path|
           FileUtils.remove_entry_secure(path)
         end
       end
