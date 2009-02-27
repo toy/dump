@@ -65,6 +65,7 @@ namespace :dump do
     task :download, :roles => :db, :only => {:primary => true} do
       files = capture("cd #{current_path}; #{dump_command(:versions)}").split("\n")
       if file = files.last
+        FileUtils.mkpath('dump')
         transfer :down, "#{current_path}/dump/#{file}", "dump/#{file}", :via => :scp
       end
     end

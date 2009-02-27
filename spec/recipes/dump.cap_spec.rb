@@ -198,10 +198,18 @@ describe "cap dump" do
         @cap.should_not_receive(:transfer)
         @cap.find_and_execute_task("dump:remote:download")
       end
-  
+
       it "should transfer latest version dump" do
         @cap.stub!(:capture).and_return("100.tgz\n200.tgz\n300.tgz\n")
         @cap.should_receive(:transfer).with(:down, "#{@remote_path}/dump/300.tgz", "dump/300.tgz", :via => :scp)
+        FileUtils.stub!(:mkpath)
+        @cap.find_and_execute_task("dump:remote:download")
+      end
+
+      it "should create local dump dir" do
+        @cap.stub!(:capture).and_return("100.tgz\n200.tgz\n300.tgz\n")
+        @cap.stub!(:transfer)
+        FileUtils.should_receive(:mkpath).with('dump')
         @cap.find_and_execute_task("dump:remote:download")
       end
     end
