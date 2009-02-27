@@ -229,15 +229,19 @@ describe "cap dump" do
         @cap.find_and_execute_task("dump:mirror:up")
       end
   
-      it "should call local:upload and remote:restore if local:create returns file name" do
+      it "should call remote:create (auto-backup), local:upload and remote:restore if local:create returns file name" do
         @cap.dump.local.stub!(:create).and_return('123.tgz')
-        @cap.dump.local.should_receive(:upload)
-        @cap.dump.remote.should_receive(:restore)
+        @cap.dump.remote.should_receive(:create).ordered
+        @cap.dump.local.should_receive(:upload).ordered
+        @cap.dump.remote.should_receive(:restore).ordered
         @cap.find_and_execute_task("dump:mirror:up")
       end
   
-      it "should call local:upload and remote:restore with environment variable VER set to name of created file" do
+      it "should call remote:create with DESC set to auto-backup, local:upload and remote:restore with VER set to name of created file" do
         @cap.dump.local.stub!(:create).and_return('123.tgz')
+        def (@cap.dump.remote).create
+          ENV['DESC'].should == 'auto-backup'
+        end
         def (@cap.dump.local).upload
           ENV['VER'].should == '123.tgz'
         end
@@ -261,15 +265,19 @@ describe "cap dump" do
         @cap.find_and_execute_task("dump:mirror:down")
       end
   
-      it "should call remote:download and local:restore if remote:create returns file name" do
+      it "should call local:create (auto-backup), remote:download and local:restore if remote:create returns file name" do
         @cap.dump.remote.stub!(:create).and_return('123.tgz')
-        @cap.dump.remote.should_receive(:download)
-        @cap.dump.local.should_receive(:restore)
+        @cap.dump.local.should_receive(:create).ordered
+        @cap.dump.remote.should_receive(:download).ordered
+        @cap.dump.local.should_receive(:restore).ordered
         @cap.find_and_execute_task("dump:mirror:down")
       end
   
-      it "should call remote:download and local:restore with environment variable VER set to name of created file" do
+      it "should call local:create with DESC set to auto-backup, remote:download and local:restore with VER set to name of created file" do
         @cap.dump.remote.stub!(:create).and_return('123.tgz')
+        def (@cap.dump.local).create
+          ENV['DESC'].should == 'auto-backup'
+        end
         def (@cap.dump.remote).download
           ENV['VER'].should == '123.tgz'
         end

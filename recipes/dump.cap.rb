@@ -76,6 +76,9 @@ namespace :dump do
     task :up, :roles => :db, :only => {:primary => true} do
       file = local.create
       unless file.nil? || file.empty?
+        with_env('DESC', 'auto-backup') do
+          remote.create
+        end
         with_env('VER', file) do
           local.upload
           remote.restore
@@ -87,6 +90,9 @@ namespace :dump do
     task :down, :roles => :db, :only => {:primary => true} do
       file = remote.create
       unless file.nil? || file.empty?
+        with_env('DESC', 'auto-backup') do
+          local.create
+        end
         with_env('VER', file) do
           remote.download
           local.restore
