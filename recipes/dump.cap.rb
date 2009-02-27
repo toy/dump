@@ -38,7 +38,7 @@ namespace :dump do
     task :upload, :roles => :db, :only => {:primary => true} do
       files = run_local(dump_command(:versions)).split("\n")
       if file = files.last
-        transfer :up, "#{RAILS_ROOT}/dump/#{file}", "#{current_path}/dump/#{file}", :via => :scp
+        transfer :up, "dump/#{file}", "#{current_path}/dump/#{file}", :via => :scp
       end
     end
   end
@@ -65,7 +65,7 @@ namespace :dump do
     task :download, :roles => :db, :only => {:primary => true} do
       files = capture("cd #{current_path}; #{dump_command(:versions)}").split("\n")
       if file = files.last
-        transfer :down, "#{current_path}/dump/#{file}", "#{RAILS_ROOT}/dump/#{file}", :via => :scp
+        transfer :down, "#{current_path}/dump/#{file}", "dump/#{file}", :via => :scp
       end
     end
   end
@@ -74,7 +74,7 @@ namespace :dump do
     desc "Creates local dump, uploads and restores on remote"
     task :up, :roles => :db, :only => {:primary => true} do
       file = local.create
-      unless file.blank?
+      unless file.nil? || file.empty?
         with_env('VER', file) do
           local.upload
           remote.restore
@@ -85,7 +85,7 @@ namespace :dump do
     desc "Creates remote dump, downloads and restores on local"
     task :down, :roles => :db, :only => {:primary => true} do
       file = remote.create
-      unless file.blank?
+      unless file.nil? || file.empty?
         with_env('VER', file) do
           remote.download
           local.restore

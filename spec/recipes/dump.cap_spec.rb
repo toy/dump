@@ -102,7 +102,7 @@ describe "cap dump" do
       
       it "should transfer latest version dump" do
         @cap.stub!(:run_local).and_return("100.tgz\n200.tgz\n300.tgz\n")
-        @cap.should_receive(:transfer).with(:up, "#{RAILS_ROOT}/dump/300.tgz", "#{@remote_path}/dump/300.tgz", :via => :scp)
+        @cap.should_receive(:transfer).with(:up, "dump/300.tgz", "#{@remote_path}/dump/300.tgz", :via => :scp)
         @cap.find_and_execute_task("dump:local:upload")
       end
     end
@@ -201,7 +201,7 @@ describe "cap dump" do
   
       it "should transfer latest version dump" do
         @cap.stub!(:capture).and_return("100.tgz\n200.tgz\n300.tgz\n")
-        @cap.should_receive(:transfer).with(:down, "#{@remote_path}/dump/300.tgz", "#{RAILS_ROOT}/dump/300.tgz", :via => :scp)
+        @cap.should_receive(:transfer).with(:down, "#{@remote_path}/dump/300.tgz", "dump/300.tgz", :via => :scp)
         @cap.find_and_execute_task("dump:remote:download")
       end
     end
