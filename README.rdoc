@@ -6,7 +6,7 @@ Tasks to create and restore dumps of selected files and database.
 
   script/plugin install git://github.com/toy/dump.git
 
-Put pathes of files you want to dump in file config/assets.
+Put pathes of dirs you want to dump in file config/assets.
 
 Example
 
