@@ -184,15 +184,6 @@ describe DumpWriter do
         @dump.write_assets
       end
 
-      it "should put assets to config" do
-        @assets = %w(images videos)
-        @dump.stub!(:assets_to_dump).and_return(@assets)
-        @dump.stub!(:create_file)
-
-        @dump.write_assets
-        @config[:assets].should == @assets
-      end
-
       it "should change root to RAILS_ROOT" do
         @file = mock('file')
         @dump.stub!(:assets_to_dump).and_return(%w(images videos))
@@ -207,41 +198,61 @@ describe DumpWriter do
         @dump.stub!(:assets_to_dump).and_return(%w(images videos))
         @dump.stub!(:create_file).and_yield(@file)
         Dir.stub!(:chdir).and_yield
-        
+
         Archive::Tar::Minitar::Output.should_receive(:open).with(@file)
         @dump.write_assets
       end
 
-      it "should use find to find files" do
+      it "should put assets to config" do
         @file = mock('file')
-        @dump.stub!(:assets_to_dump).and_return(%w(images videos))
+        @dump.stub!(:assets_to_dump).and_return(%w(images/* videos))
         @dump.stub!(:create_file).and_yield(@file)
         Dir.stub!(:chdir).and_yield
         @tar = mock('tar_writer')
         Archive::Tar::Minitar::Output.stub!(:open).and_yield(@tar)
-        
-        Find.should_receive(:find).with('images')
-        Find.should_receive(:find).with('videos')
-        
+        Dir.stub!(:[]).and_return([])
+        Dir.should_receive(:[]).with(*%w(images/* videos)).and_return(%w(images/a images/b videos))
+
+        @dump.write_assets
+        @config[:assets].should == %w(images/a images/b videos)
+      end
+
+      it "should use glob to find files" do
+        @file = mock('file')
+        @dump.stub!(:assets_to_dump).and_return(%w(images/* videos))
+        @dump.stub!(:create_file).and_yield(@file)
+        Dir.stub!(:chdir).and_yield
+        @tar = mock('tar_writer')
+        Archive::Tar::Minitar::Output.stub!(:open).and_yield(@tar)
+
+        Dir.should_receive(:[]).with(*%w(images/* videos)).and_return(%w(images/a images/b videos))
+        Dir.should_receive(:[]).with('images/a/**/*').and_return([])
+        Dir.should_receive(:[]).with('images/b/**/*').and_return([])
+        Dir.should_receive(:[]).with('videos/**/*').and_return([])
+
         @dump.write_assets
       end
-      
+
       it "should pack each file" do
         @file = mock('file')
-        @dump.stub!(:assets_to_dump).and_return(%w(images videos))
+        @dump.stub!(:assets_to_dump).and_return(%w(images/* videos))
         @dump.stub!(:create_file).and_yield(@file)
         Dir.stub!(:chdir).and_yield
         @tar = mock('tar_writer')
         Archive::Tar::Minitar::Output.stub!(:open).and_yield(@tar)
-        
-        Find.stub!(:find).with('images').and_yield('a.jpg').and_yield('b.jpg')
-        Find.stub!(:find).with('videos').and_yield('a.mov').and_yield('b.mov')
+
+        Dir.should_receive(:[]).with(*%w(images/* videos)).and_return(%w(images/a images/b videos))
+        Dir.should_receive(:[]).with('images/a/**/*').and_return(%w(a.jpg b.jpg))
+        Dir.should_receive(:[]).with('images/b/**/*').and_return(%w(c.jpg d.jpg))
+        Dir.should_receive(:[]).with('videos/**/*').and_return(%w(a.mov b.mov))
 
         Archive::Tar::Minitar.should_receive(:pack_file).with('a.jpg', @tar)
         Archive::Tar::Minitar.should_receive(:pack_file).with('b.jpg', @tar)
+        Archive::Tar::Minitar.should_receive(:pack_file).with('c.jpg', @tar)
+        Archive::Tar::Minitar.should_receive(:pack_file).with('d.jpg', @tar)
         Archive::Tar::Minitar.should_receive(:pack_file).with('a.mov', @tar)
         Archive::Tar::Minitar.should_receive(:pack_file).with('b.mov', @tar)
-        
+
         @dump.write_assets
       end
     end
@@ -261,7 +272,7 @@ describe DumpWriter do
         @dump.write_config
       end
     end
-    
+
     describe "tables_to_dump" do
       it "should call ActiveRecord::Base.connection.tables" do
         ActiveRecord::Base.connection.should_receive(:tables).and_return([])
