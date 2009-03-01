@@ -3,8 +3,11 @@ def run_local(cmd)
 end
 
 namespace :dump do
-  def dump_command(command)
+  def dump_command(command, env = {})
     cmd = "rake -s dump:#{command}"
+    env.each do |key, value|
+      cmd += " #{key}=#{value.inspect}"
+    end
     case command
     when :create
       desc = ENV['DESC'] || ENV['DESCRIPTION']
@@ -14,6 +17,10 @@ namespace :dump do
       cmd += " VER=#{ver.inspect}" if ver
     end
     cmd
+  end
+  
+  def fetch_rails_env
+    fetch(:rails_env, "production")
   end
 
   namespace :local do
@@ -46,14 +53,14 @@ namespace :dump do
   namespace :remote do
     desc "Create remote dump"
     task :create, :roles => :db, :only => {:primary => true} do
-      out = capture("cd #{current_path}; #{dump_command(:create)}")
+      out = capture("cd #{current_path}; #{dump_command(:create, :RAILS_ENV => fetch_rails_env)}")
       print out
       out.strip
     end
 
     desc "Restore remote dump"
     task :restore, :roles => :db, :only => {:primary => true} do
-      run "cd #{current_path}; #{dump_command(:restore)}"
+      run "cd #{current_path}; #{dump_command(:restore, :RAILS_ENV => fetch_rails_env)}"
     end
 
     desc "Versions of remote dumps"
