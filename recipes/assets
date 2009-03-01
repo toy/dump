@@ -1,7 +1,0 @@
-# Lines starting with # are comments
-# Put pathes of dirs you want to dump here
-# Like:
-#   public/audios
-#   public/flash
-#   public/images/upload
-#   public/videos
