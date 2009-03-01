@@ -4,12 +4,12 @@ Dump = DumpRake::Dump
 describe Dump do
   describe "versions" do
     def stub_glob
-      Dir.stub!(:glob).and_return(%w(123 345 567).map{ |name| File.join(RAILS_ROOT, 'dump', "#{name}.tgz")})
+      Dir.stub!(:[]).and_return(%w(123 345 567).map{ |name| File.join(RAILS_ROOT, 'dump', "#{name}.tgz")})
     end
 
     describe "list" do
       it "should search for files in dump dir when asked for list" do
-        Dir.should_receive(:glob).with(File.join(RAILS_ROOT, 'dump', '*.tgz')).and_return([])
+        Dir.should_receive(:[]).with(File.join(RAILS_ROOT, 'dump', '*.tgz')).and_return([])
         Dump.list
       end
 

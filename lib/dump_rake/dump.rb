@@ -1,7 +1,7 @@
 class DumpRake
   class Dump
     def self.list
-      Dir.glob(File.join(RAILS_ROOT, 'dump', '*.tgz')).sort.map{ |path| new(path) }
+      Dir[File.join(RAILS_ROOT, 'dump', '*.tgz')].sort.map{ |path| new(path) }
     end
     def self.like(version)
       list.select{ |dump| dump.name[version] }

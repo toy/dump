@@ -67,7 +67,7 @@ describe "rake assets" do
         @assets.each do |asset|
           mask = File.join(RAILS_ROOT, asset, '*')
           pathes = %w(file1 file2 dir).map{ |file| File.join(RAILS_ROOT, asset, file) }
-          Dir.should_receive(:glob).with(mask).and_yield(pathes[0]).and_yield(pathes[1]).and_yield(pathes[2])
+          Dir.should_receive(:[]).with(mask).and_return([pathes[0], pathes[1], pathes[2]])
           pathes.each do |path|
             FileUtils.should_receive(:remove_entry_secure).with(path)
           end
@@ -80,7 +80,7 @@ describe "rake assets" do
         @assets = %w(images / /private ../ ../.. ./../ dir/.. dir/../..)
         ENV.stub!(:[]).with('ASSETS').and_return(@assets.join(':'))
 
-        Dir.should_receive(:glob).with(File.join(RAILS_ROOT, 'images', '*'))
+        Dir.should_receive(:[]).with(File.join(RAILS_ROOT, 'images', '*')).and_return([])
         FileUtils.should_not_receive(:remove_entry_secure)
 
         @rake["assets:delete"].invoke

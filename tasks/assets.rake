@@ -8,7 +8,7 @@ namespace :assets do
     ENV['ASSETS'].split(':').each do |asset|
       path = File.expand_path(asset, RAILS_ROOT)
       if File.dirname(path)[0, RAILS_ROOT.length] == RAILS_ROOT # asset must be in RAILS_ROOT
-        Dir.glob(File.join(path, '*')) do |path|
+        Dir[File.join(path, '*')].each do |path|
           FileUtils.remove_entry_secure(path)
         end
       end
