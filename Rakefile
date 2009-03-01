@@ -15,7 +15,7 @@ Spec::Rake::SpecTask.new(:spec_with_rcov) do |t|
   t.spec_opts = ['--colour --format progress --loadby mtime --reverse']
   t.spec_files = FileList['spec/**/*_spec.rb']
   t.rcov = true
-  t.rcov_opts = ['--exclude', '/Library,app,config,spec/,archive/tar/minitar.rb']
+  t.rcov_opts = ['--exclude', '/Library,app,config,spec/,gem']
 end
 
 task :spec_with_rcov_and_open => :spec_with_rcov do
