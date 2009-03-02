@@ -22,6 +22,12 @@ namespace :dump do
   def fetch_rails_env
     fetch(:rails_env, "production")
   end
+  
+  def transfer_with_progress(direction, from, to, options = {})
+    transfer(direction, from, to, options) do |channel, path, transfered, total|
+      print "\rTransfering: %5.1f%%" % (transfered * 100.0 / total)
+    end
+  end
 
   namespace :local do
     desc "Create local dump"
@@ -45,11 +51,11 @@ namespace :dump do
     task :upload, :roles => :db, :only => {:primary => true} do
       files = run_local(dump_command(:versions)).split("\n")
       if file = files.last
-        transfer :up, "dump/#{file}", "#{current_path}/dump/#{file}", :via => :scp
+        transfer_with_progress :up, "dump/#{file}", "#{current_path}/dump/#{file}", :via => :scp
       end
     end
   end
-
+ 
   namespace :remote do
     desc "Create remote dump"
     task :create, :roles => :db, :only => {:primary => true} do
@@ -73,7 +79,7 @@ namespace :dump do
       files = capture("cd #{current_path}; #{dump_command(:versions)}").split("\n")
       if file = files.last
         FileUtils.mkpath('dump')
-        transfer :down, "#{current_path}/dump/#{file}", "dump/#{file}", :via => :scp
+        transfer_with_progress :down, "#{current_path}/dump/#{file}", "dump/#{file}", :via => :scp
       end
     end
   end
