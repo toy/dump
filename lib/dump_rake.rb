@@ -3,10 +3,8 @@ require 'find'
 
 require 'rake'
 require 'rubygems'
-
-$:.push(*Dir[Pathname.new(__FILE__).dirname.join(*%w(.. gems * lib))])
-require 'progress'
 require 'archive/tar/minitar'
+gem 'progress', '>= 0.0.6'
 
 class DumpRake
   def self.versions(version = nil)
