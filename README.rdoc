@@ -18,10 +18,12 @@ Example
 When using cap tasks — be sure to link dump folder to persistent place on deploy, or you will lose all dumps every deploy.
 
 This plugin requires gems:
-archive/tar/minitar
-progress (version 0.0.6 or later)
+
+  archive/tar/minitar
+  progress (version 0.0.6 or later)
 
 To install:
+
   gem install archive-tar-minitar progress
 
 == Capistrano integration
