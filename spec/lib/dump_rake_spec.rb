@@ -99,6 +99,15 @@ describe DumpRake do
         DumpRake::DumpReader.should_not_receive(:restore)
         DumpRake.should_receive(:versions)
         grab_output{
+          DumpRake.restore
+        }
+      end
+
+      it "should not call DumpReader.restore and should call versions if there are no versions at all" do
+        DumpRake::Dump.stub!(:like).and_return([])
+        DumpRake::DumpReader.should_not_receive(:restore)
+        DumpRake.should_receive(:versions)
+        grab_output{
           DumpRake.restore('213')
         }
       end
