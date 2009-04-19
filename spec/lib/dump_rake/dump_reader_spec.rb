@@ -167,14 +167,14 @@ describe DumpReader do
     end
 
     describe "read_tables" do
-      it "should establish connection" do
+      it "should verify connection" do
         @dump.stub!(:config).and_return({:tables => []})
-        @dump.should_receive(:establish_connection)
+        @dump.should_receive(:verify_connection)
         @dump.read_tables
       end
 
       it "should call read_table for each table in config" do
-        @dump.stub!(:establish_connection)
+        @dump.stub!(:verify_connection)
         @dump.stub!(:config).and_return({:tables => {'first' => 1, 'second' => 3}})
 
         @dump.should_receive(:read_table).with('first', 1)
@@ -256,7 +256,7 @@ describe DumpReader do
         Rake::Task.stub!(:[]).with('assets:delete').and_return(@task)
         @task.stub!(:invoke)
       end
-      
+
       it "should not read assets if config[:assets] is nil" do
         @dump.stub!(:config).and_return({})
         @dump.should_not_receive(:find_entry)
@@ -298,21 +298,21 @@ describe DumpReader do
         @dump.stub!(:config).and_return({:assets => @assets})
         Dir.stub!(:glob).and_return([])
         FileUtils.stub!(:remove_entry_secure)
-      
+
         @dump.should_receive(:find_entry).with('assets.tar')
         @dump.read_assets
       end
-      
+
       it "should rewrite rewind method to empty method - to not raise exception and call Archive::Tar::Minitar.unpack" do
         @assets = %w(images videos)
         @dump.stub!(:config).and_return({:assets => @assets})
         Dir.stub!(:glob).and_return([])
         FileUtils.stub!(:remove_entry_secure)
-      
+
         @entry = mock('entry')
         @entry.stub!(:rewind).and_raise('hehe - we want to rewind to center of gzip')
         @dump.stub!(:find_entry).and_yield(@entry)
-      
+
         Archive::Tar::Minitar.should_receive(:unpack).and_return do |entry, path|
           entry.rewind
           path.should == RAILS_ROOT

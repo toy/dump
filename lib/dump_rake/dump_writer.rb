@@ -43,7 +43,7 @@ class DumpRake
     end
 
     def write_tables
-      establish_connection
+      verify_connection
       tables_to_dump.each_with_progress('Tables') do |table|
         write_table(table)
       end

@@ -103,14 +103,14 @@ describe DumpWriter do
     end
 
     describe "write_tables" do
-      it "should establish connection" do
+      it "should verify connection" do
         @dump.stub!(:tables_to_dump).and_return([])
-        @dump.should_receive(:establish_connection)
+        @dump.should_receive(:verify_connection)
         @dump.write_tables
       end
 
       it "should call write_table for each table returned by tables_to_dump" do
-        @dump.stub!(:establish_connection)
+        @dump.stub!(:verify_connection)
         @dump.stub!(:tables_to_dump).and_return(%w(first second))
 
         @dump.should_receive(:write_table).with('first')

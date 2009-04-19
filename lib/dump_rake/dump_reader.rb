@@ -59,7 +59,7 @@ class DumpRake
     end
 
     def read_tables
-      establish_connection
+      verify_connection
       config[:tables].each_with_progress('Tables') do |table, rows|
         read_table(table, rows)
       end

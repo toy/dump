@@ -29,8 +29,8 @@ class DumpRake
 
   protected
 
-    def establish_connection
-      ActiveRecord::Base.establish_connection
+    def verify_connection
+      ActiveRecord::Base.connection.verify!
     end
 
     def quote_table_name(table)

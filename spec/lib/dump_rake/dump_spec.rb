@@ -40,10 +40,10 @@ describe Dump do
     end
   end
 
-  describe "establish_connection" do
-    it "should return result of ActiveRecord::Base.establish_connection" do
-      ActiveRecord::Base.should_receive(:establish_connection).and_return(:result)
-      Dump.new('').send(:establish_connection).should == :result
+  describe "verify_connection" do
+    it "should return result of ActiveRecord::Base.connection.verify!" do
+      ActiveRecord::Base.connection.should_receive(:verify!).and_return(:result)
+      Dump.new('').send(:verify_connection).should == :result
     end
   end
 

@@ -161,5 +161,4 @@ describe DumpRake do
       DumpRake.clean_description(nil).should == ''
     end
   end
-
 end
