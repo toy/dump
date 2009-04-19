@@ -4,6 +4,7 @@ gem 'progress', '>= 0.0.6'
 require 'pathname'
 require 'find'
 require 'fileutils'
+require 'zlib'
 
 require 'rake'
 require 'archive/tar/minitar'
