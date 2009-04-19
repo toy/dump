@@ -55,11 +55,14 @@ class DumpRake
         config[:tables][table] = rows.length
         Progress.start('Writing dump', 1 + rows.length) do
           create_file("#{table}.dump") do |f|
-            columns = rows.first.keys.sort
-            Marshal.dump(columns, f)
+            column_names = rows.first.keys.sort
+            columns_by_name = ActiveRecord::Base.connection.columns(table).index_by(&:name)
+            Marshal.dump(column_names, f)
             Progress.step
             rows.each do |row|
-              values = row.values_at(*columns)
+              values = column_names.map do |column|
+                columns_by_name[column].type_cast(row[column])
+              end
               Marshal.dump(values, f)
               Progress.step
             end

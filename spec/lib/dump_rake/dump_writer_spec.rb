@@ -122,6 +122,13 @@ describe DumpWriter do
 
     describe "write_table" do
       before do
+        @column_definitions = [
+          mock('column', :name => 'id'),
+          mock('column', :name => 'name'),
+          mock('column', :name => 'associated_id')
+        ]
+        ActiveRecord::Base.connection.stub!(:columns).and_return(@column_definitions)
+        #
         @rows = [
           {'id' => 1, 'name' => 'a', 'associated_id' => 100},
           {'id' => 2, 'name' => 'b', 'associated_id' => 666},
@@ -157,10 +164,13 @@ describe DumpWriter do
         @dump.stub!(:table_rows).and_return(@rows)
         @dump.stub!(:create_file).and_yield(@file)
 
-        @columns = @rows.first.keys.sort
-        @file.should_receive(:write).with(Marshal.dump(@columns)).ordered
+        column_names = @rows.first.keys.sort
+        @file.should_receive(:write).with(Marshal.dump(column_names)).ordered
         @rows.each do |row|
-          @file.should_receive(:write).with(Marshal.dump(row.values_at(*@columns))).ordered
+          @file.should_receive(:write).with(Marshal.dump(row.values_at(*column_names))).ordered
+          @column_definitions.each do |column_definition|
+            column_definition.should_receive(:type_cast).with(row[column_definition.name]).and_return(row[column_definition.name])
+          end
         end
 
         @dump.write_table('first')
