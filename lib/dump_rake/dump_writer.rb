@@ -1,5 +1,3 @@
-require 'fileutils'
-
 class DumpRake
   class DumpWriter < Dump
     attr_reader :stream, :config

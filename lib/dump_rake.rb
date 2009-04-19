@@ -1,10 +1,13 @@
+require 'rubygems'
+gem 'progress', '>= 0.0.6'
+
 require 'pathname'
 require 'find'
+require 'fileutils'
 
 require 'rake'
-require 'rubygems'
 require 'archive/tar/minitar'
-gem 'progress', '>= 0.0.6'
+require 'progress'
 
 class DumpRake
   def self.versions(version = nil)

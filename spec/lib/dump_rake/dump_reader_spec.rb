@@ -1,5 +1,8 @@
 require File.dirname(__FILE__) + '/../../spec_helper'
 
+require File.dirname(__FILE__) + '/../../../lib/dump_rake'
+require File.dirname(__FILE__) + '/../../../lib/dump_rake/dump_reader'
+
 def object_of_length(required_length)
   LengthConstraint.new(required_length)
 end
