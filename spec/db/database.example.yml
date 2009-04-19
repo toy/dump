@@ -1,0 +1,10 @@
+sqlite3:
+  :adapter: sqlite3
+  :dbfile: dump.sqlite3.db
+
+mysql:
+  adapter: mysql
+  encoding: utf8
+  database: 
+  username: 
+  password: 

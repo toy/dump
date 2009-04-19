@@ -1,4 +1,6 @@
 .DS_Store
-rdoc
-spec/debug.log
-coverage
+/rdoc
+/spec/debug.log
+/spec/db/database.yml
+/spec/db/dump.sqlite3.db
+/coverage
