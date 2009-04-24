@@ -2,5 +2,4 @@
 /rdoc
 /spec/debug.log
 /spec/db/database.yml
-/spec/db/dump.sqlite3.db
 /coverage
