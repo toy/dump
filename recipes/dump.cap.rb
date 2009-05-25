@@ -113,4 +113,20 @@ namespace :dump do
       end
     end
   end
+
+  desc "Creates remote dump and downloads to local (desc defaults to 'backup')"
+  task :backup, :roles => :db, :only => {:primary => true} do
+    file = if ENV['DESC'] || ENV['DESCRIPTION']
+      remote.create
+    else
+      with_env('DESC', 'backup') do
+        remote.create
+      end
+    end
+    unless file.nil? || file.empty?
+      with_env('VER', file) do
+        remote.download
+      end
+    end
+  end
 end

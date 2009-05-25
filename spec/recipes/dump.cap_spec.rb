@@ -301,4 +301,53 @@ describe "cap dump" do
       end
     end
   end
+
+  describe "backup" do
+    it "should call remote:create" do
+      @cap.dump.remote.should_receive(:create).and_return('')
+      @cap.find_and_execute_task("dump:backup")
+    end
+
+    it "should not call remote:download if remote:create returns blank" do
+      @cap.dump.remote.stub!(:create).and_return('')
+      @cap.dump.remote.should_not_receive(:download)
+      @cap.find_and_execute_task("dump:backup")
+    end
+
+    it "should call remote:download if remote:create returns file name" do
+      @cap.dump.remote.stub!(:create).and_return('123.tgz')
+      @cap.dump.remote.should_receive(:download).ordered
+      @cap.find_and_execute_task("dump:backup")
+    end
+
+    it "should call remote:create with desc backup by default" do
+      def (@cap.dump.remote).create
+        ENV['DESC'].should == 'backup'
+        ''
+      end
+      @cap.find_and_execute_task("dump:backup")
+    end
+
+    it "should pass description if it is set through environment variable DESC" do
+      def (@cap.dump.remote).create
+        ENV['DESC'].should == 'remote dump'
+        ENV['DESCRIPTION'].should == nil
+        ''
+      end
+      with_env 'DESC', 'remote dump' do
+        @cap.find_and_execute_task("dump:backup")
+      end
+    end
+
+    it "should pass description if it is set through environment variable DESCRIPTION" do
+      def (@cap.dump.remote).create
+        ENV['DESC'].should == nil
+        ENV['DESCRIPTION'].should == 'remote dump'
+        ''
+      end
+      with_env 'DESCRIPTION', 'remote dump' do
+        @cap.find_and_execute_task("dump:backup")
+      end
+    end
+  end
 end

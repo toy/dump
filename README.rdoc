@@ -63,4 +63,7 @@ For all cap commands parameters are same as for rake tasks
 
   # use DESC[RIPTION] to add prefix to dump name
   cap dump:mirror:up # mirror local to remote (create local dump, upload it to remote and restore it there)
-  cap dump:mirror:down # mirror remote to local  (create remote dump, download it from remote and restore on local)
+  cap dump:mirror:down # mirror remote to local (create remote dump, download it from remote and restore on local)
+
+  # use DESC[RIPTION] to set dump name prefix (or it will be 'backup')
+  cap dump:backup # create local backup of remote (create remote dump and download it)
