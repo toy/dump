@@ -4,7 +4,7 @@ require 'capistrano'
 describe "cap dump" do
   before do
     @cap = Capistrano::Configuration.new
-    @cap.load File.dirname(__FILE__) + '/../../recipes/dump.cap.rb'
+    @cap.load File.dirname(__FILE__) + '/../../recipes/dump.rb'
     @remote_path = "/home/test/apps/dummy"
     @cap.set(:current_path, @remote_path)
   end
@@ -34,16 +34,27 @@ describe "cap dump" do
     end
 
     describe "create" do
-      it "should call local rake task" do
-        @cap.should_receive(:run_local).with("rake -s dump:create").and_return('')
-        @cap.find_and_execute_task("dump:local:create")
+      it "should raise if dump creation fails" do
+        @cap.should_receive(:run_local).with("rake -s dump:create DESC=\"local\"").and_return('')
+        proc{
+          @cap.find_and_execute_task("dump:local:create")
+        }.should raise_error('Failed creating dump')
+      end
+
+      it "should call local rake task with default DESC local" do
+        @cap.should_receive(:run_local).with("rake -s dump:create DESC=\"local\"").and_return('123.tgz')
+        grab_output{
+          @cap.find_and_execute_task("dump:local:create")
+        }
       end
 
       %w(DESC DESCRIPTION).each do |name|
         it "should pass description if it is set through environment variable #{name}" do
-          @cap.should_receive(:run_local).with("rake -s dump:create DESC=\"local dump\"").and_return('')
+          @cap.should_receive(:run_local).with("rake -s dump:create DESC=\"local dump\"").and_return('123.tgz')
           with_env name, 'local dump' do
-            @cap.find_and_execute_task("dump:local:create")
+            grab_output{
+              @cap.find_and_execute_task("dump:local:create")
+            }
           end
         end
       end
@@ -133,22 +144,35 @@ describe "cap dump" do
     end
 
     describe "create" do
-      it "should call remote rake task with default rails_env" do
-        @cap.should_receive(:capture).with("cd #{@remote_path}; rake -s dump:create RAILS_ENV=\"production\"").and_return('')
-        @cap.find_and_execute_task("dump:remote:create")
+      it "should raise if dump creation fails" do
+        @cap.should_receive(:capture).with("cd #{@remote_path}; rake -s dump:create RAILS_ENV=\"production\" DESC=\"remote\"").and_return('')
+        proc{
+          @cap.find_and_execute_task("dump:remote:create")
+        }.should raise_error('Failed creating dump')
       end
 
-      it "should call remote rake task with fetched rails_env" do
+      it "should call remote rake task with default rails_env and default DESC remote" do
+        @cap.should_receive(:capture).with("cd #{@remote_path}; rake -s dump:create RAILS_ENV=\"production\" DESC=\"remote\"").and_return('123.tgz')
+        grab_output{
+          @cap.find_and_execute_task("dump:remote:create")
+        }
+      end
+
+      it "should call remote rake task with fetched rails_env and default DESC remote" do
         @cap.dump.should_receive(:fetch_rails_env).and_return('dev')
-        @cap.should_receive(:capture).with("cd #{@remote_path}; rake -s dump:create RAILS_ENV=\"dev\"").and_return('')
-        @cap.find_and_execute_task("dump:remote:create")
+        @cap.should_receive(:capture).with("cd #{@remote_path}; rake -s dump:create RAILS_ENV=\"dev\" DESC=\"remote\"").and_return('123.tgz')
+        grab_output{
+          @cap.find_and_execute_task("dump:remote:create")
+        }
       end
 
       %w(DESC DESCRIPTION).each do |name|
         it "should pass description if it is set through environment variable #{name}" do
-          @cap.should_receive(:capture).with("cd #{@remote_path}; rake -s dump:create RAILS_ENV=\"production\" DESC=\"remote dump\"").and_return('')
+          @cap.should_receive(:capture).with("cd #{@remote_path}; rake -s dump:create RAILS_ENV=\"production\" DESC=\"remote dump\"").and_return('123.tgz')
           with_env name, 'remote dump' do
-            @cap.find_and_execute_task("dump:remote:create")
+            grab_output{
+              @cap.find_and_execute_task("dump:remote:create")
+            }
           end
         end
       end
@@ -229,75 +253,42 @@ describe "cap dump" do
   end
 
   describe "mirror" do
-    describe "up" do
-      it "should call local:create" do
-        @cap.dump.local.should_receive(:create).and_return('')
-        @cap.find_and_execute_task("dump:mirror:up")
-      end
-
-      it "should not call local:upload or remote:restore if local:create returns blank" do
-        @cap.dump.local.stub!(:create).and_return('')
-        @cap.dump.local.should_not_receive(:upload)
-        @cap.dump.remote.should_not_receive(:restore)
-        @cap.find_and_execute_task("dump:mirror:up")
-      end
-
-      it "should call remote:create (auto-backup), local:upload and remote:restore if local:create returns file name" do
-        @cap.dump.local.stub!(:create).and_return('123.tgz')
-        @cap.dump.remote.should_receive(:create).ordered
-        @cap.dump.local.should_receive(:upload).ordered
-        @cap.dump.remote.should_receive(:restore).ordered
-        @cap.find_and_execute_task("dump:mirror:up")
-      end
-
-      it "should call remote:create with DESC set to auto-backup, local:upload and remote:restore with VER set to name of created file" do
-        @cap.dump.local.stub!(:create).and_return('123.tgz')
-        def (@cap.dump.remote).create
-          ENV['DESC'].should == 'auto-backup'
+    {"up" => [:local, :remote], "down" => [:remote, :local]}.each do |dir, way|
+      src = way[0]
+      dst = way[1]
+      describe name do
+        it "should create auto-backup" do
+          @cap.dump.namespaces[dst].should_receive(:create){ ENV['DESC'].should == 'auto-backup'; '' }
+          @cap.find_and_execute_task("dump:mirror:#{dir}")
         end
-        def (@cap.dump.local).upload
-          ENV['VER'].should == '123.tgz'
-        end
-        def (@cap.dump.remote).restore
-          ENV['VER'].should == '123.tgz'
-        end
-        @cap.find_and_execute_task("dump:mirror:up")
-      end
-    end
 
-    describe "down" do
-      it "should call remote:create" do
-        @cap.dump.remote.should_receive(:create).and_return('')
-        @cap.find_and_execute_task("dump:mirror:down")
-      end
-
-      it "should not call remote:download or local:restore if remote:create returns blank" do
-        @cap.dump.remote.stub!(:create).and_return('')
-        @cap.dump.remote.should_not_receive(:download)
-        @cap.dump.local.should_not_receive(:restore)
-        @cap.find_and_execute_task("dump:mirror:down")
-      end
-
-      it "should call local:create (auto-backup), remote:download and local:restore if remote:create returns file name" do
-        @cap.dump.remote.stub!(:create).and_return('123.tgz')
-        @cap.dump.local.should_receive(:create).ordered
-        @cap.dump.remote.should_receive(:download).ordered
-        @cap.dump.local.should_receive(:restore).ordered
-        @cap.find_and_execute_task("dump:mirror:down")
-      end
-
-      it "should call local:create with DESC set to auto-backup, remote:download and local:restore with VER set to name of created file" do
-        @cap.dump.remote.stub!(:create).and_return('123.tgz')
-        def (@cap.dump.local).create
-          ENV['DESC'].should == 'auto-backup'
+        it "should not call local:create if auto-backup fails" do
+          @cap.dump.namespaces[dst].stub!(:create).and_return('')
+          @cap.dump.namespaces[src].should_not_receive(:create)
+          @cap.find_and_execute_task("dump:mirror:#{dir}")
         end
-        def (@cap.dump.remote).download
-          ENV['VER'].should == '123.tgz'
+
+        it "should call local:create if auto-backup succeedes" do
+          @cap.dump.namespaces[dst].stub!(:create).and_return('123.tgz')
+          @cap.dump.namespaces[src].should_receive(:create){ ENV['DESC'].should == "mirror:#{dir}"; '' }
+          @cap.find_and_execute_task("dump:mirror:#{dir}")
         end
-        def (@cap.dump.local).restore
-          ENV['VER'].should == '123.tgz'
+
+        it "should not call local:upload or remote:restore if local:create fails" do
+          @cap.dump.namespaces[dst].stub!(:create).and_return('123.tgz')
+          @cap.dump.namespaces[src].stub!(:create).and_return('')
+          @cap.dump.namespaces[src].should_not_receive(:upload)
+          @cap.dump.namespaces[dst].should_not_receive(:restore)
+          @cap.find_and_execute_task("dump:mirror:#{dir}")
         end
-        @cap.find_and_execute_task("dump:mirror:down")
+
+        it "should call local:upload and remote:restore with VER set to file name if local:create returns file name" do
+          @cap.dump.namespaces[dst].stub!(:create).and_return('123.tgz')
+          @cap.dump.namespaces[src].stub!(:create).and_return('123.tgz')
+          @cap.dump.namespaces[src].should_receive(:"#{dir}load").ordered{ ENV['VER'].should == '123.tgz' }
+          @cap.dump.namespaces[dst].should_receive(:restore).ordered{ ENV['VER'].should == '123.tgz' }
+          @cap.find_and_execute_task("dump:mirror:#{dir}")
+        end
       end
     end
   end

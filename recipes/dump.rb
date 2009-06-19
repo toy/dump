@@ -18,23 +18,52 @@ namespace :dump do
     end
     cmd
   end
-  
+
   def fetch_rails_env
     fetch(:rails_env, "production")
   end
-  
+
   def transfer_with_progress(direction, from, to, options = {})
     transfer(direction, from, to, options) do |channel, path, transfered, total|
       print "\rTransfering: %5.1f%%" % (transfered * 100.0 / total)
     end
   end
 
+  def with_default_desc(desc)
+    if ENV['DESC'] || ENV['DESCRIPTION']
+      yield
+    else
+      with_env('DESC', desc) do
+        yield
+      end
+    end
+  end
+
+  def print_and_return_or_fail
+    out = yield
+    raise 'Failed creating dump' if out.blank?
+    print out
+    out.strip
+  end
+
+  Object.class_eval do
+    def blank?
+      respond_to?(:empty?) ? empty? : !self
+    end
+
+    def present?
+      !blank?
+    end
+  end
+
   namespace :local do
     desc "Create local dump"
     task :create, :roles => :db, :only => {:primary => true} do
-      out = run_local(dump_command(:create))
-      print out
-      out.strip
+      print_and_return_or_fail do
+        with_default_desc('local') do
+          run_local(dump_command(:create))
+        end
+      end
     end
 
     desc "Restore local dump"
@@ -55,13 +84,15 @@ namespace :dump do
       end
     end
   end
- 
+
   namespace :remote do
     desc "Create remote dump"
     task :create, :roles => :db, :only => {:primary => true} do
-      out = capture("cd #{current_path}; #{dump_command(:create, :RAILS_ENV => fetch_rails_env)}")
-      print out
-      out.strip
+      print_and_return_or_fail do
+        with_default_desc('remote') do
+          capture("cd #{current_path}; #{dump_command(:create, :RAILS_ENV => fetch_rails_env)}")
+        end
+      end
     end
 
     desc "Restore remote dump"
@@ -87,28 +118,36 @@ namespace :dump do
   namespace :mirror do
     desc "Creates local dump, uploads and restores on remote"
     task :up, :roles => :db, :only => {:primary => true} do
-      file = local.create
-      unless file.nil? || file.empty?
-        with_env('DESC', 'auto-backup') do
-          remote.create
+      auto_backup = with_env('DESC', 'auto-backup') do
+        remote.create
+      end
+      if auto_backup.present?
+        file = with_default_desc('mirror:up') do
+          local.create
         end
-        with_env('VER', file) do
-          local.upload
-          remote.restore
+        if file.present?
+          with_env('VER', file) do
+            local.upload
+            remote.restore
+          end
         end
       end
     end
 
     desc "Creates remote dump, downloads and restores on local"
     task :down, :roles => :db, :only => {:primary => true} do
-      file = remote.create
-      unless file.nil? || file.empty?
-        with_env('DESC', 'auto-backup') do
-          local.create
+      auto_backup = with_env('DESC', 'auto-backup') do
+        local.create
+      end
+      if auto_backup.present?
+        file = with_default_desc('mirror:down') do
+          remote.create
         end
-        with_env('VER', file) do
-          remote.download
-          local.restore
+        if file.present?
+          with_env('VER', file) do
+            remote.download
+            local.restore
+          end
         end
       end
     end
@@ -116,14 +155,10 @@ namespace :dump do
 
   desc "Creates remote dump and downloads to local (desc defaults to 'backup')"
   task :backup, :roles => :db, :only => {:primary => true} do
-    file = if ENV['DESC'] || ENV['DESCRIPTION']
+    file = with_default_desc('backup') do
       remote.create
-    else
-      with_env('DESC', 'backup') do
-        remote.create
-      end
     end
-    unless file.nil? || file.empty?
+    if file.present?
       with_env('VER', file) do
         remote.download
       end
