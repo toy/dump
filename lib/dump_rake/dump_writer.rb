@@ -81,7 +81,12 @@ class DumpRake
               Dir[*assets].each_with_progress('Assets') do |asset|
                 config[:assets] << asset
                 Dir[File.join(asset, '**', '*')].each_with_progress(asset) do |entry|
-                  Archive::Tar::Minitar.pack_file(entry, outp)
+                  begin
+                    Archive::Tar::Minitar.pack_file(entry, outp)
+                  rescue => e
+                    puts "Skipped asset due to error #{e}"
+                  end
+                  sleep 0.2
                 end
               end
             end

@@ -268,6 +268,26 @@ describe DumpWriter do
 
         @dump.write_assets
       end
+
+      it "should not raise if something fails when packing" do
+        @file = mock('file')
+        @dump.stub!(:assets_to_dump).and_return(%w(videos))
+        @dump.stub!(:create_file).and_yield(@file)
+        Dir.stub!(:chdir).and_yield
+        @tar = mock('tar_writer')
+        Archive::Tar::Minitar::Output.stub!(:open).and_yield(@tar)
+
+        Dir.should_receive(:[]).with(*%w(videos)).and_return(%w(videos))
+        Dir.should_receive(:[]).with('videos/**/*').and_return(%w(a.mov b.mov))
+
+        Archive::Tar::Minitar.should_receive(:pack_file).with('a.mov', @tar).and_raise('file not found')
+        Archive::Tar::Minitar.should_receive(:pack_file).with('b.mov', @tar)
+
+        grab_output {
+          @dump.write_assets
+        }
+      end
+
     end
 
     describe "write_config" do
