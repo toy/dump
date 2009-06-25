@@ -98,7 +98,7 @@ class DumpRake
     end
 
     def tables_to_dump
-      ActiveRecord::Base.connection.tables - %w(schema_info schema_migrations sessions)
+      ActiveRecord::Base.connection.tables - %w(sessions)
     end
 
     def table_rows(table)

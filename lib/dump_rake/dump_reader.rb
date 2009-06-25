@@ -67,9 +67,10 @@ class DumpRake
 
     def read_table(table, rows_count)
       find_entry("#{table}.dump") do |entry|
-        columns = Marshal.load(entry)
-
         table_sql = quote_table_name(table)
+        clear_table(table_sql) if schema_tables.include?(table)
+
+        columns = Marshal.load(entry)
         columns_sql = columns_insert_sql(columns)
         Progress.start(table, rows_count) do
           until entry.eof?
@@ -112,6 +113,14 @@ class DumpRake
     end
 
   protected
+
+    def schema_tables
+      %w(schema_info schema_migrations)
+    end
+
+    def clear_table(table_sql)
+      ActiveRecord::Base.connection.delete("DELETE FROM #{table_sql}", 'Clearing table')
+    end
 
     def quote_column_name(column)
       ActiveRecord::Base.connection.quote_column_name(column)

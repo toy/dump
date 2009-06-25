@@ -292,9 +292,9 @@ describe DumpWriter do
         @dump.tables_to_dump
       end
 
-      it "should exclude certain tables from result" do
-        ActiveRecord::Base.connection.should_receive(:tables).and_return(%w(first second schema_info))
-        @dump.tables_to_dump.should == %w(first second)
+      it "should exclude sessions table from result" do
+        ActiveRecord::Base.connection.should_receive(:tables).and_return(%w(first second schema_info schema_migrations sessions))
+        @dump.tables_to_dump.should == %w(first second schema_info schema_migrations)
       end
     end
 

@@ -198,6 +198,22 @@ describe DumpReader do
         @dump.read_table('first', 10)
       end
 
+      it "should not call clear_table for basic tables" do
+        @entry = mock('entry', :to_str => Marshal.dump('data'), :eof? => true)
+        @dump.should_receive(:find_entry).with('first.dump').and_yield(@entry)
+        @dump.should_receive(:quote_table_name).with('first')
+        @dump.should_not_receive(:clear_table)
+        @dump.read_table('first', 10)
+      end
+
+      it "should clear schema table before writing" do
+        @entry = mock('entry', :to_str => Marshal.dump('data'), :eof? => true)
+        @dump.should_receive(:find_entry).with('schema_migrations.dump').and_yield(@entry)
+        @dump.should_receive(:quote_table_name).with('schema_migrations').and_return('`schema_migrations`')
+        @dump.should_receive(:clear_table).with('`schema_migrations`')
+        @dump.read_table('schema_migrations', 10)
+      end
+
       describe "reading/writing data" do
         def create_entry(rows_count)
           @entry = StringIO.new
@@ -318,6 +334,19 @@ describe DumpReader do
           path.should == RAILS_ROOT
         end
         @dump.read_assets
+      end
+    end
+
+    describe "schema_tables" do
+      it "should return schema_tables" do
+        DumpReader.new('').send(:schema_tables).should == %w(schema_info schema_migrations)
+      end
+    end
+
+    describe "clear_table" do
+      it "should call ActiveRecord::Base.connection.delete with sql for deleting everything from table" do
+        ActiveRecord::Base.connection.should_receive(:delete).with('DELETE FROM `first`', anything)
+        DumpReader.new('').send(:clear_table, '`first`')
       end
     end
 
