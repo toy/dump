@@ -55,6 +55,7 @@ class DumpRake
         with_env('SCHEMA', f.path) do
           Rake::Task['db:schema:load'].invoke
         end
+        Rake::Task['db:schema:dump'].invoke
       end
     end
 

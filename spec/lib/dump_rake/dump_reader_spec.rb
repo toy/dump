@@ -141,6 +141,12 @@ describe DumpReader do
     end
 
     describe "read_schema" do
+      before do
+        @task = mock('task')
+        Rake::Task.stub!(:[]).and_return(@task)
+        @task.stub!(:invoke)
+      end
+
       it "should read schema.rb to temp file" do
         @dump.should_receive(:read_entry_to_file).with('schema.rb')
         @dump.read_schema
@@ -154,13 +160,16 @@ describe DumpReader do
         @dump.read_schema
       end
 
-      it "should call task db:schema:load" do
+      it "should call task db:schema:load and db:schema:dump" do
         @file = mock('tempfile', :path => '/temp/123-arst')
         @dump.stub!(:read_entry_to_file).and_yield(@file)
 
-        @task = mock('task')
-        Rake::Task.should_receive(:[]).with('db:schema:load').and_return(@task)
-        @task.should_receive(:invoke)
+        @load_task = mock('load_task')
+        @dump_task = mock('dump_task')
+        Rake::Task.should_receive(:[]).with('db:schema:load').and_return(@load_task)
+        Rake::Task.should_receive(:[]).with('db:schema:dump').and_return(@dump_task)
+        @load_task.should_receive(:invoke)
+        @dump_task.should_receive(:invoke)
 
         @dump.read_schema
       end

@@ -70,8 +70,10 @@ def reset_rake!
   Rake::Task.define_task('environment')
   Rake::Task.define_task('db:schema:dump') do
     File.open(DUMMY_SCHEMA_PATH, 'r') do |r|
-      File.open(ENV['SCHEMA'], 'w') do |w|
-        w.write(r.read)
+      if ENV['SCHEMA']
+        File.open(ENV['SCHEMA'], 'w') do |w|
+          w.write(r.read)
+        end
       end
     end
   end
