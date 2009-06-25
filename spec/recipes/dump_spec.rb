@@ -16,7 +16,7 @@ describe "cap dump" do
         @cap.find_and_execute_task("dump:local:versions")
       end
 
-      %w(VER VERSION).each do |name|
+      %w(VER VERSION LIKE).each do |name|
         it "should pass version if it is set through environment variable #{name}" do
           @cap.should_receive(:run_local).with("rake -s dump:versions VER=\"21376\"").and_return('')
           with_env name, '21376' do
@@ -80,7 +80,7 @@ describe "cap dump" do
         @cap.find_and_execute_task("dump:local:restore")
       end
 
-      %w(VER VERSION).each do |name|
+      %w(VER VERSION LIKE).each do |name|
         it "should pass version if it is set through environment variable #{name}" do
           @cap.should_receive(:run_local).with("rake -s dump:restore VER=\"21376\"")
           with_env name, '21376' do
@@ -96,7 +96,7 @@ describe "cap dump" do
         @cap.find_and_execute_task("dump:local:upload")
       end
 
-      %w(VER VERSION).each do |name|
+      %w(VER VERSION LIKE).each do |name|
         it "should pass version if it is set through environment variable #{name}" do
           @cap.should_receive(:run_local).with("rake -s dump:versions VER=\"21376\"").and_return('')
           with_env name, '21376' do
@@ -126,7 +126,7 @@ describe "cap dump" do
         @cap.find_and_execute_task("dump:remote:versions")
       end
 
-      %w(VER VERSION).each do |name|
+      %w(VER VERSION LIKE).each do |name|
         it "should pass version if it is set through environment variable #{name}" do
           @cap.should_receive(:capture).with("cd #{@remote_path}; rake -s dump:versions VER=\"21376\"").and_return('')
           with_env name, '21376' do
@@ -205,7 +205,7 @@ describe "cap dump" do
       end
 
 
-      %w(VER VERSION).each do |name|
+      %w(VER VERSION LIKE).each do |name|
         it "should pass version if it is set through environment variable #{name}" do
           @cap.should_receive(:run).with("cd #{@remote_path}; rake -s dump:restore RAILS_ENV=\"production\" VER=\"21376\"")
           with_env name, '21376' do
@@ -221,7 +221,7 @@ describe "cap dump" do
         @cap.find_and_execute_task("dump:remote:download")
       end
 
-      %w(VER VERSION).each do |name|
+      %w(VER VERSION LIKE).each do |name|
         it "should pass version if it is set through environment variable #{name}" do
           @cap.should_receive(:capture).with("cd #{@remote_path}; rake -s dump:versions VER=\"21376\"").and_return('')
           with_env name, '21376' do

@@ -13,7 +13,7 @@ namespace :dump do
       desc = ENV['DESC'] || ENV['DESCRIPTION']
       cmd += " DESC=#{desc.inspect}" if desc
     when :restore, :versions
-      ver = ENV['VER'] || ENV['VERSION']
+      ver = ENV['VER'] || ENV['VERSION'] || ENV['LIKE']
       cmd += " VER=#{ver.inspect}" if ver
     end
     cmd

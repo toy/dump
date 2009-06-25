@@ -27,7 +27,7 @@ describe "rake dump" do
       @task.invoke
     end
 
-    %w(VER VERSION).each do |name|
+    %w(VER VERSION LIKE).each do |name|
       it "should pass version if it is set through environment variable #{name}" do
         DumpRake.should_receive(:versions).with('21376')
         with_env name, '21376' do
@@ -67,7 +67,7 @@ describe "rake dump" do
       @task.invoke
     end
 
-    %w(VER VERSION).each do |name|
+    %w(VER VERSION LIKE).each do |name|
       it "should pass version if it is set through environment variable #{name}" do
         DumpRake.should_receive(:restore).with('21378')
         with_env name, '21378' do

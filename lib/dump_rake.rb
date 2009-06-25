@@ -38,8 +38,8 @@ class DumpRake
   def self.restore(version = nil)
     dump = if version.nil?
       Dump.last
-    elsif (found = Dump.like(version)).length == 1
-      found.first
+    else
+      Dump.like(version).last
     end
 
     if dump

@@ -36,6 +36,7 @@ You can use cap dump:* tasks to control dumps on remote server. Don't forget to 
   rake dump:versions
   # show dump versions where 1234 is in name
   rake dump:versions VER[SION]=1234
+  rake dump:versions LIKE=1234
 
   # create dump
   rake dump:create
@@ -46,6 +47,7 @@ You can use cap dump:* tasks to control dumps on remote server. Don't forget to 
   rake dump:restore
   # restore dump with 1234 in its name (such dump must be uniq)
   rake dump:restore VER[SION]=1234
+  rake dump:restore LIKE=1234
 
 For all cap commands parameters are same as for rake tasks
 
@@ -57,7 +59,7 @@ For all cap commands parameters are same as for rake tasks
   cap dump:remote:restore
   cap dump:remote:versions
 
-  # use VER[SION] to select dump
+  # use VER[SION] or LIKE to select dump
   cap dump:local:upload # transfer last dump to remote server
   cap dump:remote:download # transfer last dump to local
 

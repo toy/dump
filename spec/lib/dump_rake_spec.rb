@@ -140,15 +140,6 @@ describe DumpRake do
         }
       end
 
-      it "should not call DumpReader.restore and should call versions if found multiple matching versions" do
-        DumpRake::Dump.stub!(:like).and_return([mock('dump'), mock('dump')])
-        DumpRake::DumpReader.should_not_receive(:restore)
-        DumpRake.should_receive(:versions)
-        grab_output{
-          DumpRake.restore('213')
-        }
-      end
-
       it "should call DumpReader.restore if there is desired version" do
         @dump = mock('dump', :path => 'dump/213.tgz')
         DumpRake::Dump.stub!(:like).and_return([@dump])
@@ -158,6 +149,18 @@ describe DumpRake do
           DumpRake.restore('213')
         }
       end
+
+      it "should call DumpReader.restore on last version if found multiple matching versions" do
+        @dump_a = mock('dump_a', :path => 'dump/213-a.tgz')
+        @dump_b = mock('dump_b', :path => 'dump/213-b.tgz')
+        DumpRake::Dump.stub!(:like).and_return([@dump_a, @dump_b])
+        DumpRake::DumpReader.should_receive(:restore).with('dump/213-b.tgz')
+        DumpRake.should_not_receive(:versions)
+        grab_output{
+          DumpRake.restore('213')
+        }
+      end
+
     end
   end
 
