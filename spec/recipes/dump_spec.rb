@@ -122,13 +122,13 @@ describe "cap dump" do
   describe "remote" do
     describe "versions" do
       it "should call remote rake task" do
-        @cap.should_receive(:capture).with("cd #{@remote_path}; rake -s dump:versions").and_return('')
+        @cap.should_receive(:capture).with("cd #{@remote_path}; rake -s dump:versions RAILS_ENV=\"production\"").and_return('')
         @cap.find_and_execute_task("dump:remote:versions")
       end
 
       %w(VER VERSION LIKE).each do |name|
         it "should pass version if it is set through environment variable #{name}" do
-          @cap.should_receive(:capture).with("cd #{@remote_path}; rake -s dump:versions VER=\"21376\"").and_return('')
+          @cap.should_receive(:capture).with("cd #{@remote_path}; rake -s dump:versions RAILS_ENV=\"production\" VER=\"21376\"").and_return('')
           with_env name, '21376' do
             @cap.find_and_execute_task("dump:remote:versions")
           end
@@ -217,13 +217,13 @@ describe "cap dump" do
 
     describe "download" do
       it "should run rake versions to get avaliable versions" do
-        @cap.should_receive(:capture).with("cd #{@remote_path}; rake -s dump:versions").and_return('')
+        @cap.should_receive(:capture).with("cd #{@remote_path}; rake -s dump:versions RAILS_ENV=\"production\"").and_return('')
         @cap.find_and_execute_task("dump:remote:download")
       end
 
       %w(VER VERSION LIKE).each do |name|
         it "should pass version if it is set through environment variable #{name}" do
-          @cap.should_receive(:capture).with("cd #{@remote_path}; rake -s dump:versions VER=\"21376\"").and_return('')
+          @cap.should_receive(:capture).with("cd #{@remote_path}; rake -s dump:versions RAILS_ENV=\"production\" VER=\"21376\"").and_return('')
           with_env name, '21376' do
             @cap.find_and_execute_task("dump:remote:download")
           end

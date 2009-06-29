@@ -102,12 +102,12 @@ namespace :dump do
 
     desc "Versions of remote dumps"
     task :versions, :roles => :db, :only => {:primary => true} do
-      print capture("cd #{current_path}; #{dump_command(:versions)}")
+      print capture("cd #{current_path}; #{dump_command(:versions, :RAILS_ENV => fetch_rails_env)}")
     end
 
     desc "Download dump"
     task :download, :roles => :db, :only => {:primary => true} do
-      files = capture("cd #{current_path}; #{dump_command(:versions)}").split("\n")
+      files = capture("cd #{current_path}; #{dump_command(:versions, :RAILS_ENV => fetch_rails_env)}").split("\n")
       if file = files.last
         FileUtils.mkpath('dump')
         transfer_with_progress :down, "#{current_path}/dump/#{file}", "dump/#{file}", :via => :scp
