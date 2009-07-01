@@ -24,7 +24,6 @@ class DumpRake
     description = clean_description(options[:description])
     name += "-#{description}" unless description.blank?
 
-    #TODO - send tgz name to writer and rename there
     path = File.join(RAILS_ROOT, 'dump')
     tmp_name = File.join(path, "#{name}.tmp")
     tgz_name = File.join(path, "#{name}.tgz")
