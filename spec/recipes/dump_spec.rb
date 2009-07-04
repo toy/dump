@@ -12,13 +12,13 @@ describe "cap dump" do
   describe "local" do
     describe "versions" do
       it "should call local rake task" do
-        @cap.should_receive(:run_local).with("rake -s dump:versions").and_return('')
+        @cap.dump.should_receive(:run_local).with("rake -s dump:versions").and_return('')
         @cap.find_and_execute_task("dump:local:versions")
       end
 
       %w(VER VERSION LIKE).each do |name|
         it "should pass version if it is set through environment variable #{name}" do
-          @cap.should_receive(:run_local).with("rake -s dump:versions VER=\"21376\"").and_return('')
+          @cap.dump.should_receive(:run_local).with("rake -s dump:versions VER=\"21376\"").and_return('')
           with_env name, '21376' do
             @cap.find_and_execute_task("dump:local:versions")
           end
@@ -26,7 +26,7 @@ describe "cap dump" do
       end
 
       it "should print result of rake task" do
-        @cap.stub!(:run_local).and_return("123123.tgz\n")
+        @cap.dump.stub!(:run_local).and_return("123123.tgz\n")
         grab_output{
           @cap.find_and_execute_task("dump:local:versions")
         }.should == "123123.tgz\n"
@@ -35,14 +35,14 @@ describe "cap dump" do
 
     describe "create" do
       it "should raise if dump creation fails" do
-        @cap.should_receive(:run_local).with("rake -s dump:create DESC=\"local\"").and_return('')
+        @cap.dump.should_receive(:run_local).with("rake -s dump:create DESC=\"local\"").and_return('')
         proc{
           @cap.find_and_execute_task("dump:local:create")
         }.should raise_error('Failed creating dump')
       end
 
       it "should call local rake task with default DESC local" do
-        @cap.should_receive(:run_local).with("rake -s dump:create DESC=\"local\"").and_return('123.tgz')
+        @cap.dump.should_receive(:run_local).with("rake -s dump:create DESC=\"local\"").and_return('123.tgz')
         grab_output{
           @cap.find_and_execute_task("dump:local:create")
         }
@@ -50,7 +50,7 @@ describe "cap dump" do
 
       %w(DESC DESCRIPTION).each do |name|
         it "should pass description if it is set through environment variable #{name}" do
-          @cap.should_receive(:run_local).with("rake -s dump:create DESC=\"local dump\"").and_return('123.tgz')
+          @cap.dump.should_receive(:run_local).with("rake -s dump:create DESC=\"local dump\"").and_return('123.tgz')
           with_env name, 'local dump' do
             grab_output{
               @cap.find_and_execute_task("dump:local:create")
@@ -60,14 +60,14 @@ describe "cap dump" do
       end
 
       it "should print result of rake task" do
-        @cap.stub!(:run_local).and_return("123123.tgz\n")
+        @cap.dump.stub!(:run_local).and_return("123123.tgz\n")
         grab_output{
           @cap.find_and_execute_task("dump:local:create")
         }.should == "123123.tgz\n"
       end
 
       it "should return stripped result of rake task" do
-        @cap.stub!(:run_local).and_return("123123.tgz\n")
+        @cap.dump.stub!(:run_local).and_return("123123.tgz\n")
         grab_output{
           @cap.find_and_execute_task("dump:local:create").should == "123123.tgz"
         }
@@ -76,13 +76,13 @@ describe "cap dump" do
 
     describe "restore" do
       it "should call local rake task" do
-        @cap.should_receive(:run_local).with("rake -s dump:restore")
+        @cap.dump.should_receive(:run_local).with("rake -s dump:restore")
         @cap.find_and_execute_task("dump:local:restore")
       end
 
       %w(VER VERSION LIKE).each do |name|
         it "should pass version if it is set through environment variable #{name}" do
-          @cap.should_receive(:run_local).with("rake -s dump:restore VER=\"21376\"")
+          @cap.dump.should_receive(:run_local).with("rake -s dump:restore VER=\"21376\"")
           with_env name, '21376' do
             @cap.find_and_execute_task("dump:local:restore")
           end
@@ -92,13 +92,13 @@ describe "cap dump" do
 
     describe "upload" do
       it "should run rake versions to get avaliable versions" do
-        @cap.should_receive(:run_local).with("rake -s dump:versions").and_return('')
+        @cap.dump.should_receive(:run_local).with("rake -s dump:versions").and_return('')
         @cap.find_and_execute_task("dump:local:upload")
       end
 
       %w(VER VERSION LIKE).each do |name|
         it "should pass version if it is set through environment variable #{name}" do
-          @cap.should_receive(:run_local).with("rake -s dump:versions VER=\"21376\"").and_return('')
+          @cap.dump.should_receive(:run_local).with("rake -s dump:versions VER=\"21376\"").and_return('')
           with_env name, '21376' do
             @cap.find_and_execute_task("dump:local:upload")
           end
@@ -106,13 +106,13 @@ describe "cap dump" do
       end
 
       it "should not upload anything if there are no versions avaliable" do
-        @cap.stub!(:run_local).and_return('')
+        @cap.dump.stub!(:run_local).and_return('')
         @cap.should_not_receive(:transfer)
         @cap.find_and_execute_task("dump:local:upload")
       end
 
       it "should transfer latest version dump" do
-        @cap.stub!(:run_local).and_return("100.tgz\n200.tgz\n300.tgz\n")
+        @cap.dump.stub!(:run_local).and_return("100.tgz\n200.tgz\n300.tgz\n")
         @cap.should_receive(:transfer).with(:up, "dump/300.tgz", "#{@remote_path}/dump/300.tgz", :via => :scp)
         @cap.find_and_execute_task("dump:local:upload")
       end
@@ -122,13 +122,13 @@ describe "cap dump" do
   describe "remote" do
     describe "versions" do
       it "should call remote rake task" do
-        @cap.should_receive(:capture).with("cd #{@remote_path}; rake -s dump:versions RAILS_ENV=\"production\"").and_return('')
+        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions RAILS_ENV=\"production\"").and_return('')
         @cap.find_and_execute_task("dump:remote:versions")
       end
 
       %w(VER VERSION LIKE).each do |name|
         it "should pass version if it is set through environment variable #{name}" do
-          @cap.should_receive(:capture).with("cd #{@remote_path}; rake -s dump:versions RAILS_ENV=\"production\" VER=\"21376\"").and_return('')
+          @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions RAILS_ENV=\"production\" VER=\"21376\"").and_return('')
           with_env name, '21376' do
             @cap.find_and_execute_task("dump:remote:versions")
           end
@@ -136,7 +136,7 @@ describe "cap dump" do
       end
 
       it "should print result of rake task" do
-        @cap.stub!(:capture).and_return("123123.tgz\n")
+        @cap.dump.stub!(:run_remote).and_return("123123.tgz\n")
         grab_output{
           @cap.find_and_execute_task("dump:remote:versions")
         }.should == "123123.tgz\n"
@@ -145,14 +145,14 @@ describe "cap dump" do
 
     describe "create" do
       it "should raise if dump creation fails" do
-        @cap.should_receive(:capture).with("cd #{@remote_path}; rake -s dump:create RAILS_ENV=\"production\" DESC=\"remote\"").and_return('')
+        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:create RAILS_ENV=\"production\" DESC=\"remote\"").and_return('')
         proc{
           @cap.find_and_execute_task("dump:remote:create")
         }.should raise_error('Failed creating dump')
       end
 
       it "should call remote rake task with default rails_env and default DESC remote" do
-        @cap.should_receive(:capture).with("cd #{@remote_path}; rake -s dump:create RAILS_ENV=\"production\" DESC=\"remote\"").and_return('123.tgz')
+        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:create RAILS_ENV=\"production\" DESC=\"remote\"").and_return('123.tgz')
         grab_output{
           @cap.find_and_execute_task("dump:remote:create")
         }
@@ -160,7 +160,7 @@ describe "cap dump" do
 
       it "should call remote rake task with fetched rails_env and default DESC remote" do
         @cap.dump.should_receive(:fetch_rails_env).and_return('dev')
-        @cap.should_receive(:capture).with("cd #{@remote_path}; rake -s dump:create RAILS_ENV=\"dev\" DESC=\"remote\"").and_return('123.tgz')
+        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:create RAILS_ENV=\"dev\" DESC=\"remote\"").and_return('123.tgz')
         grab_output{
           @cap.find_and_execute_task("dump:remote:create")
         }
@@ -168,7 +168,7 @@ describe "cap dump" do
 
       %w(DESC DESCRIPTION).each do |name|
         it "should pass description if it is set through environment variable #{name}" do
-          @cap.should_receive(:capture).with("cd #{@remote_path}; rake -s dump:create RAILS_ENV=\"production\" DESC=\"remote dump\"").and_return('123.tgz')
+          @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:create RAILS_ENV=\"production\" DESC=\"remote dump\"").and_return('123.tgz')
           with_env name, 'remote dump' do
             grab_output{
               @cap.find_and_execute_task("dump:remote:create")
@@ -178,14 +178,14 @@ describe "cap dump" do
       end
 
       it "should print result of rake task" do
-        @cap.stub!(:capture).and_return("123123.tgz\n")
+        @cap.dump.stub!(:run_remote).and_return("123123.tgz\n")
         grab_output{
           @cap.find_and_execute_task("dump:remote:create")
         }.should == "123123.tgz\n"
       end
 
       it "should return stripped result of rake task" do
-        @cap.stub!(:capture).and_return("123123.tgz\n")
+        @cap.dump.stub!(:run_remote).and_return("123123.tgz\n")
         grab_output{
           @cap.find_and_execute_task("dump:remote:create").should == "123123.tgz"
         }
@@ -194,20 +194,20 @@ describe "cap dump" do
 
     describe "restore" do
       it "should call remote rake task with default rails_env" do
-        @cap.should_receive(:run).with("cd #{@remote_path}; rake -s dump:restore RAILS_ENV=\"production\"")
+        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:restore RAILS_ENV=\"production\"")
         @cap.find_and_execute_task("dump:remote:restore")
       end
 
       it "should call remote rake task with fetched rails_env" do
         @cap.dump.should_receive(:fetch_rails_env).and_return('dev')
-        @cap.should_receive(:run).with("cd #{@remote_path}; rake -s dump:restore RAILS_ENV=\"dev\"")
+        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:restore RAILS_ENV=\"dev\"")
         @cap.find_and_execute_task("dump:remote:restore")
       end
 
 
       %w(VER VERSION LIKE).each do |name|
         it "should pass version if it is set through environment variable #{name}" do
-          @cap.should_receive(:run).with("cd #{@remote_path}; rake -s dump:restore RAILS_ENV=\"production\" VER=\"21376\"")
+          @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:restore RAILS_ENV=\"production\" VER=\"21376\"")
           with_env name, '21376' do
             @cap.find_and_execute_task("dump:remote:restore")
           end
@@ -217,13 +217,13 @@ describe "cap dump" do
 
     describe "download" do
       it "should run rake versions to get avaliable versions" do
-        @cap.should_receive(:capture).with("cd #{@remote_path}; rake -s dump:versions RAILS_ENV=\"production\"").and_return('')
+        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions RAILS_ENV=\"production\"").and_return('')
         @cap.find_and_execute_task("dump:remote:download")
       end
 
       %w(VER VERSION LIKE).each do |name|
         it "should pass version if it is set through environment variable #{name}" do
-          @cap.should_receive(:capture).with("cd #{@remote_path}; rake -s dump:versions RAILS_ENV=\"production\" VER=\"21376\"").and_return('')
+          @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions RAILS_ENV=\"production\" VER=\"21376\"").and_return('')
           with_env name, '21376' do
             @cap.find_and_execute_task("dump:remote:download")
           end
@@ -231,20 +231,20 @@ describe "cap dump" do
       end
 
       it "should not download anything if there are no versions avaliable" do
-        @cap.stub!(:capture).and_return('')
+        @cap.dump.stub!(:run_remote).and_return('')
         @cap.should_not_receive(:transfer)
         @cap.find_and_execute_task("dump:remote:download")
       end
 
       it "should transfer latest version dump" do
-        @cap.stub!(:capture).and_return("100.tgz\n200.tgz\n300.tgz\n")
+        @cap.dump.stub!(:run_remote).and_return("100.tgz\n200.tgz\n300.tgz\n")
         @cap.should_receive(:transfer).with(:down, "#{@remote_path}/dump/300.tgz", "dump/300.tgz", :via => :scp)
         FileUtils.stub!(:mkpath)
         @cap.find_and_execute_task("dump:remote:download")
       end
 
       it "should create local dump dir" do
-        @cap.stub!(:capture).and_return("100.tgz\n200.tgz\n300.tgz\n")
+        @cap.dump.stub!(:run_remote).and_return("100.tgz\n200.tgz\n300.tgz\n")
         @cap.stub!(:transfer)
         FileUtils.should_receive(:mkpath).with('dump')
         @cap.find_and_execute_task("dump:remote:download")

@@ -1,7 +1,3 @@
-def run_local(cmd)
-  `#{cmd}`
-end
-
 namespace :dump do
   def dump_command(command, env = {})
     cmd = "rake -s dump:#{command}"
@@ -44,6 +40,24 @@ namespace :dump do
     raise 'Failed creating dump' if out.blank?
     print out
     out.strip
+  end
+
+  def run_local(cmd)
+    `#{cmd}`
+  end
+
+  def run_remote(cmd)
+    output = ''
+    run(cmd) do |channel, io, data|
+      case io
+      when :out
+        output << data
+        STDOUT << data
+      when :err
+        STDERR << data
+      end
+    end
+    output
   end
 
   Object.class_eval do
@@ -90,24 +104,24 @@ namespace :dump do
     task :create, :roles => :db, :only => {:primary => true} do
       print_and_return_or_fail do
         with_default_desc('remote') do
-          capture("cd #{current_path}; #{dump_command(:create, :RAILS_ENV => fetch_rails_env)}")
+          run_remote("cd #{current_path}; #{dump_command(:create, :RAILS_ENV => fetch_rails_env)}")
         end
       end
     end
 
     desc "Restore remote dump"
     task :restore, :roles => :db, :only => {:primary => true} do
-      run "cd #{current_path}; #{dump_command(:restore, :RAILS_ENV => fetch_rails_env)}"
+      run_remote("cd #{current_path}; #{dump_command(:restore, :RAILS_ENV => fetch_rails_env)}")
     end
 
     desc "Versions of remote dumps"
     task :versions, :roles => :db, :only => {:primary => true} do
-      print capture("cd #{current_path}; #{dump_command(:versions, :RAILS_ENV => fetch_rails_env)}")
+      print run_remote("cd #{current_path}; #{dump_command(:versions, :RAILS_ENV => fetch_rails_env)}")
     end
 
     desc "Download dump"
     task :download, :roles => :db, :only => {:primary => true} do
-      files = capture("cd #{current_path}; #{dump_command(:versions, :RAILS_ENV => fetch_rails_env)}").split("\n")
+      files = run_remote("cd #{current_path}; #{dump_command(:versions, :RAILS_ENV => fetch_rails_env)}").split("\n")
       if file = files.last
         FileUtils.mkpath('dump')
         transfer_with_progress :down, "#{current_path}/dump/#{file}", "dump/#{file}", :via => :scp
