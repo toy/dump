@@ -1,6 +1,8 @@
 namespace :dump do
   def dump_command(command, env = {})
-    cmd = "rake -s dump:#{command}"
+    _rake = env.delete(:rake) || 'rake'
+
+    cmd = "#{_rake} -s dump:#{command}"
     env.each do |key, value|
       cmd += " #{key}=#{value.inspect}"
     end
@@ -104,24 +106,24 @@ namespace :dump do
     task :create, :roles => :db, :only => {:primary => true} do
       print_and_return_or_fail do
         with_default_desc('remote') do
-          run_remote("cd #{current_path}; #{dump_command(:create, :RAILS_ENV => fetch_rails_env)}")
+          run_remote("cd #{current_path}; #{dump_command(:create, :rake => rake, :RAILS_ENV => fetch_rails_env)}")
         end
       end
     end
 
     desc "Restore remote dump"
     task :restore, :roles => :db, :only => {:primary => true} do
-      run_remote("cd #{current_path}; #{dump_command(:restore, :RAILS_ENV => fetch_rails_env)}")
+      run_remote("cd #{current_path}; #{dump_command(:restore, :rake => rake, :RAILS_ENV => fetch_rails_env)}")
     end
 
     desc "Versions of remote dumps"
     task :versions, :roles => :db, :only => {:primary => true} do
-      print run_remote("cd #{current_path}; #{dump_command(:versions, :RAILS_ENV => fetch_rails_env)}")
+      print run_remote("cd #{current_path}; #{dump_command(:versions, :rake => rake, :RAILS_ENV => fetch_rails_env)}")
     end
 
     desc "Download dump"
     task :download, :roles => :db, :only => {:primary => true} do
-      files = run_remote("cd #{current_path}; #{dump_command(:versions, :RAILS_ENV => fetch_rails_env)}").split("\n")
+      files = run_remote("cd #{current_path}; #{dump_command(:versions, :rake => rake, :RAILS_ENV => fetch_rails_env)}").split("\n")
       if file = files.last
         FileUtils.mkpath('dump')
         transfer_with_progress :down, "#{current_path}/dump/#{file}", "dump/#{file}", :via => :scp
