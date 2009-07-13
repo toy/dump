@@ -60,6 +60,10 @@ namespace :dump do
     output
   end
 
+  def last_line(out)
+    out.strip.split(/\s*\n\s*/).last
+  end
+
   Object.class_eval do
     def blank?
       respond_to?(:empty?) ? empty? : !self
@@ -92,8 +96,7 @@ namespace :dump do
 
     desc "Upload dump"
     task :upload, :roles => :db, :only => {:primary => true} do
-      files = run_local(dump_command(:versions)).split("\n")
-      if file = files.last
+      if file = last_line(run_local(dump_command(:versions)))
         transfer_with_progress :up, "dump/#{file}", "#{current_path}/dump/#{file}", :via => :scp
       end
     end
@@ -121,8 +124,7 @@ namespace :dump do
 
     desc "Download dump"
     task :download, :roles => :db, :only => {:primary => true} do
-      files = run_remote("cd #{current_path}; #{dump_command(:versions, :RAILS_ENV => fetch_rails_env)}").split("\n")
-      if file = files.last
+      if file = last_line(run_remote("cd #{current_path}; #{dump_command(:versions, :RAILS_ENV => fetch_rails_env)}"))
         FileUtils.mkpath('dump')
         transfer_with_progress :down, "#{current_path}/dump/#{file}", "dump/#{file}", :via => :scp
       end
