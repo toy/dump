@@ -61,7 +61,7 @@ namespace :dump do
   end
 
   def last_line(out)
-    out.strip.split(/\s*\n\s*/).last
+    out.strip.split(/\s*[\n\r]\s*/).last
   end
 
   Object.class_eval do
