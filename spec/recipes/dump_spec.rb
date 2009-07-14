@@ -147,6 +147,12 @@ describe "cap dump" do
           @cap.find_and_execute_task("dump:remote:versions")
         }.should == "123123.tgz\n"
       end
+
+      it "should use custom rake binary" do
+        @cap.dump.should_receive(:fetch_rake).and_return('/custom/rake')
+        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; /custom/rake -s dump:versions RAILS_ENV=\"production\"").and_return('')
+        @cap.find_and_execute_task("dump:remote:versions")
+      end
     end
 
     describe "create" do
@@ -196,6 +202,14 @@ describe "cap dump" do
           @cap.find_and_execute_task("dump:remote:create").should == "123123.tgz"
         }
       end
+
+      it "should use custom rake binary" do
+        @cap.dump.should_receive(:fetch_rake).and_return('/custom/rake')
+        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; /custom/rake -s dump:create RAILS_ENV=\"production\" DESC=\"remote\"").and_return('123.tgz')
+        grab_output{
+          @cap.find_and_execute_task("dump:remote:create")
+        }
+      end
     end
 
     describe "restore" do
@@ -218,6 +232,12 @@ describe "cap dump" do
             @cap.find_and_execute_task("dump:remote:restore")
           end
         end
+      end
+
+      it "should use custom rake binary" do
+        @cap.dump.should_receive(:fetch_rake).and_return('/custom/rake')
+        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; /custom/rake -s dump:restore RAILS_ENV=\"production\"")
+        @cap.find_and_execute_task("dump:remote:restore")
       end
     end
 
@@ -260,6 +280,12 @@ describe "cap dump" do
         @cap.dump.stub!(:run_remote).and_return("100.tgz\n200.tgz\n300.tgz\n")
         @cap.stub!(:transfer)
         FileUtils.should_receive(:mkpath).with('dump')
+        @cap.find_and_execute_task("dump:remote:download")
+      end
+
+      it "should run rake versions use custom rake binary" do
+        @cap.dump.should_receive(:fetch_rake).and_return('/custom/rake')
+        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; /custom/rake -s dump:versions RAILS_ENV=\"production\"").and_return('')
         @cap.find_and_execute_task("dump:remote:download")
       end
     end

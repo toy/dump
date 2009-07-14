@@ -29,6 +29,9 @@ To install:
 == Capistrano integration
 
 You can use cap dump:* tasks to control dumps on remote server. Don't forget to deploy application to remote server before using dump:remote tasks.
+Also you can set custom remote rake binary in your deploy.rb like:
+
+  set :rake, "/custom/rake"
 
 == Examples
 
