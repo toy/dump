@@ -1,3 +1,6 @@
+desc 'Short for dump:create'
+task :dump => 'dump:create'
+
 namespace :dump do
   desc 'Show avaliable versions, use version as for restore to show only matching dumps'
   task :versions => :environment do
