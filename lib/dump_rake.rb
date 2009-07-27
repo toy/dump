@@ -23,9 +23,9 @@ require_gem_or_unpacked_gem 'archive/tar/minitar'
 require_gem_or_unpacked_gem 'progress', '>= 0.0.6'
 
 class DumpRake
-  def self.versions(version = nil)
-    if version
-      puts Dump.like(version)
+  def self.versions(options = {})
+    if options[:like]
+      puts Dump.like(options[:like])
     else
       puts Dump.list
     end
@@ -46,11 +46,11 @@ class DumpRake
     puts File.basename(tgz_name)
   end
 
-  def self.restore(version = nil)
-    dump = if version.nil?
-      Dump.last
+  def self.restore(options = {})
+    dump = if options[:like]
+      Dump.like(options[:like]).last
     else
-      Dump.like(version).last
+      Dump.last
     end
 
     if dump

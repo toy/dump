@@ -9,7 +9,7 @@ describe DumpRake do
 
     it "should call Dump.like if called with version" do
       DumpRake::Dump.should_receive(:like).and_return([])
-      DumpRake.versions('123')
+      DumpRake.versions(:like => '123')
     end
 
     it "should print versions" do
@@ -127,7 +127,7 @@ describe DumpRake do
       it "should call Dump.like" do
         DumpRake::Dump.should_receive(:like).and_return([])
         grab_output{
-          DumpRake.restore('213')
+          DumpRake.restore(:like => '213')
         }
       end
 
@@ -146,7 +146,7 @@ describe DumpRake do
         DumpRake::DumpReader.should_receive(:restore).with('dump/213.tgz')
         DumpRake.should_not_receive(:versions)
         grab_output{
-          DumpRake.restore('213')
+          DumpRake.restore(:like => '213')
         }
       end
 
@@ -157,7 +157,7 @@ describe DumpRake do
         DumpRake::DumpReader.should_receive(:restore).with('dump/213-b.tgz')
         DumpRake.should_not_receive(:versions)
         grab_output{
-          DumpRake.restore('213')
+          DumpRake.restore(:like => '213')
         }
       end
 
