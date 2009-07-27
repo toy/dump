@@ -7,7 +7,7 @@ class DumpRake
     end
 
     def initialize(path)
-      @path = path
+      @path = Pathname(path)
     end
 
     def path

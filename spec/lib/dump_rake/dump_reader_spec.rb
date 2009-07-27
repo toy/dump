@@ -45,7 +45,7 @@ describe DumpReader do
     it "should set stream to gzipped tar reader" do
       @gzip = mock('gzip')
       @stream = mock('stream')
-      Zlib::GzipReader.should_receive(:open).with("123.tgz").and_yield(@gzip)
+      Zlib::GzipReader.should_receive(:open).with(Pathname("123.tgz")).and_yield(@gzip)
       Archive::Tar::Minitar::Input.should_receive(:open).with(@gzip).and_yield(@stream)
 
       @dump = DumpReader.new('123.tgz')

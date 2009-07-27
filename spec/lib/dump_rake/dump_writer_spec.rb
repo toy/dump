@@ -38,7 +38,7 @@ describe DumpWriter do
       FileUtils.stub!(:mkpath)
       @gzip = mock('gzip')
       @stream = mock('stream')
-      Zlib::GzipWriter.should_receive(:open).with("123.tgz").and_yield(@gzip)
+      Zlib::GzipWriter.should_receive(:open).with(Pathname("123.tgz")).and_yield(@gzip)
       Archive::Tar::Minitar::Output.should_receive(:open).with(@gzip).and_yield(@stream)
 
       @dump = DumpWriter.new('123.tgz')
