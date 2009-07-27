@@ -17,7 +17,7 @@ Example
 
 When using cap tasks — be sure to link dump folder to persistent place on deploy, or you will lose all dumps every deploy.
 
-This plugin requires gems:
+This plugin requires gems (but to reduce problems on shared hostings, unpacked versions of archive-tar-minitar-0.5.2 and progress-0.0.9.0 are used if they are not present):
 
   archive/tar/minitar
   progress (version 0.0.6 or later)

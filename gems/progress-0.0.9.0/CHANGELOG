@@ -1,0 +1,8 @@
+v0.0.7.1 2009-04-24 rake spec
+v0.0.7 2009-03-24 moved to echoe
+v0.0.6 2009-02-19 printing messages to stderr
+v0.0.5 2008-11-07 piping result of block execution, changed default step count to 1 (from 100)
+v0.0.4 2008-11-06 step now accept count of steps made
+v0.0.3 2008-11-01 recreated with newgem, created specs, autospec now runs well, created documentation
+v0.0.2 2008-10-31 added enclosed progress possibility
+v0.0.1 initial release

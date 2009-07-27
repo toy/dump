@@ -1,0 +1,13 @@
+CHANGELOG
+lib/progress/enumerable.rb
+lib/progress/integer.rb
+lib/progress/with_progress.rb
+lib/progress.rb
+Manifest
+Rakefile
+README.rdoc
+spec/progress_spec.rb
+spec/spec.opts
+spec/spec_helper.rb
+tasks/rspec.rake
+VERSION.yml

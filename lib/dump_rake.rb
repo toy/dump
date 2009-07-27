@@ -1,5 +1,4 @@
 require 'rubygems'
-gem 'progress', '>= 0.0.6'
 
 require 'pathname'
 require 'find'
@@ -7,8 +6,21 @@ require 'fileutils'
 require 'zlib'
 
 require 'rake'
-require 'archive/tar/minitar'
-require 'progress'
+
+def require_gem_or_unpacked_gem(name, version = nil)
+  unpacked_gems_path = Pathname(__FILE__).dirname.parent + 'gems'
+
+  begin
+    gem name, version if version
+    require name
+  rescue Gem::LoadError, MissingSourceFile
+    $: << Pathname.glob(unpacked_gems_path + "#{name.gsub('/', '-')}*").last + 'lib'
+    require name
+  end
+end
+
+require_gem_or_unpacked_gem 'archive/tar/minitar'
+require_gem_or_unpacked_gem 'progress', '>= 0.0.6'
 
 class DumpRake
   def self.versions(version = nil)
