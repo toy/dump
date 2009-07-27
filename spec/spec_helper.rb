@@ -27,9 +27,13 @@ ensure
 end
 
 def grab_output
-  old_value, $stdout = $stdout, StringIO.new
-  yield
-  $stdout.string
-ensure
-  $stdout = old_value
+  real_stdout, $stdout = $stdout, StringIO.new
+  real_stderr, $stderr = $stderr, StringIO.new
+  begin
+    yield
+    {:stdout => $stdout.string, :stderr => $stderr.string}
+  ensure
+    $stdout = real_stdout
+    $stderr = real_stderr
+  end
 end

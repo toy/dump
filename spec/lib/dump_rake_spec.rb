@@ -16,7 +16,7 @@ describe DumpRake do
       DumpRake::Dump.should_receive(:list).and_return(%w(123.tgz 456.tgz))
       grab_output{
         DumpRake.versions
-      }.should == "123.tgz\n456.tgz\n"
+      }[:stdout].should == "123.tgz\n456.tgz\n"
     end
   end
 
@@ -68,7 +68,7 @@ describe DumpRake do
         DumpRake::DumpWriter.stub!(:create)
         grab_output{
           DumpRake.create(:description => 'Some text and !@')
-        }.should match(/^\d{14}-some-text-and\.tgz$/)
+        }[:stdout].should match(/^\d{14}-some-text-and\.tgz$/)
       end
     end
 

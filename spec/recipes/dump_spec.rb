@@ -29,7 +29,7 @@ describe "cap dump" do
         @cap.dump.stub!(:run_local).and_return("123123.tgz\n")
         grab_output{
           @cap.find_and_execute_task("dump:local:versions")
-        }.should == "123123.tgz\n"
+        }[:stdout].should == "123123.tgz\n"
       end
     end
 
@@ -63,7 +63,7 @@ describe "cap dump" do
         @cap.dump.stub!(:run_local).and_return("123123.tgz\n")
         grab_output{
           @cap.find_and_execute_task("dump:local:create")
-        }.should == "123123.tgz\n"
+        }[:stdout].should == "123123.tgz\n"
       end
 
       it "should return stripped result of rake task" do
@@ -145,7 +145,7 @@ describe "cap dump" do
         @cap.dump.stub!(:run_remote).and_return("123123.tgz\n")
         grab_output{
           @cap.find_and_execute_task("dump:remote:versions")
-        }.should == "123123.tgz\n"
+        }[:stdout].should == "123123.tgz\n"
       end
 
       it "should use custom rake binary" do
@@ -193,7 +193,7 @@ describe "cap dump" do
         @cap.dump.stub!(:run_remote).and_return("123123.tgz\n")
         grab_output{
           @cap.find_and_execute_task("dump:remote:create")
-        }.should == "123123.tgz\n"
+        }[:stdout].should == "123123.tgz\n"
       end
 
       it "should return stripped result of rake task" do
