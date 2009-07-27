@@ -17,19 +17,10 @@ describe Dump do
         stub_glob
         Dump.list.all?{ |dump| dump.should be_a(Dump) }
       end
-    end
 
-    describe "last" do
-      it "should return last dump in list" do
+      it "should return dumps with name containting :like" do
         stub_glob
-        Dump.last.should == Dump.list.last
-      end
-    end
-
-    describe "like" do
-      it "should return dumps with name containting argument" do
-        stub_glob
-        Dump.like('3').should == [Dump.list[0], Dump.list[1]]
+        Dump.list(:like => '3').should == [Dump.list[0], Dump.list[1]]
       end
     end
   end

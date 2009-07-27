@@ -24,11 +24,7 @@ require_gem_or_unpacked_gem 'progress', '>= 0.0.6'
 
 class DumpRake
   def self.versions(options = {})
-    if options[:like]
-      puts Dump.like(options[:like])
-    else
-      puts Dump.list
-    end
+    puts Dump.list(options)
   end
 
   def self.create(options = {})
@@ -47,11 +43,7 @@ class DumpRake
   end
 
   def self.restore(options = {})
-    dump = if options[:like]
-      Dump.like(options[:like]).last
-    else
-      Dump.last
-    end
+    dump = Dump.list(options).last
 
     if dump
       DumpReader.restore(dump.path)

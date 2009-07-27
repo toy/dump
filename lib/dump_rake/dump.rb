@@ -1,13 +1,9 @@
 class DumpRake
   class Dump
-    def self.list
-      Dir[File.join(RAILS_ROOT, 'dump', '*.tgz')].sort.map{ |path| new(path) }
-    end
-    def self.like(version)
-      list.select{ |dump| dump.name[version] }
-    end
-    def self.last
-      list.last
+    def self.list(options = {})
+      dumps = Dir[File.join(RAILS_ROOT, 'dump', '*.tgz')].sort.map{ |path| new(path) }
+      dumps = dumps.select{ |dump| dump.name[options[:like]] } if options[:like]
+      dumps
     end
 
     def initialize(path)
