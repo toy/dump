@@ -18,7 +18,7 @@ describe "cap dump" do
 
       DumpRake::Env::DICTIONARY[:like].each do |name|
         it "should pass version if it is set through environment variable #{name}" do
-          @cap.dump.should_receive(:run_local).with("rake -s dump:versions LIKE=\"21376\"").and_return('')
+          @cap.dump.should_receive(:run_local).with("rake -s dump:versions LIKE=21376").and_return('')
           DumpRake::Env.with_env name => '21376' do
             @cap.find_and_execute_task("dump:local:versions")
           end
@@ -35,14 +35,14 @@ describe "cap dump" do
 
     describe "create" do
       it "should raise if dump creation fails" do
-        @cap.dump.should_receive(:run_local).with("rake -s dump:create DESC=\"local\"").and_return('')
+        @cap.dump.should_receive(:run_local).with("rake -s dump:create DESC=local").and_return('')
         proc{
           @cap.find_and_execute_task("dump:local:create")
         }.should raise_error('Failed creating dump')
       end
 
       it "should call local rake task with default DESC local" do
-        @cap.dump.should_receive(:run_local).with("rake -s dump:create DESC=\"local\"").and_return('123.tgz')
+        @cap.dump.should_receive(:run_local).with("rake -s dump:create DESC=local").and_return('123.tgz')
         grab_output{
           @cap.find_and_execute_task("dump:local:create")
         }
@@ -50,7 +50,7 @@ describe "cap dump" do
 
       DumpRake::Env::DICTIONARY[:desc].each do |name|
         it "should pass description if it is set through environment variable #{name}" do
-          @cap.dump.should_receive(:run_local).with("rake -s dump:create DESC=\"local dump\"").and_return('123.tgz')
+          @cap.dump.should_receive(:run_local).with("rake -s dump:create 'DESC=local dump'").and_return('123.tgz')
           DumpRake::Env.with_env name => 'local dump' do
             grab_output{
               @cap.find_and_execute_task("dump:local:create")
@@ -82,7 +82,7 @@ describe "cap dump" do
 
       DumpRake::Env::DICTIONARY[:like].each do |name|
         it "should pass version if it is set through environment variable #{name}" do
-          @cap.dump.should_receive(:run_local).with("rake -s dump:restore LIKE=\"21376\"")
+          @cap.dump.should_receive(:run_local).with("rake -s dump:restore LIKE=21376")
           DumpRake::Env.with_env name => '21376' do
             @cap.find_and_execute_task("dump:local:restore")
           end
@@ -98,7 +98,7 @@ describe "cap dump" do
 
       DumpRake::Env::DICTIONARY[:like].each do |name|
         it "should pass version if it is set through environment variable #{name}" do
-          @cap.dump.should_receive(:run_local).with("rake -s dump:versions LIKE=\"21376\"").and_return('')
+          @cap.dump.should_receive(:run_local).with("rake -s dump:versions LIKE=21376").and_return('')
           DumpRake::Env.with_env name => '21376' do
             @cap.find_and_execute_task("dump:local:upload")
           end
@@ -128,13 +128,13 @@ describe "cap dump" do
   describe "remote" do
     describe "versions" do
       it "should call remote rake task" do
-        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions RAILS_ENV=\"production\"").and_return('')
+        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions PROGRESS_TTY=+ RAILS_ENV=production").and_return('')
         @cap.find_and_execute_task("dump:remote:versions")
       end
 
       DumpRake::Env::DICTIONARY[:like].each do |name|
         it "should pass version if it is set through environment variable #{name}" do
-          @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions RAILS_ENV=\"production\" LIKE=\"21376\"").and_return('')
+          @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions LIKE=21376 PROGRESS_TTY=+ RAILS_ENV=production").and_return('')
           DumpRake::Env.with_env name => '21376' do
             @cap.find_and_execute_task("dump:remote:versions")
           end
@@ -150,21 +150,21 @@ describe "cap dump" do
 
       it "should use custom rake binary" do
         @cap.dump.should_receive(:fetch_rake).and_return('/custom/rake')
-        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; /custom/rake -s dump:versions RAILS_ENV=\"production\"").and_return('')
+        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; /custom/rake -s dump:versions PROGRESS_TTY=+ RAILS_ENV=production").and_return('')
         @cap.find_and_execute_task("dump:remote:versions")
       end
     end
 
     describe "create" do
       it "should raise if dump creation fails" do
-        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:create RAILS_ENV=\"production\" DESC=\"remote\"").and_return('')
+        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:create DESC=remote PROGRESS_TTY=+ RAILS_ENV=production").and_return('')
         proc{
           @cap.find_and_execute_task("dump:remote:create")
         }.should raise_error('Failed creating dump')
       end
 
       it "should call remote rake task with default rails_env and default DESC remote" do
-        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:create RAILS_ENV=\"production\" DESC=\"remote\"").and_return('123.tgz')
+        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:create DESC=remote PROGRESS_TTY=+ RAILS_ENV=production").and_return('123.tgz')
         grab_output{
           @cap.find_and_execute_task("dump:remote:create")
         }
@@ -172,7 +172,7 @@ describe "cap dump" do
 
       it "should call remote rake task with fetched rails_env and default DESC remote" do
         @cap.dump.should_receive(:fetch_rails_env).and_return('dev')
-        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:create RAILS_ENV=\"dev\" DESC=\"remote\"").and_return('123.tgz')
+        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:create DESC=remote PROGRESS_TTY=+ RAILS_ENV=dev").and_return('123.tgz')
         grab_output{
           @cap.find_and_execute_task("dump:remote:create")
         }
@@ -180,7 +180,7 @@ describe "cap dump" do
 
       DumpRake::Env::DICTIONARY[:desc].each do |name|
         it "should pass description if it is set through environment variable #{name}" do
-          @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:create RAILS_ENV=\"production\" DESC=\"remote dump\"").and_return('123.tgz')
+          @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:create 'DESC=remote dump' PROGRESS_TTY=+ RAILS_ENV=production").and_return('123.tgz')
           DumpRake::Env.with_env name => 'remote dump' do
             grab_output{
               @cap.find_and_execute_task("dump:remote:create")
@@ -205,7 +205,7 @@ describe "cap dump" do
 
       it "should use custom rake binary" do
         @cap.dump.should_receive(:fetch_rake).and_return('/custom/rake')
-        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; /custom/rake -s dump:create RAILS_ENV=\"production\" DESC=\"remote\"").and_return('123.tgz')
+        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; /custom/rake -s dump:create DESC=remote PROGRESS_TTY=+ RAILS_ENV=production").and_return('123.tgz')
         grab_output{
           @cap.find_and_execute_task("dump:remote:create")
         }
@@ -214,20 +214,20 @@ describe "cap dump" do
 
     describe "restore" do
       it "should call remote rake task with default rails_env" do
-        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:restore RAILS_ENV=\"production\"")
+        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:restore PROGRESS_TTY=+ RAILS_ENV=production")
         @cap.find_and_execute_task("dump:remote:restore")
       end
 
       it "should call remote rake task with fetched rails_env" do
         @cap.dump.should_receive(:fetch_rails_env).and_return('dev')
-        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:restore RAILS_ENV=\"dev\"")
+        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:restore PROGRESS_TTY=+ RAILS_ENV=dev")
         @cap.find_and_execute_task("dump:remote:restore")
       end
 
 
       DumpRake::Env::DICTIONARY[:like].each do |name|
         it "should pass version if it is set through environment variable #{name}" do
-          @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:restore RAILS_ENV=\"production\" LIKE=\"21376\"")
+          @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:restore LIKE=21376 PROGRESS_TTY=+ RAILS_ENV=production")
           DumpRake::Env.with_env name => '21376' do
             @cap.find_and_execute_task("dump:remote:restore")
           end
@@ -236,20 +236,20 @@ describe "cap dump" do
 
       it "should use custom rake binary" do
         @cap.dump.should_receive(:fetch_rake).and_return('/custom/rake')
-        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; /custom/rake -s dump:restore RAILS_ENV=\"production\"")
+        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; /custom/rake -s dump:restore PROGRESS_TTY=+ RAILS_ENV=production")
         @cap.find_and_execute_task("dump:remote:restore")
       end
     end
 
     describe "download" do
       it "should run rake versions to get avaliable versions" do
-        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions RAILS_ENV=\"production\"").and_return('')
+        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions PROGRESS_TTY=+ RAILS_ENV=production").and_return('')
         @cap.find_and_execute_task("dump:remote:download")
       end
 
       DumpRake::Env::DICTIONARY[:like].each do |name|
         it "should pass version if it is set through environment variable #{name}" do
-          @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions RAILS_ENV=\"production\" LIKE=\"21376\"").and_return('')
+          @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions LIKE=21376 PROGRESS_TTY=+ RAILS_ENV=production").and_return('')
           DumpRake::Env.with_env name => '21376' do
             @cap.find_and_execute_task("dump:remote:download")
           end
@@ -285,7 +285,7 @@ describe "cap dump" do
 
       it "should run rake versions use custom rake binary" do
         @cap.dump.should_receive(:fetch_rake).and_return('/custom/rake')
-        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; /custom/rake -s dump:versions RAILS_ENV=\"production\"").and_return('')
+        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; /custom/rake -s dump:versions PROGRESS_TTY=+ RAILS_ENV=production").and_return('')
         @cap.find_and_execute_task("dump:remote:download")
       end
     end

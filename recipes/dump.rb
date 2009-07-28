@@ -1,23 +1,31 @@
 $: << File.join(File.dirname(__FILE__), '..', 'lib')
 require 'dump_rake/env'
+require 'shell_escape'
 
 namespace :dump do
   def dump_command(command, env = {})
     rake = env.delete(:rake) || 'rake'
 
-    cmd = "#{rake} -s dump:#{command}"
-    env.each do |key, value|
-      cmd += " #{key}=#{value.inspect}"
+    # stringify_keys! from activesupport
+    env.keys.each do |key|
+      env[key.to_s] = env.delete(key)
     end
-    case command
+
+    add_envs = case command
     when :create
-      desc = DumpRake::Env[:desc]
-      cmd += " #{DumpRake::Env::DICTIONARY[:desc].first}=#{desc.inspect}" if desc
+      [:desc]
     when :restore, :versions
-      like = DumpRake::Env[:like]
-      cmd += " #{DumpRake::Env::DICTIONARY[:like].first}=#{like.inspect}" if like
+      [:like]
     end
-    cmd
+
+    add_envs.each do |add_env|
+      value = DumpRake::Env[add_env]
+      env[DumpRake::Env::DICTIONARY[add_env].first] = value if value
+    end
+
+    cmd = %W(#{rake} -s dump:#{command})
+    cmd += env.sort.map{ |key, value| "#{key}=#{value}" }
+    ShellEscape.command(*cmd)
   end
 
   def fetch_rails_env
