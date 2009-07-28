@@ -110,18 +110,6 @@ describe Dump do
     end
   end
 
-  describe "with_env" do
-    it "should set env to new_value for duration of block" do
-      ENV['TESTING'] = 'old_value'
-
-      ENV['TESTING'].should == 'old_value'
-      Dump.new('').send(:with_env, 'TESTING', 'new_value') do
-        ENV['TESTING'].should == 'new_value'
-      end
-      ENV['TESTING'].should == 'old_value'
-    end
-  end
-
   describe "clean_description" do
     it "should shorten string to 30 chars and replace all symbols except a-z and 0-9 with '-'" do
       Dump.new('').send(:clean_description, 'aenarhts ENHENH 12837192837 #$@#^%%^^%*&(*& arsth *&^*&^ ahrenst haenr sheanrs heran t').should == 'aenarhts-enhenh-12837192837-ar'

@@ -88,7 +88,7 @@ describe DumpWriter do
       it "should set ENV[SCHEMA] to path of returned file" do
         @file = mock('file', :path => 'db/schema.rb')
         @dump.stub!(:create_file).and_yield(@file)
-        @dump.should_receive(:with_env).with('SCHEMA', 'db/schema.rb')
+        DumpRake::Env.should_receive(:with_env).with('SCHEMA' => 'db/schema.rb')
         @dump.write_schema
       end
 
@@ -338,14 +338,14 @@ describe DumpWriter do
         @task = mock('task')
         Rake::Task.stub!(:[]).and_return(@task)
         @task.stub!(:invoke)
-        with_env('ASSETS', 'images:videos') do
+        DumpRake::Env.with_env('ASSETS' => 'images:videos') do
           @dump.assets_to_dump.should == %w(images videos)
         end
       end
 
       it "should return empty array if calling rake task assets raises an exception" do
         Rake::Task.stub!(:[]).and_raise('task assets not found')
-        with_env('ASSETS', 'images:videos') do
+        DumpRake::Env.with_env('ASSETS' => 'images:videos') do
           @dump.assets_to_dump.should == []
         end
       end

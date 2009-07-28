@@ -18,8 +18,8 @@ describe "cap dump" do
 
       %w(VER VERSION LIKE).each do |name|
         it "should pass version if it is set through environment variable #{name}" do
-          @cap.dump.should_receive(:run_local).with("rake -s dump:versions VER=\"21376\"").and_return('')
-          with_env name, '21376' do
+          @cap.dump.should_receive(:run_local).with("rake -s dump:versions LIKE=\"21376\"").and_return('')
+          DumpRake::Env.with_env name => '21376' do
             @cap.find_and_execute_task("dump:local:versions")
           end
         end
@@ -51,7 +51,7 @@ describe "cap dump" do
       %w(DESC DESCRIPTION).each do |name|
         it "should pass description if it is set through environment variable #{name}" do
           @cap.dump.should_receive(:run_local).with("rake -s dump:create DESC=\"local dump\"").and_return('123.tgz')
-          with_env name, 'local dump' do
+          DumpRake::Env.with_env name => 'local dump' do
             grab_output{
               @cap.find_and_execute_task("dump:local:create")
             }
@@ -82,8 +82,8 @@ describe "cap dump" do
 
       %w(VER VERSION LIKE).each do |name|
         it "should pass version if it is set through environment variable #{name}" do
-          @cap.dump.should_receive(:run_local).with("rake -s dump:restore VER=\"21376\"")
-          with_env name, '21376' do
+          @cap.dump.should_receive(:run_local).with("rake -s dump:restore LIKE=\"21376\"")
+          DumpRake::Env.with_env name => '21376' do
             @cap.find_and_execute_task("dump:local:restore")
           end
         end
@@ -98,8 +98,8 @@ describe "cap dump" do
 
       %w(VER VERSION LIKE).each do |name|
         it "should pass version if it is set through environment variable #{name}" do
-          @cap.dump.should_receive(:run_local).with("rake -s dump:versions VER=\"21376\"").and_return('')
-          with_env name, '21376' do
+          @cap.dump.should_receive(:run_local).with("rake -s dump:versions LIKE=\"21376\"").and_return('')
+          DumpRake::Env.with_env name => '21376' do
             @cap.find_and_execute_task("dump:local:upload")
           end
         end
@@ -134,8 +134,8 @@ describe "cap dump" do
 
       %w(VER VERSION LIKE).each do |name|
         it "should pass version if it is set through environment variable #{name}" do
-          @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions RAILS_ENV=\"production\" VER=\"21376\"").and_return('')
-          with_env name, '21376' do
+          @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions RAILS_ENV=\"production\" LIKE=\"21376\"").and_return('')
+          DumpRake::Env.with_env name => '21376' do
             @cap.find_and_execute_task("dump:remote:versions")
           end
         end
@@ -181,7 +181,7 @@ describe "cap dump" do
       %w(DESC DESCRIPTION).each do |name|
         it "should pass description if it is set through environment variable #{name}" do
           @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:create RAILS_ENV=\"production\" DESC=\"remote dump\"").and_return('123.tgz')
-          with_env name, 'remote dump' do
+          DumpRake::Env.with_env name => 'remote dump' do
             grab_output{
               @cap.find_and_execute_task("dump:remote:create")
             }
@@ -227,8 +227,8 @@ describe "cap dump" do
 
       %w(VER VERSION LIKE).each do |name|
         it "should pass version if it is set through environment variable #{name}" do
-          @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:restore RAILS_ENV=\"production\" VER=\"21376\"")
-          with_env name, '21376' do
+          @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:restore RAILS_ENV=\"production\" LIKE=\"21376\"")
+          DumpRake::Env.with_env name => '21376' do
             @cap.find_and_execute_task("dump:remote:restore")
           end
         end
@@ -249,8 +249,8 @@ describe "cap dump" do
 
       %w(VER VERSION LIKE).each do |name|
         it "should pass version if it is set through environment variable #{name}" do
-          @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions RAILS_ENV=\"production\" VER=\"21376\"").and_return('')
-          with_env name, '21376' do
+          @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions RAILS_ENV=\"production\" LIKE=\"21376\"").and_return('')
+          DumpRake::Env.with_env name => '21376' do
             @cap.find_and_execute_task("dump:remote:download")
           end
         end
@@ -321,11 +321,11 @@ describe "cap dump" do
           @cap.find_and_execute_task("dump:mirror:#{dir}")
         end
 
-        it "should call local:upload and remote:restore with VER set to file name if local:create returns file name" do
+        it "should call local:upload and remote:restore with LIKE set to file name if local:create returns file name" do
           @cap.dump.namespaces[dst].stub!(:create).and_return('123.tgz')
           @cap.dump.namespaces[src].stub!(:create).and_return('123.tgz')
-          @cap.dump.namespaces[src].should_receive(:"#{dir}load").ordered{ ENV['VER'].should == '123.tgz' }
-          @cap.dump.namespaces[dst].should_receive(:restore).ordered{ ENV['VER'].should == '123.tgz' }
+          @cap.dump.namespaces[src].should_receive(:"#{dir}load").ordered{ ENV['LIKE'].should == '123.tgz' }
+          @cap.dump.namespaces[dst].should_receive(:restore).ordered{ ENV['LIKE'].should == '123.tgz' }
           @cap.find_and_execute_task("dump:mirror:#{dir}")
         end
       end
@@ -364,7 +364,7 @@ describe "cap dump" do
         ENV['DESCRIPTION'].should == nil
         ''
       end
-      with_env 'DESC', 'remote dump' do
+      DumpRake::Env.with_env 'DESC' => 'remote dump' do
         @cap.find_and_execute_task("dump:backup")
       end
     end
@@ -375,7 +375,7 @@ describe "cap dump" do
         ENV['DESCRIPTION'].should == 'remote dump'
         ''
       end
-      with_env 'DESCRIPTION', 'remote dump' do
+      DumpRake::Env.with_env 'DESCRIPTION' => 'remote dump' do
         @cap.find_and_execute_task("dump:backup")
       end
     end

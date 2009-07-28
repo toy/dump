@@ -19,13 +19,6 @@ DUMMY_SCHEMA_PATH = File.join(PLUGIN_SPEC_DIR, "db", "schema.rb") unless defined
 class Chicken < ActiveRecord::Base
 end
 
-def with_env(key, value)
-  old_value, ENV[key] = ENV[key], value
-  yield
-ensure
-  ENV[key] = old_value
-end
-
 def grab_output
   real_stdout, $stdout = $stdout, StringIO.new
   real_stderr, $stderr = $stderr, StringIO.new

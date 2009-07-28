@@ -51,15 +51,6 @@ class DumpRake
       ActiveRecord::Base.connection.quote_table_name(table)
     end
 
-    def with_env(key, value)
-      old_value, ENV[key] = ENV[key], value
-      begin
-        yield
-      ensure
-        ENV[key] = old_value
-      end
-    end
-
   private
 
     def path_with_ext(ext)

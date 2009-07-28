@@ -1,3 +1,6 @@
+$: << File.join(File.dirname(__FILE__), '..', 'lib')
+require 'dump_rake/env'
+
 namespace :dump do
   def dump_command(command, env = {})
     rake = env.delete(:rake) || 'rake'
@@ -8,11 +11,11 @@ namespace :dump do
     end
     case command
     when :create
-      desc = ENV['DESC'] || ENV['DESCRIPTION']
-      cmd += " DESC=#{desc.inspect}" if desc
+      desc = DumpRake::Env[:desc]
+      cmd += " #{DumpRake::Env::DICTIONARY[:desc].first}=#{desc.inspect}" if desc
     when :restore, :versions
-      ver = ENV['VER'] || ENV['VERSION'] || ENV['LIKE']
-      cmd += " VER=#{ver.inspect}" if ver
+      like = DumpRake::Env[:like]
+      cmd += " #{DumpRake::Env::DICTIONARY[:like].first}=#{like.inspect}" if like
     end
     cmd
   end
@@ -31,7 +34,7 @@ namespace :dump do
     if ENV['DESC'] || ENV['DESCRIPTION']
       yield
     else
-      with_env('DESC', desc) do
+      DumpRake::Env.with_env(:desc => desc) do
         yield
       end
     end
@@ -140,7 +143,7 @@ namespace :dump do
   namespace :mirror do
     desc "Creates local dump, uploads and restores on remote"
     task :up, :roles => :db, :only => {:primary => true} do
-      auto_backup = with_env('DESC', 'auto-backup') do
+      auto_backup = DumpRake::Env.with_env(:desc => 'auto-backup') do
         remote.create
       end
       if auto_backup.present?
@@ -148,7 +151,7 @@ namespace :dump do
           local.create
         end
         if file.present?
-          with_env('VER', file) do
+          DumpRake::Env.with_env(:like => file) do
             local.upload
             remote.restore
           end
@@ -158,7 +161,7 @@ namespace :dump do
 
     desc "Creates remote dump, downloads and restores on local"
     task :down, :roles => :db, :only => {:primary => true} do
-      auto_backup = with_env('DESC', 'auto-backup') do
+      auto_backup = DumpRake::Env.with_env(:desc => 'auto-backup') do
         local.create
       end
       if auto_backup.present?
@@ -166,7 +169,7 @@ namespace :dump do
           remote.create
         end
         if file.present?
-          with_env('VER', file) do
+          DumpRake::Env.with_env(:like => file) do
             remote.download
             local.restore
           end
@@ -181,7 +184,7 @@ namespace :dump do
       remote.create
     end
     if file.present?
-      with_env('VER', file) do
+      DumpRake::Env.with_env(:like => file) do
         remote.download
       end
     end

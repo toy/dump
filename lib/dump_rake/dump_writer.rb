@@ -36,7 +36,7 @@ class DumpRake
 
     def write_schema
       create_file('schema.rb') do |f|
-        with_env('SCHEMA', f.path) do
+        DumpRake::Env.with_env('SCHEMA' => f.path) do
           Rake::Task['db:schema:dump'].invoke
         end
       end

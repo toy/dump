@@ -156,7 +156,7 @@ describe DumpReader do
         @file = mock('tempfile', :path => '/temp/123-arst')
         @dump.stub!(:read_entry_to_file).and_yield(@file)
 
-        @dump.should_receive(:with_env).with('SCHEMA', '/temp/123-arst')
+        DumpRake::Env.should_receive(:with_env).with('SCHEMA' => '/temp/123-arst')
         @dump.read_schema
       end
 

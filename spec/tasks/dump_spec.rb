@@ -30,7 +30,7 @@ describe "rake dump" do
     %w(VER VERSION LIKE).each do |name|
       it "should pass version if it is set through environment variable #{name}" do
         DumpRake.should_receive(:versions).with(:like => '21376')
-        with_env name, '21376' do
+        DumpRake::Env.with_env name => '21376' do
           @task.invoke
         end
       end
@@ -50,7 +50,7 @@ describe "rake dump" do
     %w(DESC DESCRIPTION).each do |name|
       it "should pass description if it is set through environment variable #{name}" do
         DumpRake.should_receive(:create).with(:description => 'simple dump')
-        with_env name, 'simple dump' do
+        DumpRake::Env.with_env name => 'simple dump' do
           @task.invoke
         end
       end
@@ -70,7 +70,7 @@ describe "rake dump" do
     %w(VER VERSION LIKE).each do |name|
       it "should pass version if it is set through environment variable #{name}" do
         DumpRake.should_receive(:restore).with(:like => '21378')
-        with_env name, '21378' do
+        DumpRake::Env.with_env name => '21378' do
           @task.invoke
         end
       end

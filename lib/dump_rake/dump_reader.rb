@@ -52,7 +52,7 @@ class DumpRake
 
     def read_schema
       read_entry_to_file('schema.rb') do |f|
-        with_env('SCHEMA', f.path) do
+        DumpRake::Env.with_env('SCHEMA' => f.path) do
           Rake::Task['db:schema:load'].invoke
         end
         Rake::Task['db:schema:dump'].invoke
@@ -96,7 +96,7 @@ class DumpRake
 
     def read_assets
       unless config[:assets].blank?
-        with_env('ASSETS', config[:assets].join(':')) do
+        DumpRake::Env.with_env('ASSETS' => config[:assets].join(':')) do
           Rake::Task['assets:delete'].invoke
         end
 
