@@ -6,12 +6,30 @@ class DumpRake
       dumps
     end
 
-    def initialize(path)
-      @path = Pathname(path)
+    def initialize(path_or_options = {})
+      if path_or_options.is_a?(Hash)
+        options = path_or_options
+
+        name = Time.now.utc.strftime("%Y%m%d%H%M%S")
+        description = clean_description(options[:description])
+        name += "-#{description}" unless description.blank?
+        tgz_name = "#{name}.tgz"
+
+        @path = options[:dir] ? Pathname(options[:dir]) + tgz_name : Pathname(tgz_name)
+
+      else
+        @path = Pathname(path_or_options)
+      end
     end
 
-    def path
-      @path
+    attr_reader :path
+
+    def tgz_path
+      path_with_ext('tgz')
+    end
+
+    def tmp_path
+      path_with_ext('tmp')
     end
 
     def ==(other)
@@ -41,5 +59,16 @@ class DumpRake
         ENV[key] = old_value
       end
     end
+
+  private
+
+    def path_with_ext(ext)
+      Pathname(path.to_s.sub(/#{Regexp.escape(path.extname)}$/, ".#{ext}"))
+    end
+
+    def clean_description(description)
+      description.to_s.downcase.gsub(/[^a-z0-9]+/, ' ').strip[0, 30].strip.gsub(/ /, '-')
+    end
+
   end
 end

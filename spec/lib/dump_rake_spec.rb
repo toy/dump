@@ -165,14 +165,4 @@ describe DumpRake do
 
     end
   end
-
-  describe "clean_description" do
-    it "should shorten string to 30 chars and replace all symbols except a-z and 0-9 with '-'" do
-      DumpRake.clean_description('aenarhts ENHENH 12837192837 #$@#^%%^^%*&(*& arsth *&^*&^ ahrenst haenr sheanrs heran t').should == 'aenarhts-enhenh-12837192837-ar'
-    end
-
-    it "should accept non string" do
-      DumpRake.clean_description(nil).should == ''
-    end
-  end
 end

@@ -28,18 +28,12 @@ class DumpRake
   end
 
   def self.create(options = {})
-    name = Time.now.utc.strftime("%Y%m%d%H%M%S")
-    description = clean_description(options[:description])
-    name += "-#{description}" unless description.blank?
+    dump = Dump.new(options.merge(:dir => File.join(RAILS_ROOT, 'dump')))
 
-    path = File.join(RAILS_ROOT, 'dump')
-    tmp_name = File.join(path, "#{name}.tmp")
-    tgz_name = File.join(path, "#{name}.tgz")
+    DumpWriter.create(dump.tmp_path)
 
-    DumpWriter.create(tmp_name)
-
-    File.rename(tmp_name, tgz_name)
-    puts File.basename(tgz_name)
+    File.rename(dump.tmp_path, dump.tgz_path)
+    puts File.basename(dump.tgz_path)
   end
 
   def self.restore(options = {})
@@ -51,11 +45,5 @@ class DumpRake
       puts "Avaliable versions:"
       versions
     end
-  end
-
-protected
-
-  def self.clean_description(description)
-    description.to_s.downcase.gsub(/[^a-z0-9]+/, ' ').strip[0, 30].strip.gsub(/ /, '-')
   end
 end
