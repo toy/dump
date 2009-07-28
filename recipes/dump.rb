@@ -1,4 +1,5 @@
 $: << File.join(File.dirname(__FILE__), '..', 'lib')
+require 'dump_rake/env'
 
 namespace :dump do
   def dump_command(command, env = {})

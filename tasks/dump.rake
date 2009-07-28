@@ -1,5 +1,3 @@
-$: << File.join(File.dirname(__FILE__), '..', 'lib')
-
 desc 'Short for dump:create'
 task :dump => 'dump:create'
 
