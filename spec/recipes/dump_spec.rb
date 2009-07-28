@@ -16,7 +16,7 @@ describe "cap dump" do
         @cap.find_and_execute_task("dump:local:versions")
       end
 
-      %w(VER VERSION LIKE).each do |name|
+      DumpRake::Env::DICTIONARY[:like].each do |name|
         it "should pass version if it is set through environment variable #{name}" do
           @cap.dump.should_receive(:run_local).with("rake -s dump:versions LIKE=\"21376\"").and_return('')
           DumpRake::Env.with_env name => '21376' do
@@ -48,7 +48,7 @@ describe "cap dump" do
         }
       end
 
-      %w(DESC DESCRIPTION).each do |name|
+      DumpRake::Env::DICTIONARY[:desc].each do |name|
         it "should pass description if it is set through environment variable #{name}" do
           @cap.dump.should_receive(:run_local).with("rake -s dump:create DESC=\"local dump\"").and_return('123.tgz')
           DumpRake::Env.with_env name => 'local dump' do
@@ -80,7 +80,7 @@ describe "cap dump" do
         @cap.find_and_execute_task("dump:local:restore")
       end
 
-      %w(VER VERSION LIKE).each do |name|
+      DumpRake::Env::DICTIONARY[:like].each do |name|
         it "should pass version if it is set through environment variable #{name}" do
           @cap.dump.should_receive(:run_local).with("rake -s dump:restore LIKE=\"21376\"")
           DumpRake::Env.with_env name => '21376' do
@@ -96,7 +96,7 @@ describe "cap dump" do
         @cap.find_and_execute_task("dump:local:upload")
       end
 
-      %w(VER VERSION LIKE).each do |name|
+      DumpRake::Env::DICTIONARY[:like].each do |name|
         it "should pass version if it is set through environment variable #{name}" do
           @cap.dump.should_receive(:run_local).with("rake -s dump:versions LIKE=\"21376\"").and_return('')
           DumpRake::Env.with_env name => '21376' do
@@ -132,7 +132,7 @@ describe "cap dump" do
         @cap.find_and_execute_task("dump:remote:versions")
       end
 
-      %w(VER VERSION LIKE).each do |name|
+      DumpRake::Env::DICTIONARY[:like].each do |name|
         it "should pass version if it is set through environment variable #{name}" do
           @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions RAILS_ENV=\"production\" LIKE=\"21376\"").and_return('')
           DumpRake::Env.with_env name => '21376' do
@@ -178,7 +178,7 @@ describe "cap dump" do
         }
       end
 
-      %w(DESC DESCRIPTION).each do |name|
+      DumpRake::Env::DICTIONARY[:desc].each do |name|
         it "should pass description if it is set through environment variable #{name}" do
           @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:create RAILS_ENV=\"production\" DESC=\"remote dump\"").and_return('123.tgz')
           DumpRake::Env.with_env name => 'remote dump' do
@@ -225,7 +225,7 @@ describe "cap dump" do
       end
 
 
-      %w(VER VERSION LIKE).each do |name|
+      DumpRake::Env::DICTIONARY[:like].each do |name|
         it "should pass version if it is set through environment variable #{name}" do
           @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:restore RAILS_ENV=\"production\" LIKE=\"21376\"")
           DumpRake::Env.with_env name => '21376' do
@@ -247,7 +247,7 @@ describe "cap dump" do
         @cap.find_and_execute_task("dump:remote:download")
       end
 
-      %w(VER VERSION LIKE).each do |name|
+      DumpRake::Env::DICTIONARY[:like].each do |name|
         it "should pass version if it is set through environment variable #{name}" do
           @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions RAILS_ENV=\"production\" LIKE=\"21376\"").and_return('')
           DumpRake::Env.with_env name => '21376' do

@@ -27,7 +27,7 @@ describe "rake dump" do
       @task.invoke
     end
 
-    %w(VER VERSION LIKE).each do |name|
+    DumpRake::Env::DICTIONARY[:like].each do |name|
       it "should pass version if it is set through environment variable #{name}" do
         DumpRake.should_receive(:versions).with(:like => '21376')
         DumpRake::Env.with_env name => '21376' do
@@ -47,7 +47,7 @@ describe "rake dump" do
       @task.invoke
     end
 
-    %w(DESC DESCRIPTION).each do |name|
+    DumpRake::Env::DICTIONARY[:desc].each do |name|
       it "should pass description if it is set through environment variable #{name}" do
         DumpRake.should_receive(:create).with(:description => 'simple dump')
         DumpRake::Env.with_env name => 'simple dump' do
@@ -67,7 +67,7 @@ describe "rake dump" do
       @task.invoke
     end
 
-    %w(VER VERSION LIKE).each do |name|
+    DumpRake::Env::DICTIONARY[:like].each do |name|
       it "should pass version if it is set through environment variable #{name}" do
         DumpRake.should_receive(:restore).with(:like => '21378')
         DumpRake::Env.with_env name => '21378' do

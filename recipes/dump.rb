@@ -1,5 +1,4 @@
 $: << File.join(File.dirname(__FILE__), '..', 'lib')
-require 'dump_rake/env'
 
 namespace :dump do
   def dump_command(command, env = {})
@@ -31,7 +30,7 @@ namespace :dump do
   end
 
   def with_default_desc(desc)
-    if ENV['DESC'] || ENV['DESCRIPTION']
+    if DumpRake::Env[:desc]
       yield
     else
       DumpRake::Env.with_env(:desc => desc) do
