@@ -92,6 +92,11 @@ namespace :dump do
   end
 
   namespace :local do
+    desc "Shorthand for dump:local:create"
+    task :default, :roles => :db, :only => {:primary => true} do
+      create
+    end
+
     desc "Create local dump"
     task :create, :roles => :db, :only => {:primary => true} do
       print_and_return_or_fail do
@@ -120,6 +125,11 @@ namespace :dump do
   end
 
   namespace :remote do
+    desc "Shorthand for dump:remote:create"
+    task :default, :roles => :db, :only => {:primary => true} do
+      remote.create
+    end
+
     desc "Create remote dump"
     task :create, :roles => :db, :only => {:primary => true} do
       print_and_return_or_fail do
