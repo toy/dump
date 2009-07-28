@@ -11,17 +11,7 @@ namespace :dump do
       env[key.to_s] = env.delete(key)
     end
 
-    add_envs = case command
-    when :create
-      [:desc]
-    when :restore, :versions
-      [:like]
-    end
-
-    add_envs.each do |add_env|
-      value = DumpRake::Env[add_env]
-      env[DumpRake::Env::DICTIONARY[add_env].first] = value if value
-    end
+    env.update(DumpRake::Env.for_command(command, true))
 
     cmd = %W(#{rake} -s dump:#{command})
     cmd += env.sort.map{ |key, value| "#{key}=#{value}" }

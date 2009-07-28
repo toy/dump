@@ -66,4 +66,43 @@ describe Env do
       Env[:desc].should == nil
     end
   end
+
+  describe "for_command" do
+    describe "when no vars present" do
+      it "should return empty hash for every command" do
+        Env.for_command(:create).should == {}
+        Env.for_command(:restore).should == {}
+        Env.for_command(:versions).should == {}
+        Env.for_command(:bad).should == {}
+      end
+
+      it "should return empty hash for every command when asking for string keys" do
+        Env.for_command(:create, true).should == {}
+        Env.for_command(:restore, true).should == {}
+        Env.for_command(:versions, true).should == {}
+        Env.for_command(:bad, true).should == {}
+      end
+    end
+
+    describe "when vars are present" do
+      before do
+        ENV['LIKE'] = 'Version'
+        ENV['DESC'] = 'Description'
+      end
+
+      it "should return hash with symbol keys for every command" do
+        Env.for_command(:create).should == {:desc => 'Description'}
+        Env.for_command(:restore).should == {:like => 'Version'}
+        Env.for_command(:versions).should == {:like => 'Version'}
+        Env.for_command(:bad).should == {}
+      end
+
+      it "should return hash with symbol keys for every command when asking for string keys" do
+        Env.for_command(:create, true).should == {'DESC' => 'Description'}
+        Env.for_command(:restore, true).should == {'LIKE' => 'Version'}
+        Env.for_command(:versions, true).should == {'LIKE' => 'Version'}
+        Env.for_command(:bad, true).should == {}
+      end
+    end
+  end
 end

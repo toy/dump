@@ -49,7 +49,7 @@ describe "rake dump" do
 
     DumpRake::Env::DICTIONARY[:desc].each do |name|
       it "should pass description if it is set through environment variable #{name}" do
-        DumpRake.should_receive(:create).with(:description => 'simple dump')
+        DumpRake.should_receive(:create).with(:desc => 'simple dump')
         DumpRake::Env.with_env name => 'simple dump' do
           @task.invoke
         end

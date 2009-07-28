@@ -36,7 +36,15 @@ describe Dump do
       end
 
       it "should generate path with description" do
-        Dump.new(:dir => 'dump_dir', :description => 'hello world').path.should == Pathname('dump_dir/19650414000000-hello-world.tgz')
+        Dump.new(:dir => 'dump_dir', :desc => 'hello world').path.should == Pathname('dump_dir/19650414000000-hello world.tgz')
+      end
+
+      it "should generate path with tags" do
+        Dump.new(:dir => 'dump_dir', :tags => ' mirror, hello world ').path.should == Pathname('dump_dir/19650414000000@hello world@mirror.tgz')
+      end
+
+      it "should generate path with description and tags" do
+        Dump.new(:dir => 'dump_dir', :desc => 'Anniversary backup', :tags => ' mirror, hello world ').path.should == Pathname('dump_dir/19650414000000-Anniversary backup@hello world@mirror.tgz')
       end
     end
   end
@@ -111,12 +119,35 @@ describe Dump do
   end
 
   describe "clean_description" do
-    it "should shorten string to 30 chars and replace all symbols except a-z and 0-9 with '-'" do
-      Dump.new('').send(:clean_description, 'aenarhts ENHENH 12837192837 #$@#^%%^^%*&(*& arsth *&^*&^ ahrenst haenr sheanrs heran t').should == 'aenarhts-enhenh-12837192837-ar'
+    it "should shorten string to 50 chars and replace special symblos with '-'" do
+      Dump.new('').send(:clean_description, 'Special  Dump #12837192837 (before fixind *&^*&^ photos)').should == 'Special Dump #12837192837 (before fixind _ photos)'
+      Dump.new('').send(:clean_description, "To#{'o' * 100} long description").should == "T#{'o' * 49}"
     end
 
     it "should accept non string" do
       Dump.new('').send(:clean_description, nil).should == ''
+    end
+  end
+
+  describe "clean_tag" do
+    it "should shorten string to 20 chars and replace special symblos with '-'" do
+      Dump.new('').send(:clean_tag, 'Very special  tag #12837192837 (fixind *&^*&^)').should == 'very special tag _12'
+      Dump.new('').send(:clean_tag, "To#{'o' * 100} long tag").should == "t#{'o' * 19}"
+    end
+
+    it "should accept non string" do
+      Dump.new('').send(:clean_tag, nil).should == ''
+    end
+  end
+
+  describe "clean_tags" do
+    it "should split string and return uniq non blank sorted tags" do
+      Dump.new('').send(:clean_tags, ' perfect  tag , hello,Hello,this  is (*^(*&').should == ['hello', 'perfect tag', 'this is _']
+      Dump.new('').send(:clean_tags, "l#{'o' * 100}ng tag").should == ["l#{'o' * 19}"]
+    end
+
+    it "should accept non string" do
+      Dump.new('').send(:clean_tags, nil).should == []
     end
   end
 end

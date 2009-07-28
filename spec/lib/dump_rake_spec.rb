@@ -45,21 +45,21 @@ describe DumpRake do
       it "should create file with name like yyyymmddhhmmss-some-text-and.tmp when called with description Some text and !@" do
         File.stub!(:rename)
         DumpRake::DumpWriter.should_receive(:create) do |path|
-          File.basename(path).should match(/^\d{14}-some-text-and\.tmp$/)
+          File.basename(path).should match(/^\d{14}-Some text and _\.tmp$/)
         end
         grab_output{
-          DumpRake.create(:description => 'Some text and !@')
+          DumpRake.create(:desc => 'Some text and !@')
         }
       end
 
       it "should rename file after creating" do
         File.should_receive(:rename) do |tmp_path, tgz_path|
-          File.basename(tmp_path).should match(/^\d{14}-some-text-and\.tmp$/)
-          File.basename(tgz_path).should match(/^\d{14}-some-text-and\.tgz$/)
+          File.basename(tmp_path).should match(/^\d{14}-Some text and _\.tmp$/)
+          File.basename(tgz_path).should match(/^\d{14}-Some text and _\.tgz$/)
         end
         DumpRake::DumpWriter.stub!(:create)
         grab_output{
-          DumpRake.create(:description => 'Some text and !@')
+          DumpRake.create(:desc => 'Some text and !@')
         }
       end
 
@@ -67,8 +67,8 @@ describe DumpRake do
         File.stub!(:rename)
         DumpRake::DumpWriter.stub!(:create)
         grab_output{
-          DumpRake.create(:description => 'Some text and !@')
-        }[:stdout].should match(/^\d{14}-some-text-and\.tgz$/)
+          DumpRake.create(:desc => 'Some text and !@')
+        }[:stdout].should match(/^\d{14}-Some text and _\.tgz$/)
       end
     end
 

@@ -3,6 +3,7 @@ class DumpRake
     DICTIONARY = {
       :like => %w(LIKE VER VERSION),
       :desc => %w(DESC DESCRIPTION),
+      :tags => %w(TAGS TAG),
     }
 
     def self.with_env(hash)
@@ -26,6 +27,22 @@ class DumpRake
         ENV.values_at(*DICTIONARY[key]).compact.first
       else
         ENV[key]
+      end
+    end
+
+    def self.for_command(command, strings = false)
+      variables = case command
+      when :create
+        [:desc]
+      when :restore, :versions
+        [:like]
+      else
+        []
+      end
+      variables.inject({}) do |env, variable|
+        value = self[variable]
+        env[strings ? DICTIONARY[variable].first : variable] = value if value
+        env
       end
     end
   end
