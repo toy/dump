@@ -3,6 +3,12 @@ class DumpRake
     def self.list(options = {})
       dumps = Dir[File.join(RAILS_ROOT, 'dump', '*.tgz')].sort.map{ |path| new(path) }
       dumps = dumps.select{ |dump| dump.name[options[:like]] } if options[:like]
+      if options[:tags]
+        tags = get_filter_tags(options[:tags])
+        dumps = dumps.select{ |dump| (dump.tags & tags[:simple]).present? } if tags[:simple].present?
+        dumps = dumps.select{ |dump| (dump.tags & tags[:mandatory]) == tags[:mandatory] } if tags[:mandatory].present?
+        dumps = dumps.reject{ |dump| (dump.tags & tags[:forbidden]).present? } if tags[:forbidden].present?
+      end
       dumps
     end
 
@@ -16,7 +22,7 @@ class DumpRake
         name += "-#{description}" unless description.blank?
 
         tags = clean_tags(options[:tags])
-        name += tags.map{ |tag| "@#{tag}" }.join('')
+        name += "@#{tags * ','}" unless tags.empty?
 
         tgz_name = "#{name}.tgz"
 
@@ -41,10 +47,44 @@ class DumpRake
       path == other.path
     end
 
+    def parts
+      @parts ||=
+      if m = name.match(/^(\d{#{4+2+2 + 2+2+2}})(-[^@]+)?((?:@[^@]+)+)?\.(tmp|tgz)$/)
+        {
+          :time => m[1],
+          :desc => m[2] && m[2][1, m[2].length],
+          :tags => m[3] && m[3][1, m[3].length],
+          :ext => m[4]
+        }
+      else
+        {}
+      end
+    end
+
+    def time
+      parts[:time] && Time.utc(*parts[:time].match(/(\d{4})#{'(\d{2})' * 5}/)[1..6])
+    end
+
+    def description
+      clean_description(parts[:desc])
+    end
+
+    def tags
+      clean_tags(parts[:tags])
+    end
+
+    def ext
+      parts[:ext]
+    end
+
     def name
       @name ||= File.basename(path)
     end
     alias to_s name
+
+    def inspect
+      "#<%s:0x%x %s>" % [self.class, object_id, path.to_s.sub(/^.+(?=..\/[^\/]*$)/, '…')]
+    end
 
   protected
 
@@ -59,23 +99,48 @@ class DumpRake
   private
 
     def path_with_ext(ext)
-      Pathname(path.to_s.sub(/#{Regexp.escape(path.extname)}$/, ".#{ext}"))
+      Pathname(path.to_s.sub(/#{parts[:ext]}$/, ext))
     end
 
-    def clean_str(str, length, additional = nil)
-      str.to_s.strip.gsub(/\s+/, ' ').gsub(/[^A-Za-z0-9 \-_#{Regexp.escape(additional.to_s)}]+/, '_')[0, length].strip
+    def self.instance_accessible_methods(*methods)
+      methods.each do |method|
+        class_eval <<-code, __FILE__, __LINE__
+          def #{method}(*args, &block)
+            self.class.#{method}(*args, &block)
+          end
+        code
+      end
     end
 
-    def clean_description(description)
-      clean_str(description, 50, '()#')
+    def self.clean_str(str, additional = nil)
+      str.to_s.strip.gsub(/\s+/, ' ').gsub(/[^A-Za-z0-9 \-_#{Regexp.escape(additional.to_s) if additional}]+/, '_')
     end
-
-    def clean_tag(tag)
-      clean_str(tag, 20).downcase
+    def self.clean_description(description)
+      clean_str(description, '()#')[0, 50].strip
     end
-
-    def clean_tags(tags)
+    def self.clean_tag(tag)
+      clean_str(tag).downcase.sub(/^\-+/, '')[0, 20].strip
+    end
+    def self.clean_tags(tags)
       tags.to_s.split(',').map{ |tag| clean_tag(tag) }.uniq.reject{ |tag| tag.blank? }.sort
     end
+    def self.get_filter_tags(tags)
+      groups = Hash.new{ |hash, key| hash[key] = SortedSet.new }
+      tags.to_s.split(',').each do |tag|
+        if m = tag.strip.match(/^(\-|\+)?(.*)$/)
+          type = {'+' => :mandatory, '-' => :forbidden}[m[1]] || :simple
+          unless (claned_tag = clean_tag(m[2])).blank?
+            groups[type] << claned_tag
+          end
+        end
+      end
+      [:simple, :mandatory].each do |type|
+        if (clashing = (groups[type] & groups[:forbidden])).present?
+          raise "#{type} tags clashes with forbidden ones: #{clashing}"
+        end
+      end
+      groups.each_with_object({}){ |(key, value), hsh| hsh[key] = value.to_a }
+    end
+    instance_accessible_methods :clean_str, :clean_description, :clean_tag, :clean_tags, :get_filter_tags
   end
 end

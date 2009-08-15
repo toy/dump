@@ -32,7 +32,7 @@ describe DumpRake do
         }
       end
 
-      it "should create file with name like yyyymmddhhmmss.tmp when called without description" do
+      it "should create file with name like 'yyyymmddhhmmss.tmp' when called without description" do
         File.stub!(:rename)
         DumpRake::DumpWriter.should_receive(:create) do |path|
           File.basename(path).should match(/^\d{14}\.tmp$/)
@@ -42,7 +42,17 @@ describe DumpRake do
         }
       end
 
-      it "should create file with name like yyyymmddhhmmss-some-text-and.tmp when called with description Some text and !@" do
+      it "should create file with name like 'yyyymmddhhmmss-Some text and _.tmp' when called with description 'Some text and !@'" do
+        File.stub!(:rename)
+        DumpRake::DumpWriter.should_receive(:create) do |path|
+          File.basename(path).should match(/^\d{14}-Some text and _\.tmp$/)
+        end
+        grab_output{
+          DumpRake.create(:desc => 'Some text and !@')
+        }
+      end
+
+      it "should create file with name like 'yyyymmddhhmmss@super tag,second.tmp' when called with description 'Some text and !@'" do
         File.stub!(:rename)
         DumpRake::DumpWriter.should_receive(:create) do |path|
           File.basename(path).should match(/^\d{14}-Some text and _\.tmp$/)

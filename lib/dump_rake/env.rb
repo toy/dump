@@ -33,9 +33,9 @@ class DumpRake
     def self.for_command(command, strings = false)
       variables = case command
       when :create
-        [:desc]
+        [:desc, :tags]
       when :restore, :versions
-        [:like]
+        [:like, :tags]
       else
         []
       end
