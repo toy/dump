@@ -21,3 +21,12 @@ end
 task :spec_with_rcov_and_open => :spec_with_rcov do
   `open coverage/index.html`
 end
+
+desc 'unpack latest gems'
+task :unpack_gems do
+  rm_r 'gems' rescue nil
+  mkpath 'gems'
+  %w(progress archive-tar-minitar).each do |gem_name|
+    sh *%W(gem unpack #{gem_name} --target=gems)
+  end
+end
