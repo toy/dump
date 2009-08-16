@@ -18,6 +18,51 @@ describe DumpRake do
         DumpRake.versions
       }[:stdout].should == "123.tgz\n456.tgz\n"
     end
+
+    it "should not show summary if not asked for" do
+      dumps = %w(123.tgz 456.tgz).map do |s|
+        dump = mock("dump_#{s}", :path => mock("dump_#{s}_path"))
+        DumpRake::DumpReader.should_not_receive(:summary)
+        dump
+      end
+
+      DumpRake::Dump.should_receive(:list).and_return(dumps)
+      grab_output{
+        $stderr.should_not_receive(:puts)
+        DumpRake.versions
+      }
+    end
+
+    it "should show summary if asked for" do
+      dumps = %w(123.tgz 456.tgz).map do |s|
+        dump = mock("dump_#{s}", :path => mock("dump_#{s}_path"))
+        DumpRake::DumpReader.should_receive(:summary).with(dump.path)
+        dump
+      end
+
+      DumpRake::Dump.should_receive(:list).and_return(dumps)
+      grab_output{
+        $stderr.should_not_receive(:puts)
+        DumpRake.versions(:summary => true)
+      }
+    end
+
+    it "should show output to stderr if summary raises error" do
+      DumpRake::DumpReader.stub!(:summary)
+      dumps = %w(123.tgz 456.tgz).map do |s|
+        mock("dump_#{s}", :path => mock("dump_#{s}_path"))
+      end
+      DumpRake::DumpReader.should_receive(:summary).with(dumps[1].path).and_raise('terrible error')
+
+      DumpRake::Dump.should_receive(:list).and_return(dumps)
+      grab_output{
+        $stderr.stub!(:puts)
+        $stderr.should_receive(:puts) do |s|
+          s['terrible error'].should_not be_nil
+        end
+        DumpRake.versions(:summary => true)
+      }
+    end
   end
 
   describe "create" do

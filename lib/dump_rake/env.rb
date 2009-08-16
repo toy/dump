@@ -5,6 +5,7 @@ class DumpRake
       :desc => %w(DESC DESCRIPTION),
       :tags => %w(TAGS TAG),
       :leave => %w(LEAVE),
+      :summary => %w(SUMMARY),
     }.freeze
     def self.dictionary
       @dictionary
@@ -44,8 +45,10 @@ class DumpRake
       case command
       when :create
         [:desc, :tags]
-      when :restore, :versions
+      when :restore
         [:like, :tags]
+      when :versions
+        [:like, :tags, :summary]
       when :cleanup
         [:like, :tags, :leave]
       else

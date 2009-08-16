@@ -41,6 +41,79 @@ describe DumpReader do
     end
   end
 
+  describe "summary" do
+    describe "Summary class" do
+      it "should format text" do
+        @summary = DumpReader::Summary.new
+        @summary.header 'One'
+        @summary.data %w(qqq www fff ppp ggg jjj)
+        @summary.header 'Two'
+        @summary.data [['qqq', 123], ['www', 345], ['fff', 234], ['ppp', 678], ['ggg', 321], ['jjj', 666]]
+
+        output = <<-TEXT
+          One:
+            fff
+            ggg
+            jjj
+            ppp
+            qqq
+            www
+          Two:
+            fff: 234
+            ggg: 321
+            jjj: 666
+            ppp: 678
+            qqq: 123
+            www: 345
+        TEXT
+        "#{@summary}".should == output.gsub(/#{output[/^\s+/]}/, '  ')
+      end
+    end
+
+    it "should create selves instance and open" do
+      @dump = mock('dump')
+      @dump.should_receive(:open)
+      DumpReader.should_receive(:new).with('/abc/123.tmp').and_return(@dump)
+      DumpReader.summary('/abc/123.tmp')
+    end
+
+    it "should call dump subroutines and create summary" do
+      @dump = mock('dump')
+      @dump.stub!(:config).and_return(:tables => {'a' => 10, 'b' => 20, 'c' => 666}, :assets => {'path/a' => 10, 'path/b' => 20})
+      @dump.stub!(:open).and_yield(@dump)
+      DumpReader.stub!(:new).and_return(@dump)
+
+      @summary = mock('summary')
+      @summary.should_receive(:header).with('Tables with row count')
+      @summary.should_receive(:data).with('a' => 10, 'b' => 20, 'c' => 666)
+      @summary.should_receive(:header).with('Assets with file count')
+      @summary.should_receive(:data).with('path/a' => 10, 'path/b' => 20)
+      DumpReader::Summary.stub!(:new).and_return(@summary)
+
+      @dump.should_receive(:read_config).ordered
+
+      DumpReader.summary('/abc/123.tmp').should == @summary
+    end
+
+    it "should call dump subroutines and create summary for old format with assets as Array" do
+      @dump = mock('dump')
+      @dump.stub!(:config).and_return(:tables => {'a' => 10, 'b' => 20, 'c' => 666}, :assets => %w(path/a path/b))
+      @dump.stub!(:open).and_yield(@dump)
+      DumpReader.stub!(:new).and_return(@dump)
+
+      @summary = mock('summary')
+      @summary.should_receive(:header).with('Tables with row count')
+      @summary.should_receive(:data).with('a' => 10, 'b' => 20, 'c' => 666)
+      @summary.should_receive(:header).with('Assets')
+      @summary.should_receive(:data).with(%w(path/a path/b))
+      DumpReader::Summary.stub!(:new).and_return(@summary)
+
+      @dump.should_receive(:read_config).ordered
+
+      DumpReader.summary('/abc/123.tmp').should == @summary
+    end
+  end
+
   describe "open" do
     it "should set stream to gzipped tar reader" do
       @gzip = mock('gzip')

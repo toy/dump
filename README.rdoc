@@ -60,7 +60,7 @@ TAG or TAGS — comma separated list of tags
 
   rake dump TAGS='photos,videos'
 
-==== While restoring or listing dumps:
+==== While restoring dumps:
 
 LIKE, VER, VERSION — filter dumps by full dump name
 
@@ -73,20 +73,28 @@ prefixed with '+' — dump should have every tag with prefix
 prefixed with '-' — dump should not have any of tags with prefix
 
 select dumps with tags photos or videos:
-  rake dump TAGS='photos,videos'
+  rake dump:restore TAGS='photos,videos'
 
 select dumps with tags photos and videos:
-  rake dump TAGS='+photos,+videos'
+  rake dump:restore TAGS='+photos,+videos'
 
 skip dumps with tags mirror and archive:
-  rake dump TAGS='-mirror,-archive'
+  rake dump:restore TAGS='-mirror,-archive'
 
 select dumps with tags photos or videos, with tag important and without mirror:
-  rake dump TAGS='photos,videos,+important,-mirror'
+  rake dump:restore TAGS='photos,videos,+important,-mirror'
+
+==== For listing dumps:
+
+LIKE, VER, VERSION and TAG or TAGS — as for restoring
+
+SUMMARY — output info about dump
+
+  rake dump:versions SUMMARY=1
 
 ==== For cleanup:
 
-LIKE, VER, VERSION and TAG or TAGS — as for listing
+LIKE, VER, VERSION and TAG or TAGS — as for restoring
 
 LEAVE — number of dumps to leave
 

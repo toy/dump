@@ -12,6 +12,42 @@ class DumpRake
       end
     end
 
+    class Summary
+      attr_reader :text
+      alias_method :to_s, :text
+      def initialize
+        @text = ''
+      end
+
+      def header(header)
+        @text << "  #{header}:\n"
+      end
+
+      def data(entries)
+        entries.sort.each do |entry|
+          @text << "    #{Array(entry).join(': ')}\n"
+        end
+      end
+    end
+
+    def self.summary(path)
+      new(path).open do |dump|
+        dump.read_config
+
+        summary = Summary.new
+
+        tables = dump.config[:tables]
+        summary.header "Tables with row count"
+        summary.data tables
+
+        assets = dump.config[:assets]
+        summary.header assets.is_a?(Hash) ? "Assets with file count" : "Assets"
+        summary.data assets
+
+        summary
+      end
+    end
+
     def open
       Zlib::GzipReader.open(path) do |gzip|
         Archive::Tar::Minitar.open(gzip, 'r') do |stream|

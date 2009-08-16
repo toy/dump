@@ -24,7 +24,18 @@ require_gem_or_unpacked_gem 'progress', '>= 0.0.6'
 
 class DumpRake
   def self.versions(options = {})
-    puts Dump.list(options)
+    Dump.list(options).each do |dump|
+      puts dump
+      if options[:summary]
+        begin
+          puts DumpReader.summary(dump.path)
+          puts
+        rescue => e
+          $stderr.puts "Error reading dump: #{e}"
+          $stderr.puts
+        end
+      end
+    end
   end
 
   def self.create(options = {})
