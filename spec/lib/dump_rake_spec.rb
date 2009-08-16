@@ -281,5 +281,26 @@ describe DumpRake do
         }
       end
     end
+
+    it "should print to stderr if can not delete dump" do
+      dumps = %w(a b c d e f g h i j).map do |s|
+        dump = mock("dump_#{s}", :ext => 'tgz', :path => mock("dump_#{s}_path"))
+        dump.stub!(:lock).and_yield
+        dump.path.stub!(:unlink)
+        dump
+      end
+
+      dumps[3].path.should_receive(:unlink).and_raise('Horrible error')
+
+      DumpRake::Dump.stub!(:list).and_return(dumps)
+      grab_output{
+        $stderr.stub!(:puts)
+        $stderr.should_receive(:puts) do |s|
+          s[dumps[3].path.to_s].should_not be_nil
+          s['Horrible error'].should_not be_nil
+        end
+        DumpRake.cleanup
+      }
+    end
   end
 end
