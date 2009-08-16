@@ -88,7 +88,6 @@ class DumpRake
                   rescue => e
                     puts "Skipped asset due to error #{e}"
                   end
-                  sleep 0.2
                 end
               end
             end
