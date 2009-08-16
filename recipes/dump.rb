@@ -1,6 +1,7 @@
 $: << File.join(File.dirname(__FILE__), '..', 'lib')
 require 'dump_rake/env'
 require 'shell_escape'
+require 'activesupport'
 
 namespace :dump do
   def dump_command(command, env = {})
@@ -28,13 +29,10 @@ namespace :dump do
     end
   end
 
-  def with_default_desc(desc)
-    if DumpRake::Env[:desc]
+  def with_additional_tags(*tags)
+    tags = [tags, DumpRake::Env[:tags]].flatten.select(&:present?).join(',')
+    DumpRake::Env.with_env(:tags => tags) do
       yield
-    else
-      DumpRake::Env.with_env(:desc => desc) do
-        yield
-      end
     end
   end
 
@@ -71,16 +69,6 @@ namespace :dump do
     fetch(:rake, nil)
   end
 
-  Object.class_eval do
-    def blank?
-      respond_to?(:empty?) ? empty? : !self
-    end
-
-    def present?
-      !blank?
-    end
-  end
-
   namespace :local do
     desc "Shorthand for dump:local:create"
     task :default, :roles => :db, :only => {:primary => true} do
@@ -90,7 +78,7 @@ namespace :dump do
     desc "Create local dump"
     task :create, :roles => :db, :only => {:primary => true} do
       print_and_return_or_fail do
-        with_default_desc('local') do
+        with_additional_tags('local') do
           run_local(dump_command(:create))
         end
       end
@@ -123,7 +111,7 @@ namespace :dump do
     desc "Create remote dump"
     task :create, :roles => :db, :only => {:primary => true} do
       print_and_return_or_fail do
-        with_default_desc('remote') do
+        with_additional_tags('remote') do
           run_remote("cd #{current_path}; #{dump_command(:create, :rake => fetch_rake, :RAILS_ENV => fetch_rails_env, :PROGRESS_TTY => '+')}")
         end
       end
@@ -151,15 +139,15 @@ namespace :dump do
   namespace :mirror do
     desc "Creates local dump, uploads and restores on remote"
     task :up, :roles => :db, :only => {:primary => true} do
-      auto_backup = DumpRake::Env.with_env(:desc => 'auto-backup') do
+      auto_backup = with_additional_tags('auto-backup') do
         remote.create
       end
       if auto_backup.present?
-        file = with_default_desc('mirror:up') do
+        file = with_additional_tags('mirror', 'mirror-up') do
           local.create
         end
         if file.present?
-          DumpRake::Env.with_env(:like => file) do
+          DumpRake::Env.with_clean_env(:like => file) do
             local.upload
             remote.restore
           end
@@ -169,15 +157,15 @@ namespace :dump do
 
     desc "Creates remote dump, downloads and restores on local"
     task :down, :roles => :db, :only => {:primary => true} do
-      auto_backup = DumpRake::Env.with_env(:desc => 'auto-backup') do
+      auto_backup = with_additional_tags('auto-backup') do
         local.create
       end
       if auto_backup.present?
-        file = with_default_desc('mirror:down') do
+        file = with_additional_tags('mirror', 'mirror-down') do
           remote.create
         end
         if file.present?
-          DumpRake::Env.with_env(:like => file) do
+          DumpRake::Env.with_clean_env(:like => file) do
             remote.download
             local.restore
           end
@@ -188,11 +176,11 @@ namespace :dump do
 
   desc "Creates remote dump and downloads to local (desc defaults to 'backup')"
   task :backup, :roles => :db, :only => {:primary => true} do
-    file = with_default_desc('backup') do
+    file = with_additional_tags('backup') do
       remote.create
     end
     if file.present?
-      DumpRake::Env.with_env(:like => file) do
+      DumpRake::Env.with_clean_env(:like => file) do
         remote.download
       end
     end

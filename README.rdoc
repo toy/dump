@@ -33,43 +33,87 @@ Also you can set custom remote rake binary in your deploy.rb like:
 
   set :rake, "/custom/rake"
 
-== Examples
-
-  # show dump versions
-  rake dump:versions
-  # show dump versions where 1234 is in name
-  rake dump:versions VER[SION]=1234
-  rake dump:versions LIKE=1234
+== Usage
 
   # create dump
   rake dump
   rake dump:create
-  # create dump with name like DATE-some-text
-  rake dump:create DESC[RIPTION]="Some text"
 
-  # restore last dump
+  # list avaliable dumps
+  rake dump:versions
+
+  # restore dump
   rake dump:restore
-  # restore dump with 1234 in its name (such dump must be uniq)
-  rake dump:restore VER[SION]=1234
-  rake dump:restore LIKE=1234
 
-For all cap commands parameters are same as for rake tasks
+=== Environment variables
 
+==== While creating dumps:
+
+DESC or DESCRIPTION — free form description of dump
+
+  rake dump DESC='uploaded photos'
+
+TAG or TAGS — comma separated list of tags
+
+  rake dump TAGS='photos,videos'
+
+==== While restoring or listing dumps:
+
+LIKE, VER, VERSION — filter dumps by full dump name
+
+  rake dump:versions LIKE='2009'
+  rake dump:restore LIKE='2009' # restores last dump matching 2009
+
+TAG or TAGS — comma separated list of tags
+without '+' or '-' — dump should have any of such tags
+prefixed with '+' — dump should have every tag with prefix
+prefixed with '-' — dump should not have any of tags with prefix
+
+select dumps with tags photos or videos:
+  rake dump TAGS='photos,videos'
+
+select dumps with tags photos and videos:
+  rake dump TAGS='+photos,+videos'
+
+skip dumps with tags mirror and archive:
+  rake dump TAGS='-mirror,-archive'
+
+select dumps with tags photos or videos, with tag important and without mirror:
+  rake dump TAGS='photos,videos,+important,-mirror'
+
+=== cap tasks
+
+For all cap commands environment variables are same as for rake tasks
+
+==== Basic cap tasks are same as rake tasks
+
+  cap dump:local
   cap dump:local:create
   cap dump:local:restore
   cap dump:local:versions
 
+  cap dump:remote
   cap dump:remote:create
   cap dump:remote:restore
   cap dump:remote:versions
 
-  # use VER[SION] or LIKE to select dump
-  cap dump:local:upload # transfer last dump to remote server
-  cap dump:remote:download # transfer last dump to local
+==== Dump exchanging tasks
 
-  # use DESC[RIPTION] to add prefix to dump name
-  cap dump:mirror:up # mirror local to remote (create local dump, upload it to remote and restore it there)
-  cap dump:mirror:down # mirror remote to local (create remote dump, download it from remote and restore on local)
+transfer selected dump to remote server:
+  cap dump:local:upload
 
-  # use DESC[RIPTION] to set dump name prefix (or it will be 'backup')
-  cap dump:backup # create local backup of remote (create remote dump and download it)
+transfer selected dump to local:
+  cap dump:remote:download
+
+----
+
+mirror local to remote (create local dump, upload it to remote and restore it there):
+  cap dump:mirror:up
+
+mirror remote to local (create remote dump, download it from remote and restore on local):
+  cap dump:mirror:down
+
+----
+
+backup remote on local (create remote dump and download it):
+  cap dump:backup

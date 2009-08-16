@@ -22,6 +22,12 @@ class DumpRake
       end
     end
 
+    def self.with_clean_env(hash = {}, &block)
+      empty_env = {}
+      DICTIONARY.keys.each{ |key| empty_env[key] = nil }
+      with_env(empty_env.merge(hash), &block)
+    end
+
     def self.[](key)
       if DICTIONARY[key]
         ENV.values_at(*DICTIONARY[key]).compact.first
