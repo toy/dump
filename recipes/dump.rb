@@ -101,7 +101,10 @@ namespace :dump do
 
     desc "Upload dump"
     task :upload, :roles => :db, :only => {:primary => true} do
-      if file = last_line(run_local(dump_command(:versions)))
+      file = DumpRake::Env.with_env(:summary => nil) do
+        last_line(run_local(dump_command(:versions)))
+      end
+      if file
         transfer_with_progress :up, "dump/#{file}", "#{current_path}/dump/#{file}", :via => :scp
       end
     end
@@ -139,7 +142,10 @@ namespace :dump do
 
     desc "Download dump"
     task :download, :roles => :db, :only => {:primary => true} do
-      if file = last_line(run_remote("cd #{current_path}; #{dump_command(:versions, :rake => fetch_rake, :RAILS_ENV => fetch_rails_env, :PROGRESS_TTY => '+')}"))
+      file = DumpRake::Env.with_env(:summary => nil) do
+        last_line(run_remote("cd #{current_path}; #{dump_command(:versions, :rake => fetch_rake, :RAILS_ENV => fetch_rails_env, :PROGRESS_TTY => '+')}"))
+      end
+      if file
         FileUtils.mkpath('dump')
         transfer_with_progress :down, "#{current_path}/dump/#{file}", "dump/#{file}", :via => :scp
       end

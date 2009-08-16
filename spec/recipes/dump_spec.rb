@@ -40,6 +40,15 @@ describe "cap dump" do
         end
       end
 
+      DumpRake::Env.dictionary[:summary].each do |name|
+        it "should pass tags through environment variable #{name}" do
+          @cap.dump.should_receive(:run_local).with("rake -s dump:versions SUMMARY=true").and_return('')
+          DumpRake::Env.with_env name => 'true' do
+            @cap.find_and_execute_task("dump:local:versions")
+          end
+        end
+      end
+
       it "should print result of rake task" do
         @cap.dump.stub!(:run_local).and_return("123123.tgz\n")
         grab_output{
@@ -170,6 +179,15 @@ describe "cap dump" do
         @cap.find_and_execute_task("dump:local:upload")
       end
 
+      it "should block sending summary to versions" do
+        @cap.dump.should_receive(:run_local).with("rake -s dump:versions").and_return('')
+        DumpRake::Env.dictionary[:summary].each do |name|
+          DumpRake::Env.with_env name => 'true' do
+            @cap.find_and_execute_task("dump:local:upload")
+          end
+        end
+      end
+
       DumpRake::Env.dictionary[:like].each do |name|
         it "should pass version if it is set through environment variable #{name}" do
           @cap.dump.should_receive(:run_local).with("rake -s dump:versions LIKE=21376").and_return('')
@@ -228,6 +246,15 @@ describe "cap dump" do
         it "should pass tags through environment variable #{name}" do
           @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions PROGRESS_TTY=+ RAILS_ENV=production TAGS=21376").and_return('')
           DumpRake::Env.with_env name => '21376' do
+            @cap.find_and_execute_task("dump:remote:versions")
+          end
+        end
+      end
+
+      DumpRake::Env.dictionary[:summary].each do |name|
+        it "should pass tags through environment variable #{name}" do
+          @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions PROGRESS_TTY=+ RAILS_ENV=production SUMMARY=true").and_return('')
+          DumpRake::Env.with_env name => 'true' do
             @cap.find_and_execute_task("dump:remote:versions")
           end
         end
@@ -401,6 +428,15 @@ describe "cap dump" do
       it "should run rake versions to get avaliable versions" do
         @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions PROGRESS_TTY=+ RAILS_ENV=production").and_return('')
         @cap.find_and_execute_task("dump:remote:download")
+      end
+
+      it "should block sending summary to versions" do
+        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions PROGRESS_TTY=+ RAILS_ENV=production").and_return('')
+        DumpRake::Env.dictionary[:summary].each do |name|
+          DumpRake::Env.with_env name => 'true' do
+            @cap.find_and_execute_task("dump:remote:download")
+          end
+        end
       end
 
       DumpRake::Env.dictionary[:like].each do |name|
