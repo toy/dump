@@ -98,37 +98,43 @@ describe DumpRake do
   describe "restore" do
     describe "without version" do
       it "should call Dump.list" do
+        DumpRake::Dump.stub!(:list)
         DumpRake::Dump.should_receive(:list).and_return([])
-        DumpRake.stub!(:versions)
         grab_output{
           DumpRake.restore
         }
       end
 
-      it "should not call DumpReader.restore and should call versions if there are no versions at all" do
+      it "should not call DumpReader.restore and should call Dump.list and output it to $stderr if there are no versions at all" do
         DumpRake::Dump.stub!(:list).and_return([])
         DumpRake::DumpReader.should_not_receive(:restore)
-        DumpRake.should_receive(:versions)
+        all_dumps = mock('all_dumps')
+        DumpRake::Dump.should_receive(:list).with().and_return(all_dumps)
         grab_output{
+          $stderr.should_receive(:puts).with(kind_of(String))
+          $stderr.should_receive(:puts).with(all_dumps)
           DumpRake.restore
         }
       end
 
-      it "should not call DumpReader.restore and should call versions if there are no versions at all" do
+      it "should not call DumpReader.restore and should call Dump.list and output it to $stderr if there are no versions at all" do
         DumpRake::Dump.stub!(:list).and_return([])
         DumpRake::DumpReader.should_not_receive(:restore)
-        DumpRake.should_receive(:versions)
+        all_dumps = mock('all_dumps')
+        DumpRake::Dump.should_receive(:list).with().and_return(all_dumps)
         grab_output{
+          $stderr.should_receive(:puts).with(kind_of(String))
+          $stderr.should_receive(:puts).with(all_dumps)
           DumpRake.restore('213')
         }
       end
 
       it "should call DumpReader.restore if there are versions" do
         @dump = mock('dump', :path => 'dump/213.tgz')
-        DumpRake::Dump.stub!(:list).and_return([@dump])
+        DumpRake::Dump.should_receive(:list).once.and_return([@dump])
         DumpRake::DumpReader.should_receive(:restore).with('dump/213.tgz')
-        DumpRake.should_not_receive(:versions)
         grab_output{
+          $stderr.should_not_receive(:puts)
           DumpRake.restore
         }
       end
@@ -136,8 +142,8 @@ describe DumpRake do
 
     describe "with version" do
       it "should call Dump.list with options" do
+        DumpRake::Dump.stub!(:list)
         DumpRake::Dump.should_receive(:list).with(:like => '213').and_return([])
-        DumpRake.stub!(:versions)
         grab_output{
           DumpRake.restore(:like => '213')
         }
@@ -146,18 +152,22 @@ describe DumpRake do
       it "should not call DumpReader.restore and should call versions if desired version not found" do
         DumpRake::Dump.stub!(:list).and_return([])
         DumpRake::DumpReader.should_not_receive(:restore)
-        DumpRake.should_receive(:versions)
+        all_dumps = mock('all_dumps')
+        DumpRake::Dump.should_receive(:list).with().and_return(all_dumps)
         grab_output{
+          $stderr.should_receive(:puts).with(kind_of(String))
+          $stderr.should_receive(:puts).with(all_dumps)
           DumpRake.restore('213')
         }
       end
 
       it "should call DumpReader.restore if there is desired version" do
         @dump = mock('dump', :path => 'dump/213.tgz')
-        DumpRake::Dump.stub!(:list).and_return([@dump])
+        DumpRake::Dump.should_receive(:list).once.and_return([@dump])
         DumpRake::DumpReader.should_receive(:restore).with('dump/213.tgz')
         DumpRake.should_not_receive(:versions)
         grab_output{
+          $stderr.should_not_receive(:puts)
           DumpRake.restore(:like => '213')
         }
       end
@@ -165,10 +175,10 @@ describe DumpRake do
       it "should call DumpReader.restore on last version if found multiple matching versions" do
         @dump_a = mock('dump_a', :path => 'dump/213-a.tgz')
         @dump_b = mock('dump_b', :path => 'dump/213-b.tgz')
-        DumpRake::Dump.stub!(:list).and_return([@dump_a, @dump_b])
+        DumpRake::Dump.should_receive(:list).once.and_return([@dump_a, @dump_b])
         DumpRake::DumpReader.should_receive(:restore).with('dump/213-b.tgz')
-        DumpRake.should_not_receive(:versions)
         grab_output{
+          $stderr.should_not_receive(:puts)
           DumpRake.restore(:like => '213')
         }
       end
