@@ -60,6 +60,10 @@ TAG or TAGS — comma separated list of tags
 
   rake dump TAGS='photos,videos'
 
+ASSETS — colon separated list of pathes or globs to dump
+
+  rake dump ASSETS='public/system:public/images/masks/*'
+
 ==== While restoring dumps:
 
 LIKE, VER, VERSION — filter dumps by full dump name
