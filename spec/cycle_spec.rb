@@ -181,7 +181,7 @@ describe 'full cycle' do
       end
     end
   rescue Errno::ENOENT => e
-    STDERR.puts e
+    $stderr.puts e
     it "create database.yml from example to run all tests"
   end
 end

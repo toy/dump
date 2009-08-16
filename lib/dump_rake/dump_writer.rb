@@ -86,7 +86,7 @@ class DumpRake
                   begin
                     Archive::Tar::Minitar.pack_file(entry, outp)
                   rescue => e
-                    STDERR.puts "Skipped asset due to error #{e}"
+                    $stderr.puts "Skipped asset due to error #{e}"
                   end
                 end
               end

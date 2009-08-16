@@ -42,7 +42,8 @@ class DumpRake
     if dump
       DumpReader.restore(dump.path)
     else
-      STDERR.puts "Avaliable versions:", Dump.list
+      $stderr.puts "Avaliable versions:"
+      $stderr.puts Dump.list
     end
   end
 
@@ -62,7 +63,7 @@ class DumpRake
           dump.path.unlink
           puts "Deleted #{dump.path}"
         rescue => e
-          STDERR.puts "Can not delete #{dump.path} — #{e}"
+          $stderr.puts "Can not delete #{dump.path} — #{e}"
         end
       end
     end

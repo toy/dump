@@ -25,7 +25,7 @@ namespace :dump do
 
   def transfer_with_progress(direction, from, to, options = {})
     transfer(direction, from, to, options) do |channel, path, transfered, total|
-      STDERR << "\rTransfering: %5.1f%%" % (transfered * 100.0 / total)
+      $stderr << "\rTransfering: %5.1f%%" % (transfered * 100.0 / total)
     end
   end
 
@@ -53,9 +53,9 @@ namespace :dump do
       case io
       when :out
         output << data
-        STDOUT << data
+        $stdout << data
       when :err
-        STDERR << data
+        $stderr << data
       end
     end
     output
