@@ -37,9 +37,10 @@ describe "rake assets" do
       public/images/b
     end_src
     File.stub!(:readlines).and_return(StringIO.new(data).readlines)
-    ENV['ASSETS'] = 'public/images'
-    @rake["assets"].invoke
-    ENV['ASSETS'].should == 'public/images'
+    DumpRake::Env.with_env :assets => 'public/images' do
+      @rake["assets"].invoke
+      ENV['ASSETS'].should == 'public/images'
+    end
   end
 
   describe "delete" do
