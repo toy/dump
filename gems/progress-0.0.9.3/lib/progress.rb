@@ -28,9 +28,9 @@ class Progress
   #     end
   #   end
   # ==== To output progress as lines (not trying to stay on line)
-  #   Progress.start('Test', 1000, :lines => true) do
-  #     1000.times{ Progress.step }
-  #   end
+  #   Progress.lines = true
+  # ==== To force highlight
+  #   Progress.highlight = true
   def self.start(title, total = 1, options = {})
     levels << new(title, total, levels.length, options)
     print_message
@@ -86,21 +86,58 @@ protected
       @io.puts if levels.empty?
     end
 
+    def io
+      @io ||= $stderr
+    end
+
+    def io_tty?
+      ENV['PROGRESS_TTY'] || io.tty?
+    end
+
     def io=(io)
       @io = io
+    end
+
+    def lines=(value)
+      @lines = value
+    end
+    def lines?
+      if @lines.nil?
+        @lines = !io_tty?
+      end
+      @lines
+    end
+
+    def highlight=(value)
+      @highlight = value
+    end
+    def highlight?
+      if @highlight.nil?
+        @highlight = io_tty?
+      end
+      @highlight
     end
 
   protected
 
     def print_message
       message = levels.map{ |level| level.message } * ' > '
-      @io ||= $stderr
-      @io.sync = true
-      if @io.tty? && !levels.any?{ |level| level.options[:lines] }
-        @io.print message.ljust(@previous_length || 0).gsub(/\d+\.\d+/){ |s| s == '100.0' ? s : "\e[1m#{s}\e[0m" } + "\r"
+      io.sync = true
+
+      unless lines?
+        previous_length = @previous_length || 0
         @previous_length = message.length
+        message = message.ljust(previous_length, ' ') + "\r"
+      end
+
+      if highlight?
+        message.gsub!(/\d+\.\d+/){ |s| s == '100.0' ? s : "\e[1m#{s}\e[0m" }
+      end
+
+      unless lines?
+        io.print message
       else
-        @io.puts message
+        io.puts message
       end
     end
 
