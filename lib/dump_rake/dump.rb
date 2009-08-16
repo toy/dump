@@ -1,7 +1,7 @@
 class DumpRake
   class Dump
     def self.list(options = {})
-      dumps = Dir[File.join(RAILS_ROOT, 'dump', '*.tgz')].sort.map{ |path| new(path) }
+      dumps = Dir[File.join(RAILS_ROOT, 'dump', options[:all] ? '*.*' : '*.tgz')].sort.select{ |path| File.file?(path) }.map{ |path| new(path) }
       dumps = dumps.select{ |dump| dump.name[options[:like]] } if options[:like]
       if options[:tags]
         tags = get_filter_tags(options[:tags])
@@ -84,6 +84,19 @@ class DumpRake
 
     def inspect
       "#<%s:0x%x %s>" % [self.class, object_id, path.to_s.sub(/^.+(?=..\/[^\/]*$)/, '…')]
+    end
+
+    def lock
+      if lock = File.open(path, 'r')
+        begin
+          if lock.flock(File::LOCK_EX | File::LOCK_NB)
+            yield
+          end
+        ensure
+          lock.flock(File::LOCK_UN)
+          lock.close
+        end
+      end
     end
 
   protected

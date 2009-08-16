@@ -10,6 +10,50 @@ describe Dump do
     Dump.new(dump_path(file_name))
   end
 
+  describe "lock" do
+    before do
+      @yield_receiver = mock('yield_receiver')
+    end
+
+    it "should not yield if file does not exist" do
+      @yield_receiver.should_not_receive(:fire)
+
+      File.should_receive(:open).and_return(nil)
+
+      Dump.new('hello').lock do
+        @yield_receiver.fire
+      end
+    end
+
+    it "should not yield if file can not be locked" do
+      @yield_receiver.should_not_receive(:fire)
+
+      @file = mock('file')
+      @file.should_receive(:flock).with(File::LOCK_EX | File::LOCK_NB).and_return(nil)
+      @file.should_receive(:flock).with(File::LOCK_UN)
+      @file.should_receive(:close)
+      File.should_receive(:open).and_return(@file)
+
+      Dump.new('hello').lock do
+        @yield_receiver.fire
+      end
+    end
+
+    it "should yield if file can not be locked" do
+      @yield_receiver.should_receive(:fire)
+
+      @file = mock('file')
+      @file.should_receive(:flock).with(File::LOCK_EX | File::LOCK_NB).and_return(true)
+      @file.should_receive(:flock).with(File::LOCK_UN)
+      @file.should_receive(:close)
+      File.should_receive(:open).and_return(@file)
+
+      Dump.new('hello').lock do
+        @yield_receiver.fire
+      end
+    end
+  end
+
   describe "new" do
     it "should init with path if String sent" do
       Dump.new('hello').path.should == Pathname('hello')
@@ -52,7 +96,12 @@ describe Dump do
   describe "versions" do
     describe "list" do
       def stub_glob
-        Dir.stub!(:[]).and_return(%w(123 345 567).map{ |name| dump_path("#{name}.tgz")})
+        pathes = %w(123 345 567).map do |name|
+          path = dump_path("#{name}.tgz")
+          File.should_receive(:file?).with(path).at_least(1).and_return(true)
+          path
+        end
+        Dir.stub!(:[]).and_return(pathes)
       end
 
       it "should search for files in dump dir when asked for list" do
@@ -75,7 +124,12 @@ describe Dump do
       before do
         #             0        1  2    3      4      5        6    7    8      9  10   11   12     13 14 15   16
         dumps_tags = [''] + %w(a  a,d  a,d,o  a,d,s  a,d,s,o  a,o  a,s  a,s,o  d  d,o  d,s  d,s,o  o  s  s,o  z)
-        Dir.stub!(:[]).and_return(dumps_tags.enum_with_index.map{ |dump_tags, i| dump_path("196504140659#{10 + i}@#{dump_tags}.tgz")})
+        pathes = dumps_tags.enum_with_index.map do |dump_tags, i|
+          path = dump_path("196504140659#{10 + i}@#{dump_tags}.tgz")
+          File.should_receive(:file?).with(path).at_least(1).and_return(true)
+          path
+        end
+        Dir.stub!(:[]).and_return(pathes)
       end
 
       it "should return all dumps if no tags send" do

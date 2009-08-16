@@ -16,10 +16,12 @@ class DumpRake
     def open
       Pathname.new(path).dirname.mkpath
       Zlib::GzipWriter.open(path) do |gzip|
-        Archive::Tar::Minitar.open(gzip, 'w') do |stream|
-          @stream = stream
-          @config = {:tables => {}}
-          yield(self)
+        lock do
+          Archive::Tar::Minitar.open(gzip, 'w') do |stream|
+            @stream = stream
+            @config = {:tables => {}}
+            yield(self)
+          end
         end
       end
     end

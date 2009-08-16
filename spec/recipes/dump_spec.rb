@@ -10,7 +10,7 @@ describe "cap dump" do
   end
 
   def all_dictionary_variables
-    DumpRake::Env::DICTIONARY.each_with_object({}) do |(key, value), filled_env|
+    DumpRake::Env.dictionary.each_with_object({}) do |(key, value), filled_env|
       filled_env[key] = value.join(' ')
     end
   end
@@ -22,7 +22,7 @@ describe "cap dump" do
         @cap.find_and_execute_task("dump:local:versions")
       end
 
-      DumpRake::Env::DICTIONARY[:like].each do |name|
+      DumpRake::Env.dictionary[:like].each do |name|
         it "should pass version if it is set through environment variable #{name}" do
           @cap.dump.should_receive(:run_local).with("rake -s dump:versions LIKE=21376").and_return('')
           DumpRake::Env.with_env name => '21376' do
@@ -31,7 +31,7 @@ describe "cap dump" do
         end
       end
 
-      DumpRake::Env::DICTIONARY[:tags].each do |name|
+      DumpRake::Env.dictionary[:tags].each do |name|
         it "should pass tags through environment variable #{name}" do
           @cap.dump.should_receive(:run_local).with("rake -s dump:versions TAGS=21376").and_return('')
           DumpRake::Env.with_env name => '21376' do
@@ -44,6 +44,47 @@ describe "cap dump" do
         @cap.dump.stub!(:run_local).and_return("123123.tgz\n")
         grab_output{
           @cap.find_and_execute_task("dump:local:versions")
+        }[:stdout].should == "123123.tgz\n"
+      end
+    end
+
+    describe "cleanup" do
+      it "should call local rake task" do
+        @cap.dump.should_receive(:run_local).with("rake -s dump:cleanup").and_return('')
+        @cap.find_and_execute_task("dump:local:cleanup")
+      end
+
+      DumpRake::Env.dictionary[:like].each do |name|
+        it "should pass version if it is set through environment variable #{name}" do
+          @cap.dump.should_receive(:run_local).with("rake -s dump:cleanup LIKE=21376").and_return('')
+          DumpRake::Env.with_env name => '21376' do
+            @cap.find_and_execute_task("dump:local:cleanup")
+          end
+        end
+      end
+
+      DumpRake::Env.dictionary[:tags].each do |name|
+        it "should pass tags through environment variable #{name}" do
+          @cap.dump.should_receive(:run_local).with("rake -s dump:cleanup TAGS=21376").and_return('')
+          DumpRake::Env.with_env name => '21376' do
+            @cap.find_and_execute_task("dump:local:cleanup")
+          end
+        end
+      end
+
+      DumpRake::Env.dictionary[:leave].each do |name|
+        it "should pass tags through environment variable #{name}" do
+          @cap.dump.should_receive(:run_local).with("rake -s dump:cleanup LEAVE=21376").and_return('')
+          DumpRake::Env.with_env name => '21376' do
+            @cap.find_and_execute_task("dump:local:cleanup")
+          end
+        end
+      end
+
+      it "should print result of rake task" do
+        @cap.dump.stub!(:run_local).and_return("123123.tgz\n")
+        grab_output{
+          @cap.find_and_execute_task("dump:local:cleanup")
         }[:stdout].should == "123123.tgz\n"
       end
     end
@@ -72,7 +113,7 @@ describe "cap dump" do
         }
       end
 
-      DumpRake::Env::DICTIONARY[:desc].each do |name|
+      DumpRake::Env.dictionary[:desc].each do |name|
         it "should pass description if it is set through environment variable #{name}" do
           @cap.dump.should_receive(:run_local).with("rake -s dump:create 'DESC=local dump' TAGS=local").and_return('123.tgz')
           DumpRake::Env.with_env name => 'local dump' do
@@ -104,7 +145,7 @@ describe "cap dump" do
         @cap.find_and_execute_task("dump:local:restore")
       end
 
-      DumpRake::Env::DICTIONARY[:like].each do |name|
+      DumpRake::Env.dictionary[:like].each do |name|
         it "should pass version if it is set through environment variable #{name}" do
           @cap.dump.should_receive(:run_local).with("rake -s dump:restore LIKE=21376")
           DumpRake::Env.with_env name => '21376' do
@@ -113,7 +154,7 @@ describe "cap dump" do
         end
       end
 
-      DumpRake::Env::DICTIONARY[:tags].each do |name|
+      DumpRake::Env.dictionary[:tags].each do |name|
         it "should pass tags through environment variable #{name}" do
           @cap.dump.should_receive(:run_local).with("rake -s dump:restore TAGS=21376")
           DumpRake::Env.with_env name => '21376' do
@@ -129,7 +170,7 @@ describe "cap dump" do
         @cap.find_and_execute_task("dump:local:upload")
       end
 
-      DumpRake::Env::DICTIONARY[:like].each do |name|
+      DumpRake::Env.dictionary[:like].each do |name|
         it "should pass version if it is set through environment variable #{name}" do
           @cap.dump.should_receive(:run_local).with("rake -s dump:versions LIKE=21376").and_return('')
           DumpRake::Env.with_env name => '21376' do
@@ -138,7 +179,7 @@ describe "cap dump" do
         end
       end
 
-      DumpRake::Env::DICTIONARY[:tags].each do |name|
+      DumpRake::Env.dictionary[:tags].each do |name|
         it "should pass tags through environment variable #{name}" do
           @cap.dump.should_receive(:run_local).with("rake -s dump:versions TAGS=21376").and_return('')
           DumpRake::Env.with_env name => '21376' do
@@ -174,7 +215,7 @@ describe "cap dump" do
         @cap.find_and_execute_task("dump:remote:versions")
       end
 
-      DumpRake::Env::DICTIONARY[:like].each do |name|
+      DumpRake::Env.dictionary[:like].each do |name|
         it "should pass version if it is set through environment variable #{name}" do
           @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions LIKE=21376 PROGRESS_TTY=+ RAILS_ENV=production").and_return('')
           DumpRake::Env.with_env name => '21376' do
@@ -183,7 +224,7 @@ describe "cap dump" do
         end
       end
 
-      DumpRake::Env::DICTIONARY[:tags].each do |name|
+      DumpRake::Env.dictionary[:tags].each do |name|
         it "should pass tags through environment variable #{name}" do
           @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions PROGRESS_TTY=+ RAILS_ENV=production TAGS=21376").and_return('')
           DumpRake::Env.with_env name => '21376' do
@@ -203,6 +244,53 @@ describe "cap dump" do
         @cap.dump.should_receive(:fetch_rake).and_return('/custom/rake')
         @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; /custom/rake -s dump:versions PROGRESS_TTY=+ RAILS_ENV=production").and_return('')
         @cap.find_and_execute_task("dump:remote:versions")
+      end
+    end
+
+    describe "cleanup" do
+      it "should call remote rake task" do
+        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:cleanup PROGRESS_TTY=+ RAILS_ENV=production").and_return('')
+        @cap.find_and_execute_task("dump:remote:cleanup")
+      end
+
+      DumpRake::Env.dictionary[:like].each do |name|
+        it "should pass version if it is set through environment variable #{name}" do
+          @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:cleanup LIKE=21376 PROGRESS_TTY=+ RAILS_ENV=production").and_return('')
+          DumpRake::Env.with_env name => '21376' do
+            @cap.find_and_execute_task("dump:remote:cleanup")
+          end
+        end
+      end
+
+      DumpRake::Env.dictionary[:tags].each do |name|
+        it "should pass tags through environment variable #{name}" do
+          @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:cleanup PROGRESS_TTY=+ RAILS_ENV=production TAGS=21376").and_return('')
+          DumpRake::Env.with_env name => '21376' do
+            @cap.find_and_execute_task("dump:remote:cleanup")
+          end
+        end
+      end
+
+      DumpRake::Env.dictionary[:leave].each do |name|
+        it "should pass tags through environment variable #{name}" do
+          @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:cleanup LEAVE=21376 PROGRESS_TTY=+ RAILS_ENV=production").and_return('')
+          DumpRake::Env.with_env name => '21376' do
+            @cap.find_and_execute_task("dump:remote:cleanup")
+          end
+        end
+      end
+
+      it "should print result of rake task" do
+        @cap.dump.stub!(:run_remote).and_return("123123.tgz\n")
+        grab_output{
+          @cap.find_and_execute_task("dump:remote:cleanup")
+        }[:stdout].should == "123123.tgz\n"
+      end
+
+      it "should use custom rake binary" do
+        @cap.dump.should_receive(:fetch_rake).and_return('/custom/rake')
+        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; /custom/rake -s dump:cleanup PROGRESS_TTY=+ RAILS_ENV=production").and_return('')
+        @cap.find_and_execute_task("dump:remote:cleanup")
       end
     end
 
@@ -238,7 +326,7 @@ describe "cap dump" do
         }
       end
 
-      DumpRake::Env::DICTIONARY[:desc].each do |name|
+      DumpRake::Env.dictionary[:desc].each do |name|
         it "should pass description if it is set through environment variable #{name}" do
           @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:create 'DESC=remote dump' PROGRESS_TTY=+ RAILS_ENV=production TAGS=remote").and_return('123.tgz')
           DumpRake::Env.with_env name => 'remote dump' do
@@ -284,7 +372,7 @@ describe "cap dump" do
         @cap.find_and_execute_task("dump:remote:restore")
       end
 
-      DumpRake::Env::DICTIONARY[:like].each do |name|
+      DumpRake::Env.dictionary[:like].each do |name|
         it "should pass version if it is set through environment variable #{name}" do
           @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:restore LIKE=21376 PROGRESS_TTY=+ RAILS_ENV=production")
           DumpRake::Env.with_env name => '21376' do
@@ -293,7 +381,7 @@ describe "cap dump" do
         end
       end
 
-      DumpRake::Env::DICTIONARY[:tags].each do |name|
+      DumpRake::Env.dictionary[:tags].each do |name|
         it "should pass tags through environment variable #{name}" do
           @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:restore PROGRESS_TTY=+ RAILS_ENV=production TAGS=21376")
           DumpRake::Env.with_env name => '21376' do
@@ -315,7 +403,7 @@ describe "cap dump" do
         @cap.find_and_execute_task("dump:remote:download")
       end
 
-      DumpRake::Env::DICTIONARY[:like].each do |name|
+      DumpRake::Env.dictionary[:like].each do |name|
         it "should pass version if it is set through environment variable #{name}" do
           @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions LIKE=21376 PROGRESS_TTY=+ RAILS_ENV=production").and_return('')
           DumpRake::Env.with_env name => '21376' do
@@ -324,7 +412,7 @@ describe "cap dump" do
         end
       end
 
-      DumpRake::Env::DICTIONARY[:tags].each do |name|
+      DumpRake::Env.dictionary[:tags].each do |name|
         it "should pass tags through environment variable #{name}" do
           @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions PROGRESS_TTY=+ RAILS_ENV=production TAGS=21376").and_return('')
           DumpRake::Env.with_env name => '21376' do
@@ -426,8 +514,6 @@ describe "cap dump" do
           DumpRake::Env.with_env all_dictionary_variables do
             @cap.find_and_execute_task("dump:mirror:#{dir}")
           end
-
-
         end
       end
     end

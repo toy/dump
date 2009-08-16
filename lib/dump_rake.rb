@@ -46,4 +46,26 @@ class DumpRake
       versions
     end
   end
+
+  def self.cleanup(options = {})
+    to_delete = []
+
+    all_dumps = Dump.list(options.merge(:all => true))
+    to_delete.concat(all_dumps.select{ |dump| dump.ext != 'tgz' })
+
+    dumps = Dump.list(options)
+    leave = (options[:leave] || 5).to_i
+    to_delete.concat(dumps[0, dumps.length - leave]) if dumps.length > leave
+
+    to_delete.each do |dump|
+      dump.lock do
+        begin
+          dump.path.unlink
+          puts "Deleted #{dump.path}"
+        rescue => e
+          puts "Can not delete #{dump.path} — #{e}"
+        end
+      end
+    end
+  end
 end

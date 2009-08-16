@@ -172,7 +172,59 @@ describe DumpRake do
           DumpRake.restore(:like => '213')
         }
       end
+    end
+  end
 
+  describe "cleanup" do
+    it "should call ask for all files in dump dir and for dumps" do
+      DumpRake::Dump.should_receive(:list).with(:all => true).and_return([])
+      DumpRake::Dump.should_receive(:list).with({}).and_return([])
+      DumpRake.cleanup
+    end
+
+    it "should call Dump.list with options if called with version and tags" do
+      DumpRake::Dump.should_receive(:list).with(:like => '123', :tags => 'a,b,c', :all => true).and_return([])
+      DumpRake::Dump.should_receive(:list).with(:like => '123', :tags => 'a,b,c').and_return([])
+      DumpRake.cleanup(:like => '123', :tags => 'a,b,c')
+    end
+
+    {
+      {} => [0..4],
+      {:leave => '3'} => [0..6],
+      {:leave => '5'} => [0..4],
+      {:leave => '9'} => [0],
+      {:leave => '10'} => [],
+      {:leave => '15'} => [],
+      {:leave => 'none'} => [0..9],
+    }.each do |options, ids|
+      it "should call delete #{ids} dumps when called with #{options}" do
+        dumps = %w(a b c d e f g h i j).map do |s|
+          mock("dump_#{s}", :ext => 'tgz', :path => mock("dump_#{s}_path"))
+        end
+        tmp_dumps = %w(a b c).map do |s|
+          mock("tmp_dump_#{s}", :ext => 'tmp', :path => mock("tmp_dump_#{s}_path"))
+        end
+        all_dumps = tmp_dumps[0, 1] + dumps[0, 5] + tmp_dumps[1, 1] + dumps[5, 5] + tmp_dumps[2, 1]
+
+        (dumps.values_at(*ids) + [tmp_dumps[0], tmp_dumps[2]]).each do |dump|
+          dump.should_receive(:lock).and_yield
+          dump.path.should_receive(:unlink)
+        end
+        [tmp_dumps[1]].each do |dump|
+          dump.should_receive(:lock)
+          dump.path.should_not_receive(:unlink)
+        end
+        (dumps - dumps.values_at(*ids)).each do |dump|
+          dump.should_not_receive(:lock)
+          dump.path.should_not_receive(:unlink)
+        end
+
+        DumpRake::Dump.should_receive(:list).with(hash_including(:all => true)).and_return(all_dumps)
+        DumpRake::Dump.should_receive(:list).with(hash_not_including(:all => true)).and_return(dumps)
+        grab_output{
+          DumpRake.cleanup({:like => '123', :tags => 'a,b,c'}.merge(options))
+        }
+      end
     end
   end
 end

@@ -1,15 +1,19 @@
 class DumpRake
   module Env
-    DICTIONARY = {
+    @dictionary = {
       :like => %w(LIKE VER VERSION),
       :desc => %w(DESC DESCRIPTION),
       :tags => %w(TAGS TAG),
-    }
+      :leave => %w(LEAVE),
+    }.freeze
+    def self.dictionary
+      @dictionary
+    end
 
     def self.with_env(hash)
       old = {}
       hash.each do |key, value|
-        key = DICTIONARY[key].first if DICTIONARY[key]
+        key = dictionary[key].first if dictionary[key]
         old[key] = ENV[key]
         ENV[key] = value
       end
@@ -24,30 +28,36 @@ class DumpRake
 
     def self.with_clean_env(hash = {}, &block)
       empty_env = {}
-      DICTIONARY.keys.each{ |key| empty_env[key] = nil }
+      dictionary.keys.each{ |key| empty_env[key] = nil }
       with_env(empty_env.merge(hash), &block)
     end
 
     def self.[](key)
-      if DICTIONARY[key]
-        ENV.values_at(*DICTIONARY[key]).compact.first
+      if dictionary[key]
+        ENV.values_at(*dictionary[key]).compact.first
       else
         ENV[key]
       end
     end
 
-    def self.for_command(command, strings = false)
-      variables = case command
+    def self.variable_names_for_command(command)
+      case command
       when :create
         [:desc, :tags]
       when :restore, :versions
         [:like, :tags]
+      when :cleanup
+        [:like, :tags, :leave]
       else
         []
       end
+    end
+
+    def self.for_command(command, strings = false)
+      variables = variable_names_for_command(command)
       variables.inject({}) do |env, variable|
         value = self[variable]
-        env[strings ? DICTIONARY[variable].first : variable] = value if value
+        env[strings ? dictionary[variable].first : variable] = value if value
         env
       end
     end

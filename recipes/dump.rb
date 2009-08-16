@@ -94,6 +94,11 @@ namespace :dump do
       print run_local(dump_command(:versions))
     end
 
+    desc "Cleanup local dumps"
+    task :cleanup, :roles => :db, :only => {:primary => true} do
+      print run_local(dump_command(:cleanup))
+    end
+
     desc "Upload dump"
     task :upload, :roles => :db, :only => {:primary => true} do
       if file = last_line(run_local(dump_command(:versions)))
@@ -125,6 +130,11 @@ namespace :dump do
     desc "Versions of remote dumps"
     task :versions, :roles => :db, :only => {:primary => true} do
       print run_remote("cd #{current_path}; #{dump_command(:versions, :rake => fetch_rake, :RAILS_ENV => fetch_rails_env, :PROGRESS_TTY => '+')}")
+    end
+
+    desc "Cleanup of remote dumps"
+    task :cleanup, :roles => :db, :only => {:primary => true} do
+      print run_remote("cd #{current_path}; #{dump_command(:cleanup, :rake => fetch_rake, :RAILS_ENV => fetch_rails_env, :PROGRESS_TTY => '+')}")
     end
 
     desc "Download dump"

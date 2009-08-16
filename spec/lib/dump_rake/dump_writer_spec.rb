@@ -42,6 +42,7 @@ describe DumpWriter do
       Archive::Tar::Minitar::Output.should_receive(:open).with(@gzip).and_yield(@stream)
 
       @dump = DumpWriter.new('123.tgz')
+      @dump.should_receive(:lock).and_yield
       @dump.open do |dump|
         dump.should == @dump
         dump.stream.should == @stream

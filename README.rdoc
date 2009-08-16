@@ -45,6 +45,9 @@ Also you can set custom remote rake binary in your deploy.rb like:
   # restore dump
   rake dump:restore
 
+  # delete old and unfinished dumps (all non tgz files will be deleted if they are not locked)
+  rake dump:cleanup
+
 === Environment variables
 
 ==== While creating dumps:
@@ -81,6 +84,15 @@ skip dumps with tags mirror and archive:
 select dumps with tags photos or videos, with tag important and without mirror:
   rake dump TAGS='photos,videos,+important,-mirror'
 
+==== For cleanup:
+
+LIKE, VER, VERSION and TAG or TAGS — as for listing
+
+LEAVE — number of dumps to leave
+
+  rake dump:cleanup LEAVE=10
+  rake dump:cleanup LEAVE=none
+
 === cap tasks
 
 For all cap commands environment variables are same as for rake tasks
@@ -91,11 +103,13 @@ For all cap commands environment variables are same as for rake tasks
   cap dump:local:create
   cap dump:local:restore
   cap dump:local:versions
+  cap dump:local:cleanup
 
   cap dump:remote
   cap dump:remote:create
   cap dump:remote:restore
   cap dump:remote:versions
+  cap dump:remote:cleanup
 
 ==== Dump exchanging tasks
 
