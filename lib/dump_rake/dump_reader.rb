@@ -96,19 +96,28 @@ class DumpRake
 
     def read_assets
       unless config[:assets].blank?
-        DumpRake::Env.with_env('ASSETS' => config[:assets].join(':')) do
+        assets = config[:assets]
+        assets_count = assets.is_a?(Hash) ? assets.values.sum : nil
+        assets_pathes = assets.is_a?(Hash) ? assets.keys : assets
+
+        DumpRake::Env.with_env('ASSETS' => assets_pathes.join(':')) do
           Rake::Task['assets:delete'].invoke
         end
 
-        Progress.start('Assets') do
-          find_entry('assets.tar') do |entry|
-            def entry.rewind
+        Progress.start('Assets', assets_count || 1) do
+          find_entry('assets.tar') do |assets_tar|
+            def assets_tar.rewind
               # rewind will fail - it must go to center of gzip
               # also we don't need it - this is last step in dump restore
             end
-            Archive::Tar::Minitar.unpack(entry, RAILS_ROOT)
+            Archive::Tar::Minitar.open(assets_tar) do |inp|
+              inp.each do |entry|
+                inp.extract_entry(RAILS_ROOT, entry)
+                Progress.step if assets_count
+              end
+            end
           end
-          Progress.step
+          Progress.step unless assets_count
         end
       end
     end

@@ -228,7 +228,7 @@ describe DumpWriter do
         Dir.should_receive(:[]).with(*%w(images/* videos)).and_return(%w(images/a images/b videos))
 
         @dump.write_assets
-        @config[:assets].should == %w(images/a images/b videos)
+        @config[:assets].should == {'images/a' => 0, 'images/b' => 0, 'videos' => 0}
       end
 
       it "should use glob to find files" do

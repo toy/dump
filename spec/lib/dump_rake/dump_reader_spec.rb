@@ -328,20 +328,26 @@ describe DumpReader do
         @dump.read_assets
       end
 
-      it "should rewrite rewind method to empty method - to not raise exception and call Archive::Tar::Minitar.unpack" do
+      it "should rewrite rewind method to empty method - to not raise exception, open tar and extract each entry" do
         @assets = %w(images videos)
         @dump.stub!(:config).and_return({:assets => @assets})
         Dir.stub!(:glob).and_return([])
         FileUtils.stub!(:remove_entry_secure)
 
-        @entry = mock('entry')
-        @entry.stub!(:rewind).and_raise('hehe - we want to rewind to center of gzip')
-        @dump.stub!(:find_entry).and_yield(@entry)
+        @assets_tar = mock('assets_tar')
+        @assets_tar.stub!(:rewind).and_raise('hehe - we want to rewind to center of gzip')
+        @dump.stub!(:find_entry).and_yield(@assets_tar)
 
-        Archive::Tar::Minitar.should_receive(:unpack).and_return do |entry, path|
-          entry.rewind
-          path.should == RAILS_ROOT
+        @inp = mock('inp')
+        each_excpectation = @inp.should_receive(:each)
+        @entries = %w(a b c d).map do |s|
+          file = mock("file_#{s}")
+          each_excpectation.and_yield(file)
+          @inp.should_receive(:extract_entry).with(RAILS_ROOT, file)
+          file
         end
+        Archive::Tar::Minitar.should_receive(:open).with(@assets_tar).and_yield(@inp)
+
         @dump.read_assets
       end
     end

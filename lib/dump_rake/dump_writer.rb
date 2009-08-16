@@ -76,13 +76,14 @@ class DumpRake
     def write_assets
       assets = assets_to_dump
       unless assets.blank?
-        config[:assets] = []
-        create_file('assets.tar') do |f|
+        config[:assets] = {}
+        create_file('assets.tar') do |assets_tar|
           Dir.chdir(RAILS_ROOT) do
-            Archive::Tar::Minitar.open(f, 'w') do |outp|
-              Dir[*assets].each_with_progress('Assets') do |asset|
-                config[:assets] << asset
-                Dir[File.join(asset, '**', '*')].each_with_progress(asset) do |entry|
+            Archive::Tar::Minitar.open(assets_tar, 'w') do |outp|
+              Dir[*assets].uniq.each_with_progress('Assets') do |asset|
+                files = Dir[File.join(asset, '**', '*')]
+                config[:assets][asset] = files.length
+                files.each_with_progress(asset) do |entry|
                   begin
                     Archive::Tar::Minitar.pack_file(entry, outp)
                   rescue => e
