@@ -9,7 +9,7 @@ describe "rake assets" do
     ENV['ASSETS'] = nil
   end
 
-  it "should set ENV['ASSETS'] to pathes from config/assets" do
+  it "should set ENV['ASSETS'] to paths from config/assets" do
     data = <<-end_src
       public/images/a
       public/images/b
@@ -67,9 +67,9 @@ describe "rake assets" do
         ENV.stub!(:[]).with('ASSETS').and_return(@assets.join(':'))
         @assets.each do |asset|
           mask = File.join(RAILS_ROOT, asset, '*')
-          pathes = %w(file1 file2 dir).map{ |file| File.join(RAILS_ROOT, asset, file) }
-          Dir.should_receive(:[]).with(mask).and_return([pathes[0], pathes[1], pathes[2]])
-          pathes.each do |path|
+          paths = %w(file1 file2 dir).map{ |file| File.join(RAILS_ROOT, asset, file) }
+          Dir.should_receive(:[]).with(mask).and_return([paths[0], paths[1], paths[2]])
+          paths.each do |path|
             FileUtils.should_receive(:remove_entry_secure).with(path)
           end
         end
@@ -77,7 +77,7 @@ describe "rake assets" do
         @rake["assets:delete"].invoke
       end
 
-      it "should not glob risky pathes" do
+      it "should not glob risky paths" do
         @assets = %w(images / /private ../ ../.. ./../ dir/.. dir/../..)
         ENV.stub!(:[]).with('ASSETS').and_return(@assets.join(':'))
 

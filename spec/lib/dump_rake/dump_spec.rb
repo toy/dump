@@ -96,12 +96,12 @@ describe Dump do
   describe "versions" do
     describe "list" do
       def stub_glob
-        pathes = %w(123 345 567).map do |name|
+        paths = %w(123 345 567).map do |name|
           path = dump_path("#{name}.tgz")
           File.should_receive(:file?).with(path).at_least(1).and_return(true)
           path
         end
-        Dir.stub!(:[]).and_return(pathes)
+        Dir.stub!(:[]).and_return(paths)
       end
 
       it "should search for files in dump dir when asked for list" do
@@ -124,12 +124,12 @@ describe Dump do
       before do
         #             0        1  2    3      4      5        6    7    8      9  10   11   12     13 14 15   16
         dumps_tags = [''] + %w(a  a,d  a,d,o  a,d,s  a,d,s,o  a,o  a,s  a,s,o  d  d,o  d,s  d,s,o  o  s  s,o  z)
-        pathes = dumps_tags.enum_with_index.map do |dump_tags, i|
+        paths = dumps_tags.enum_with_index.map do |dump_tags, i|
           path = dump_path("196504140659#{10 + i}@#{dump_tags}.tgz")
           File.should_receive(:file?).with(path).at_least(1).and_return(true)
           path
         end
-        Dir.stub!(:[]).and_return(pathes)
+        Dir.stub!(:[]).and_return(paths)
       end
 
       it "should return all dumps if no tags send" do

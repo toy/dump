@@ -28,7 +28,11 @@ class DumpRake
       puts dump
       if options[:summary]
         begin
-          puts DumpReader.summary(dump.path)
+          if %w(full 2).include?((options[:summary] || '').downcase)
+            puts DumpReader.summary(dump.path, :schema => true)
+          else
+            puts DumpReader.summary(dump.path)
+          end
           puts
         rescue => e
           $stderr.puts "Error reading dump: #{e}"

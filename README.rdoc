@@ -6,7 +6,7 @@ Tasks to create and restore dumps of selected files and database.
 
   script/plugin install git://github.com/toy/dump.git
 
-Put pathes of dirs you want to dump in file config/assets.
+Put paths of dirs you want to dump in file config/assets.
 
 Example
 
@@ -60,7 +60,7 @@ TAG or TAGS — comma separated list of tags
 
   rake dump TAGS='photos,videos'
 
-ASSETS — colon separated list of pathes or globs to dump
+ASSETS — colon separated list of paths or globs to dump
 
   rake dump ASSETS='public/system:public/images/masks/*'
 
@@ -92,9 +92,10 @@ select dumps with tags photos or videos, with tag important and without mirror:
 
 LIKE, VER, VERSION and TAG or TAGS — as for restoring
 
-SUMMARY — output info about dump
+SUMMARY — output info about dump, 
 
   rake dump:versions SUMMARY=1
+  rake dump:versions SUMMARY=full # output schema too
 
 ==== For cleanup:
 

@@ -24,27 +24,50 @@ class DumpRake
       end
 
       def data(entries)
-        entries.sort.each do |entry|
-          @text << "    #{Array(entry).join(': ')}\n"
+        entries.each do |entry|
+          @text << "    #{entry}\n"
         end
+      end
+
+      # from ActionView::Helpers::TextHelper
+      def self.pluralize(count, singular)
+        "#{count} #{count == 1 ? singular : singular.pluralize}"
       end
     end
 
-    def self.summary(path)
+    def self.summary(path, options = {})
       new(path).open do |dump|
         dump.read_config
 
-        summary = Summary.new
+        sum = Summary.new
 
         tables = dump.config[:tables]
-        summary.header "Tables with row count"
-        summary.data tables
+        sum.header 'Tables'
+        sum.data tables.sort.map{ |(table, rows)|
+          "#{table}: #{Summary.pluralize(rows, 'row')}"
+        }
 
         assets = dump.config[:assets]
-        summary.header assets.is_a?(Hash) ? "Assets with file count" : "Assets"
-        summary.data assets
+        sum.header 'Assets'
+        sum.data assets.sort.map{ |entry|
+          if String === entry
+            entry
+          else
+            asset, paths = entry
+            if Hash === paths
+              "#{asset}: #{Summary.pluralize paths[:files], 'file'} (#{Summary.pluralize paths[:total], 'entry'} total)"
+            else
+              "#{asset}: #{Summary.pluralize paths, 'entry'}"
+            end
+          end
+        }
 
-        summary
+        if options[:schema]
+          sum.header 'Schema'
+          sum.data dump.schema.split("\n")
+        end
+
+        sum
       end
     end
 
@@ -95,6 +118,10 @@ class DumpRake
       end
     end
 
+    def schema
+      read_entry('schema.rb')
+    end
+
     def read_tables
       verify_connection
       config[:tables].each_with_progress('Tables') do |table, rows|
@@ -133,10 +160,14 @@ class DumpRake
     def read_assets
       unless config[:assets].blank?
         assets = config[:assets]
-        assets_count = assets.is_a?(Hash) ? assets.values.sum : nil
-        assets_pathes = assets.is_a?(Hash) ? assets.keys : assets
+        if Hash === assets
+          assets_count = assets.values.sum{ |value| Hash === value ? value[:total] : value }
+          assets_paths = assets.keys
+        else
+          assets_count, assets_paths = nil, assets
+        end
 
-        DumpRake::Env.with_env('ASSETS' => assets_pathes.join(':')) do
+        DumpRake::Env.with_env('ASSETS' => assets_paths.join(':')) do
           Rake::Task['assets:delete'].invoke
         end
 

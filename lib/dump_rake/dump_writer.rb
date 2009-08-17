@@ -77,23 +77,29 @@ class DumpRake
       assets = assets_to_dump
       unless assets.blank?
         config[:assets] = {}
-        create_file('assets.tar') do |assets_tar|
-          Dir.chdir(RAILS_ROOT) do
-            Archive::Tar::Minitar.open(assets_tar, 'w') do |outp|
-              Dir[*assets].uniq.each_with_progress('Assets') do |asset|
-                files = Dir[File.join(asset, '**', '*')]
-                config[:assets][asset] = files.length
-                files.each_with_progress(asset) do |entry|
-                  begin
-                    Archive::Tar::Minitar.pack_file(entry, outp)
-                  rescue => e
-                    $stderr.puts "Skipped asset due to error #{e}"
+        Dir.chdir(RAILS_ROOT) do
+          assets = Dir[*assets].uniq
+          Progress.start('Assets', assets.length * 100) do
+            create_file('assets.tar') do |assets_tar|
+              Archive::Tar::Minitar.open(assets_tar, 'w') do |outp|
+                assets.each do |asset|
+                  paths = Dir[File.join(asset, '**', '*')]
+                  files = paths.select{ |path| File.file?(path) }
+                  config[:assets][asset] = {:total => paths.length, :files => files.length}
+                  paths.each_with_progress(asset) do |entry|
+                    begin
+                      Archive::Tar::Minitar.pack_file(entry, outp)
+                    rescue => e
+                      $stderr.puts "Skipped asset due to error #{e}"
+                    end
                   end
+                  Progress.step 99
                 end
               end
+              Progress.start("Putting assets into dump", 1){}
             end
+            Progress.step assets.length
           end
-          Progress.start("Putting assets into dump", 1){}
         end
       end
     end

@@ -43,7 +43,21 @@ describe DumpRake do
       DumpRake::Dump.should_receive(:list).and_return(dumps)
       grab_output{
         $stderr.should_not_receive(:puts)
-        DumpRake.versions(:summary => true)
+        DumpRake.versions(:summary => 'true')
+      }
+    end
+
+    it "should show summary with scmema if asked for" do
+      dumps = %w(123.tgz 456.tgz).map do |s|
+        dump = mock("dump_#{s}", :path => mock("dump_#{s}_path"))
+        DumpRake::DumpReader.should_receive(:summary).with(dump.path, :schema => true)
+        dump
+      end
+
+      DumpRake::Dump.should_receive(:list).and_return(dumps)
+      grab_output{
+        $stderr.should_not_receive(:puts)
+        DumpRake.versions(:summary => 'full')
       }
     end
 
@@ -60,7 +74,7 @@ describe DumpRake do
         $stderr.should_receive(:puts) do |s|
           s['terrible error'].should_not be_nil
         end
-        DumpRake.versions(:summary => true)
+        DumpRake.versions(:summary => 'true')
       }
     end
   end
