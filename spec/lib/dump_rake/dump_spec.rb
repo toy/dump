@@ -285,4 +285,10 @@ describe Dump do
       Dump.new('').send(:get_filter_tags, nil).should == {:simple => [], :mandatory => [], :forbidden => []}
     end
   end
+
+  describe "schema_tables" do
+    it "should return schema_tables" do
+      Dump.new('').send(:schema_tables).should == %w(schema_info schema_migrations)
+    end
+  end
 end

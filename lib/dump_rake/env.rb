@@ -7,6 +7,7 @@ class DumpRake
       :leave => %w(LEAVE),
       :summary => %w(SUMMARY),
       :assets => %w(ASSETS),
+      :tables => %w(TABLES),
     }.freeze
     def self.dictionary
       @dictionary
@@ -45,7 +46,7 @@ class DumpRake
     def self.variable_names_for_command(command)
       case command
       when :create
-        [:desc, :tags, :assets]
+        [:desc, :tags, :assets, :tables]
       when :restore
         [:like, :tags]
       when :versions

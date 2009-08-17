@@ -102,6 +102,7 @@ describe "cap dump" do
         :desc => "rake -s dump:create 'DESC=some data' TAGS=local",
         :tags => "rake -s dump:create 'TAGS=local,some data'",
         :assets => "rake -s dump:create 'ASSETS=some data' TAGS=local",
+        :tables => "rake -s dump:create 'TABLES=some data' TAGS=local",
       }, :return_value => '123.tgz')
 
       it "should print result of rake task" do
@@ -252,6 +253,7 @@ describe "cap dump" do
         :desc => "rake -s dump:create 'DESC=some data' PROGRESS_TTY=+ RAILS_ENV=production TAGS=remote",
         :tags => "rake -s dump:create PROGRESS_TTY=+ RAILS_ENV=production 'TAGS=remote,some data'",
         :assets => "rake -s dump:create 'ASSETS=some data' PROGRESS_TTY=+ RAILS_ENV=production TAGS=remote",
+        :tables => "rake -s dump:create PROGRESS_TTY=+ RAILS_ENV=production 'TABLES=some data' TAGS=remote",
       }, :return_value => '123.tgz')
 
       it "should print result of rake task" do

@@ -417,7 +417,7 @@ describe DumpReader do
           @dump.stub!(:find_entry)
 
           def @task.invoke
-            ENV['ASSETS'].should == 'images:videos'
+            DumpRake::Env[:assets].should == 'images:videos'
           end
 
           @dump.read_assets
@@ -460,12 +460,6 @@ describe DumpReader do
 
           @dump.read_assets
         end
-      end
-    end
-
-    describe "schema_tables" do
-      it "should return schema_tables" do
-        DumpReader.new('').send(:schema_tables).should == %w(schema_info schema_migrations)
       end
     end
 

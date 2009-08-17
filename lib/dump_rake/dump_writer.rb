@@ -111,7 +111,19 @@ class DumpRake
     end
 
     def tables_to_dump
-      ActiveRecord::Base.connection.tables - %w(sessions)
+      avaliable_tables = ActiveRecord::Base.connection.tables
+      if DumpRake::Env[:tables]
+        env_tables = DumpRake::Env[:tables].dup
+        prefix = env_tables.slice!(/^\-/)
+        candidates = env_tables.split(',').map(&:strip).map(&:downcase).uniq.reject(&:blank?)
+        if prefix
+          avaliable_tables - (candidates - schema_tables)
+        else
+          avaliable_tables & (candidates | schema_tables)
+        end
+      else
+        avaliable_tables - %w(sessions)
+      end
     end
 
     def table_rows(table)
@@ -121,7 +133,7 @@ class DumpRake
     def assets_to_dump
       begin
         Rake::Task['assets'].invoke
-        ENV['ASSETS'].split(':')
+        DumpRake::Env[:assets].split(/[:,]/)
       rescue
         []
       end

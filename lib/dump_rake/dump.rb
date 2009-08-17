@@ -111,6 +111,10 @@ class DumpRake
 
   private
 
+    def schema_tables
+      %w(schema_info schema_migrations)
+    end
+
     def path_with_ext(ext)
       Pathname(path.to_s.sub(/#{parts[:ext]}$/, ext))
     end
@@ -135,7 +139,7 @@ class DumpRake
       clean_str(tag).downcase.sub(/^\-+/, '')[0, 20].strip
     end
     def self.clean_tags(tags)
-      tags.to_s.split(',').map{ |tag| clean_tag(tag) }.uniq.reject{ |tag| tag.blank? }.sort
+      tags.to_s.split(',').map{ |tag| clean_tag(tag) }.uniq.reject(&:blank?).sort
     end
     def self.get_filter_tags(tags)
       groups = Hash.new{ |hash, key| hash[key] = SortedSet.new }

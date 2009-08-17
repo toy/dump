@@ -191,10 +191,6 @@ class DumpRake
 
   protected
 
-    def schema_tables
-      %w(schema_info schema_migrations)
-    end
-
     def clear_table(table_sql)
       ActiveRecord::Base.connection.delete("DELETE FROM #{table_sql}", 'Clearing table')
     end
