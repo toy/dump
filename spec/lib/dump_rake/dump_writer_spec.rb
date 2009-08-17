@@ -40,6 +40,7 @@ describe DumpWriter do
       @stream = mock('stream')
       Zlib::GzipWriter.should_receive(:open).with(Pathname("123.tgz")).and_yield(@gzip)
       Archive::Tar::Minitar::Output.should_receive(:open).with(@gzip).and_yield(@stream)
+      @gzip.should_receive(:mtime=).with(Time.utc(2000))
 
       @dump = DumpWriter.new('123.tgz')
       @dump.should_receive(:lock).and_yield

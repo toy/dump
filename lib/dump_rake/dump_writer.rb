@@ -16,6 +16,7 @@ class DumpRake
     def open
       Pathname.new(path).dirname.mkpath
       Zlib::GzipWriter.open(path) do |gzip|
+        gzip.mtime = Time.utc(2000)
         lock do
           Archive::Tar::Minitar.open(gzip, 'w') do |stream|
             @stream = stream
@@ -27,7 +28,7 @@ class DumpRake
     end
 
     def create_file(name)
-      Tempfile.open('dumper') do |temp|
+      Tempfile.open('dump') do |temp|
         yield(temp)
         temp.open
         stream.tar.add_file_simple(name, :mode => 0100444, :size => temp.length) do |f|
