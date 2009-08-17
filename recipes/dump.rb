@@ -159,7 +159,7 @@ namespace :dump do
         remote.create
       end
       if auto_backup.present?
-        file = with_additional_tags('mirror', 'mirror-up') do
+        file = with_additional_tags('mirror') do
           local.create
         end
         if file.present?
@@ -177,7 +177,7 @@ namespace :dump do
         local.create
       end
       if auto_backup.present?
-        file = with_additional_tags('mirror', 'mirror-down') do
+        file = with_additional_tags('mirror') do
           remote.create
         end
         if file.present?

@@ -384,13 +384,13 @@ describe "cap dump" do
 
         it "should call local:create if auto-backup succeedes with tags mirror and mirror-#{dir}" do
           @cap.dump.namespaces[dst].stub!(:create).and_return('123.tgz')
-          @cap.dump.namespaces[src].should_receive(:create){ DumpRake::Env[:tags].should == "mirror,mirror-#{dir}"; '' }
+          @cap.dump.namespaces[src].should_receive(:create){ DumpRake::Env[:tags].should == "mirror"; '' }
           @cap.find_and_execute_task("dump:mirror:#{dir}")
         end
 
         it "should call local:create if auto-backup succeedes with additional tags mirror and mirror-#{dir}" do
           @cap.dump.namespaces[dst].stub!(:create).and_return('123.tgz')
-          @cap.dump.namespaces[src].should_receive(:create){ DumpRake::Env[:tags].should == "mirror,mirror-#{dir},photos"; '' }
+          @cap.dump.namespaces[src].should_receive(:create){ DumpRake::Env[:tags].should == "mirror,photos"; '' }
           DumpRake::Env.with_env :tags => 'photos' do
             @cap.find_and_execute_task("dump:mirror:#{dir}")
           end
