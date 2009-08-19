@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{progress}
-  s.version = "0.0.9.3"
+  s.version = "0.1.0.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 1.2") if s.respond_to? :required_rubygems_version=
   s.authors = ["toy"]
-  s.date = %q{2009-08-06}
+  s.date = %q{2009-08-19}
   s.description = %q{A library to show progress of long running tasks.}
   s.email = %q{}
   s.extra_rdoc_files = ["CHANGELOG", "lib/progress/enumerable.rb", "lib/progress/integer.rb", "lib/progress/with_progress.rb", "lib/progress.rb", "README.rdoc", "tasks/rspec.rake"]

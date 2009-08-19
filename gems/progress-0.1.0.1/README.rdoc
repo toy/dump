@@ -42,9 +42,18 @@ Class to show progress during console script run
     end
   end
 
+  symbols = []
+  Progress.start('Input 100 symbols', 100) do
+    while symbols.length < 100
+      input = gets.scan(/\S/)
+      symbols += input
+      Progress.step input.length
+    end
+  end
+
 == REQUIREMENTS:
 
-* ruby
+* ruby )))
 
 == INSTALL:
 
