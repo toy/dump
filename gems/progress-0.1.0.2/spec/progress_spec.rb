@@ -171,6 +171,20 @@ describe Progress do
     end.should == 'qwerty'
   end
 
+  it "should not raise errors on extra Progress.stop" do
+    proc{
+      10.times_with_progress('10') do
+        Progress.start 'simple' do
+          Progress.start 'procedural'
+          Progress.stop
+          Progress.stop
+        end
+        Progress.stop
+      end
+      Progress.stop
+    }.should_not raise_error
+  end
+
   it "should pipe result from nested block" do
     [1, 2, 3].with_progress('a').map do |a|
       [1, 2, 3].with_progress('b').map do |b|

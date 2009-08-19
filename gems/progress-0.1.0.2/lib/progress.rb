@@ -63,19 +63,25 @@ class Progress
     end
 
     def step(steps = 1)
-      levels.last.current += Float(steps)
-      print_message
+      if levels.last
+        levels.last.current += Float(steps)
+        print_message
+      end
     end
 
     def set(value)
-      levels.last.current = Float(value)
-      print_message
+      if levels.last
+        levels.last.current = Float(value)
+        print_message
+      end
     end
 
     def stop
-      print_message if levels.last.step_if_blank
-      levels.pop
-      io.puts if levels.empty?
+      if levels.last
+        print_message if levels.last.step_if_blank
+        levels.pop
+        io.puts if levels.empty?
+      end
     end
 
     attr_writer :io, :lines, :highlight # :nodoc:
