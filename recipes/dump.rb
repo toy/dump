@@ -25,7 +25,12 @@ namespace :dump do
 
   def transfer_with_progress(direction, from, to, options = {})
     transfer(direction, from, to, options) do |channel, path, transfered, total|
-      $stderr << "\rTransfering: %5.1f%%" % (transfered * 100.0 / total)
+      progress = if transfered < total
+        "\e[1m%5.1f%%\e[0m" % (transfered * 100.0 / total)
+      else
+        "100%"
+      end
+      $stderr << "\rTransfering: #{progress}"
     end
   end
 
