@@ -210,5 +210,5 @@ end
 
 after 'deploy:update_code' do
   from, to = %W[#{shared_path}/dump #{release_path}/dump]
-  run "mkdir -p #{from}; rm -r #{to}; ln -s #{from} #{to}"
+  run "mkdir -p #{from}; rm -rf #{to}; ln -s #{from} #{to}"
 end
