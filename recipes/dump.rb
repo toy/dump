@@ -1,6 +1,7 @@
 $: << File.join(File.dirname(__FILE__), '..', 'lib')
 require 'dump_rake/env'
 require 'shell_escape'
+require 'continious_timeout'
 require 'activesupport'
 
 namespace :dump do
@@ -23,14 +24,17 @@ namespace :dump do
     fetch(:rails_env, "production")
   end
 
-  def transfer_with_progress(direction, from, to, options = {})
-    transfer(direction, from, to, options) do |channel, path, transfered, total|
-      progress = if transfered < total
-        "\e[1m%5.1f%%\e[0m" % (transfered * 100.0 / total)
-      else
-        "100%"
+  def do_transfer(direction, from, to)
+    ContiniousTimeout.timeout 10 do |thread|
+      transfer(direction, from, to, :via => :scp) do |channel, path, transfered, total|
+        thread.defer
+        progress = if transfered < total
+          "\e[1m%5.1f%%\e[0m" % (transfered * 100.0 / total)
+        else
+          "100%"
+        end
+        $stderr << "\rTransfering: #{progress}"
       end
-      $stderr << "\rTransfering: #{progress}"
     end
   end
 
@@ -114,7 +118,7 @@ namespace :dump do
         last_line(run_local(dump_command(:versions)))
       end
       if file
-        transfer_with_progress :up, "dump/#{file}", "#{current_path}/dump/#{file}", :via => :scp
+        do_transfer :up, "dump/#{file}", "#{current_path}/dump/#{file}"
       end
     end
   end
@@ -156,7 +160,7 @@ namespace :dump do
       end
       if file
         FileUtils.mkpath('dump')
-        transfer_with_progress :down, "#{current_path}/dump/#{file}", "dump/#{file}", :via => :scp
+        do_transfer :down, "#{current_path}/dump/#{file}", "dump/#{file}"
       end
     end
   end
