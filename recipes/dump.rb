@@ -74,6 +74,10 @@ namespace :dump do
     fetch(:rake, nil)
   end
 
+  def auto_backup?
+    !%w(0 n f).include?((DumpRake::Env[:backup] || '').downcase)
+  end
+
   namespace :local do
     desc "Shorthand for dump:local:create"
     task :default, :roles => :db, :only => {:primary => true} do
@@ -160,10 +164,12 @@ namespace :dump do
   namespace :mirror do
     desc "Creates local dump, uploads and restores on remote"
     task :up, :roles => :db, :only => {:primary => true} do
-      auto_backup = with_additional_tags('auto-backup') do
-        remote.create
+      auto_backup = if auto_backup?
+        with_additional_tags('auto-backup') do
+          remote.create
+        end
       end
-      if auto_backup.present?
+      if !auto_backup? || auto_backup.present?
         file = with_additional_tags('mirror') do
           local.create
         end
@@ -178,10 +184,12 @@ namespace :dump do
 
     desc "Creates remote dump, downloads and restores on local"
     task :down, :roles => :db, :only => {:primary => true} do
-      auto_backup = with_additional_tags('auto-backup') do
-        local.create
+      auto_backup = if auto_backup?
+        with_additional_tags('auto-backup') do
+          local.create
+        end
       end
-      if auto_backup.present?
+      if !auto_backup? || auto_backup.present?
         file = with_additional_tags('mirror') do
           remote.create
         end

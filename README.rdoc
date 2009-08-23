@@ -155,6 +155,11 @@ mirror local to remote (create local dump, upload it to remote and restore it th
 mirror remote to local (create remote dump, download it from remote and restore on local):
   cap dump:mirror:down
 
+If you are sure that there is no need for autobackup — pass <tt>BACKUP</tt>, <tt>AUTOBACKUP</tt> or <tt>AUTO_BACKUP</tt> with <tt>0</tt>, or something starting with <tt>n</tt> or <tt>f</tt>
+  cap dump:mirror:down BACKUP=0
+  cap dump:mirror:down AUTOBACKUP=no
+  cap dump:mirror:down AUTO_BACKUP=false
+
 ----
 
 backup remote on local (create remote dump and download it):

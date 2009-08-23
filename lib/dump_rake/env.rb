@@ -8,6 +8,7 @@ class DumpRake
       :summary => %w(SUMMARY),
       :assets => %w(ASSETS),
       :tables => %w(TABLES),
+      :backup => %w(BACKUP AUTOBACKUP AUTO_BACKUP),
     }.freeze
     def self.dictionary
       @dictionary
