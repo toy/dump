@@ -12,7 +12,7 @@ Spec::Runner.configure do |config|
 end
 
 PLUGIN_SPEC_DIR = File.expand_path(File.dirname(__FILE__)) unless defined? PLUGIN_SPEC_DIR
-ActiveRecord::Base.logger = Logger.new(PLUGIN_SPEC_DIR + "/debug.log")
+ActiveRecord::Base.logger = Logger.new(File.join(RAILS_ROOT, 'log', 'dump-plugin-debug.log'))
 
 DUMMY_SCHEMA_PATH = File.join(PLUGIN_SPEC_DIR, "db", "schema.rb") unless defined? DUMMY_SCHEMA_PATH
 
