@@ -44,6 +44,7 @@ module ShellEscape
   # The result string is always single shell word, even if
   # the argument is "".
   def word(word)
+    word = word.to_s
     if word.empty?
       "''"
     elsif %r{\A[0-9A-Za-z+,./:=@_-]+\z} =~ word
