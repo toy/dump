@@ -8,6 +8,7 @@ class Progress
 
   module InstanceMethods # :nodoc:
     attr_accessor :title, :current, :total
+    attr_reader :current_step
     def initialize(title, total)
       total = Float(total)
       @title, @current, @total = title, 0.0, total == 0.0 ? 1.0 : total
@@ -18,7 +19,16 @@ class Progress
     end
 
     def to_f(inner)
-      (current + (inner < 1.0 ? inner : 1.0)) / total
+      inner = [inner, 1.0].min
+      inner *= current_step if current_step
+      (current + inner) / total
+    end
+
+    def step(steps)
+      @current_step = steps
+      yield
+    ensure
+      @current_step = nil
     end
   end
   include InstanceMethods
@@ -56,16 +66,25 @@ class Progress
       levels << new(title, total)
       print_message
       if block_given?
-        result = yield
-        stop
-        result
+        begin
+          yield
+        ensure
+          stop
+        end
       end
     end
 
     def step(steps = 1)
       if levels.last
+        if block_given?
+          levels.last.step(steps) do
+            yield
+          end
+        end
         levels.last.current += Float(steps)
         print_message
+      elsif block_given?
+        yield
       end
     end
 
@@ -115,18 +134,22 @@ class Progress
       inner = 0
       levels.reverse.each do |l|
         current = l.to_f(inner)
-        messages << "#{l.title}: #{(current == 0 ? '......' : '%5.1f%%' % (current * 100.0))[0, 6]}"
+        value = current == 0 ? '......' : '%5.1f%%' % (current * 100.0)
+        messages << "#{l.title}: #{!highlight? || value == '100.0%' ? value : "\e[1m#{value}\e[0m"}"
         inner = current
       end
       message = messages.reverse * ' > '
 
       unless lines?
         previous_length = @previous_length || 0
-        @previous_length = message.length
-        message = message.ljust(previous_length, ' ') + "\r"
+        message_cl = if highlight?
+          message.gsub(/\033\[(0|1)m/, '')
+        else
+          message
+        end
+        @previous_length = message_cl.length
+        message = "#{message}#{' ' * [previous_length - message_cl.length, 0].max}\r"
       end
-
-      message.gsub!(/\d+\.\d+/){ |s| s == '100.0' ? s : "\e[1m#{s}\e[0m" } if highlight?
 
       lines? ? io.puts(message) : io.print(message)
     end
@@ -137,3 +160,11 @@ require 'progress/with_progress'
 
 require 'progress/enumerable'
 require 'progress/integer'
+
+# like Pathname
+module Kernel
+  def Progress(title, total = 1, &block)
+    Progress.start(title, total, &block)
+  end
+  private :Progress
+end

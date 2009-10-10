@@ -2,15 +2,15 @@
 
 Gem::Specification.new do |s|
   s.name = %q{progress}
-  s.version = "0.1.0.2"
+  s.version = "0.1.1.3"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 1.2") if s.respond_to? :required_rubygems_version=
   s.authors = ["toy"]
-  s.date = %q{2009-08-19}
+  s.date = %q{2009-09-28}
   s.description = %q{A library to show progress of long running tasks.}
   s.email = %q{}
-  s.extra_rdoc_files = ["CHANGELOG", "lib/progress/enumerable.rb", "lib/progress/integer.rb", "lib/progress/with_progress.rb", "lib/progress.rb", "README.rdoc", "tasks/rspec.rake"]
-  s.files = ["CHANGELOG", "lib/progress/enumerable.rb", "lib/progress/integer.rb", "lib/progress/with_progress.rb", "lib/progress.rb", "Manifest", "Rakefile", "README.rdoc", "spec/progress_spec.rb", "spec/spec.opts", "spec/spec_helper.rb", "tasks/rspec.rake", "VERSION.yml", "progress.gemspec"]
+  s.extra_rdoc_files = ["README.rdoc", "lib/progress.rb", "lib/progress/enumerable.rb", "lib/progress/integer.rb", "lib/progress/with_progress.rb"]
+  s.files = ["Manifest", "README.rdoc", "Rakefile", "VERSION.yml", "lib/progress.rb", "lib/progress/enumerable.rb", "lib/progress/integer.rb", "lib/progress/with_progress.rb", "spec/progress_spec.rb", "spec/spec_helper.rb", "progress.gemspec"]
   s.homepage = %q{}
   s.rdoc_options = ["--line-numbers", "--inline-source", "--title", "Progress", "--main", "README.rdoc"]
   s.require_paths = ["lib"]
