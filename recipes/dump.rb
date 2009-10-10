@@ -119,7 +119,7 @@ namespace :dump do
   end
 
   def auto_backup?
-    !%w(0 n f).include?((DumpRake::Env[:backup] || '').downcase)
+    DumpRake::Env[:backup].nil? || %w(1 y t).include?((DumpRake::Env[:backup] || '').downcase.strip[0, 1])
   end
 
   namespace :local do
