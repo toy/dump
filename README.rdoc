@@ -20,7 +20,7 @@ When using cap tasks — be sure to link dump folder to persistent place on depl
 This plugin requires gems (but to reduce problems on shared hostings, unpacked versions of archive-tar-minitar-0.5.2 and progress-0.0.9.3 are used if they are not present):
 
   archive/tar/minitar
-  progress (version 0.0.6 or later)
+  progress (version 0.1.1 or later)
 
 To install:
 
