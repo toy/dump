@@ -76,7 +76,7 @@ class DumpRake
 
     def write_assets
       assets = assets_to_dump
-      unless assets.blank?
+      if assets.present?
         config[:assets] = {}
         Dir.chdir(RAILS_ROOT) do
           assets = Dir[*assets].uniq
