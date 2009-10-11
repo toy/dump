@@ -1,5 +1,5 @@
 task :assets do
-  ENV['ASSETS'] ||= File.readlines(File.join(RAILS_ROOT, 'config', 'assets')).map(&:strip).reject{ |path| path[0,1] == '#' }.join(':')
+  ENV['ASSETS'] ||= File.readlines(File.join(RAILS_ROOT, 'config', 'assets')).map(&:strip).grep(/^[^#]/).join(':')
 end
 
 namespace :assets do
