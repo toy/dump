@@ -172,19 +172,32 @@ class DumpRake
         end
 
         Progress.start('Assets', assets_count || 1) do
-          find_entry('assets.tar') do |assets_tar|
-            def assets_tar.rewind
-              # rewind will fail - it must go to center of gzip
-              # also we don't need it - this is last step in dump restore
+          catch :assets do
+            # old style — in separate tar
+            find_entry('assets.tar') do |assets_tar|
+              def assets_tar.rewind
+                # rewind will fail - it must go to center of gzip
+                # also we don't need it - this is last step in dump restore
+              end
+              Archive::Tar::Minitar.open(assets_tar) do |inp|
+                inp.each do |entry|
+                  inp.extract_entry(RAILS_ROOT, entry)
+                  Progress.step if assets_count
+                end
+              end
+              throw :assets
             end
-            Archive::Tar::Minitar.open(assets_tar) do |inp|
-              inp.each do |entry|
-                inp.extract_entry(RAILS_ROOT, entry)
-                Progress.step if assets_count
+
+            # new style — in same tar
+            assets_root_link do |tmpdir, prefix|
+              stream.each do |entry|
+                if entry.full_name.starts_with?("#{prefix}/")
+                  stream.extract_entry(tmpdir, entry)
+                  Progress.step if assets_count
+                end
               end
             end
           end
-          Progress.step unless assets_count
         end
       end
     end

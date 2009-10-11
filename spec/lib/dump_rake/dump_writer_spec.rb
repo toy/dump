@@ -180,22 +180,12 @@ describe DumpWriter do
     end
 
     describe "write_assets" do
+      before do
+        @dump.stub!(:assets_root_link).and_yield('/tmp', 'assets')
+      end
+
       it "should call assets_to_dump" do
         @dump.should_receive(:assets_to_dump).and_return([])
-        @dump.write_assets
-      end
-
-      it "should not create_file if assets are empty" do
-        @dump.stub!(:assets_to_dump).and_return([])
-
-        @dump.should_not_receive(:create_file)
-        @dump.write_assets
-      end
-
-      it "should create_file assets.tar if assets are not empty" do
-        @dump.stub!(:assets_to_dump).and_return(%w(images videos))
-
-        @dump.should_receive(:create_file).with('assets.tar')
         @dump.write_assets
       end
 
@@ -205,16 +195,6 @@ describe DumpWriter do
         @dump.stub!(:create_file).and_yield(@file)
 
         Dir.should_receive(:chdir).with(RAILS_ROOT)
-        @dump.write_assets
-      end
-
-      it "should open assets.tar with tar writer" do
-        @file = mock('file')
-        @dump.stub!(:assets_to_dump).and_return(%w(images videos))
-        @dump.stub!(:create_file).and_yield(@file)
-        Dir.stub!(:chdir).and_yield
-
-        Archive::Tar::Minitar::Output.should_receive(:open).with(@file)
         @dump.write_assets
       end
 
@@ -249,6 +229,24 @@ describe DumpWriter do
         @dump.write_assets
       end
 
+      it "should pack each file from assets_root_link" do
+        @file = mock('file')
+        @dump.stub!(:assets_to_dump).and_return(%w(images/* videos))
+        @dump.stub!(:create_file).and_yield(@file)
+        Dir.stub!(:chdir).and_yield
+        @tar = mock('tar_writer')
+        Archive::Tar::Minitar::Output.stub!(:open).and_yield(@tar)
+
+        Dir.should_receive(:[]).with(*%w(images/* videos)).and_return(%w(images/a images/b videos))
+        Dir.should_receive(:[]).with('images/a/**/*').and_return([])
+        Dir.should_receive(:[]).with('images/b/**/*').and_return([])
+        Dir.should_receive(:[]).with('videos/**/*').and_return([])
+
+        @dump.should_receive(:assets_root_link).exactly(3).times
+
+        @dump.write_assets
+      end
+
       it "should pack each file" do
         @file = mock('file')
         @dump.stub!(:assets_to_dump).and_return(%w(images/* videos))
@@ -262,12 +260,9 @@ describe DumpWriter do
         Dir.should_receive(:[]).with('images/b/**/*').and_return(%w(c.jpg d.jpg))
         Dir.should_receive(:[]).with('videos/**/*').and_return(%w(a.mov b.mov))
 
-        Archive::Tar::Minitar.should_receive(:pack_file).with('a.jpg', @tar)
-        Archive::Tar::Minitar.should_receive(:pack_file).with('b.jpg', @tar)
-        Archive::Tar::Minitar.should_receive(:pack_file).with('c.jpg', @tar)
-        Archive::Tar::Minitar.should_receive(:pack_file).with('d.jpg', @tar)
-        Archive::Tar::Minitar.should_receive(:pack_file).with('a.mov', @tar)
-        Archive::Tar::Minitar.should_receive(:pack_file).with('b.mov', @tar)
+        %w(a.jpg b.jpg c.jpg d.jpg a.mov b.mov).each do |file_name|
+          Archive::Tar::Minitar.should_receive(:pack_file).with("assets/#{file_name}", @stream)
+        end
 
         @dump.write_assets
       end
@@ -283,8 +278,8 @@ describe DumpWriter do
         Dir.should_receive(:[]).with(*%w(videos)).and_return(%w(videos))
         Dir.should_receive(:[]).with('videos/**/*').and_return(%w(a.mov b.mov))
 
-        Archive::Tar::Minitar.should_receive(:pack_file).with('a.mov', @tar).and_raise('file not found')
-        Archive::Tar::Minitar.should_receive(:pack_file).with('b.mov', @tar)
+        Archive::Tar::Minitar.should_receive(:pack_file).with('assets/a.mov', @stream).and_raise('file not found')
+        Archive::Tar::Minitar.should_receive(:pack_file).with('assets/b.mov', @stream)
 
         grab_output {
           @dump.write_assets

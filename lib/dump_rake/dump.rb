@@ -1,3 +1,5 @@
+require 'backported_tmpdir' unless Dir.respond_to?(:mktmpdir)
+
 class DumpRake
   class Dump
     def self.list(options = {})
@@ -107,6 +109,20 @@ class DumpRake
 
     def quote_table_name(table)
       ActiveRecord::Base.connection.quote_table_name(table)
+    end
+
+    def assets_root_link
+      prefix = 'assets'
+      Dir.mktmpdir do |dir|
+        Dir.chdir(dir) do
+          File.symlink(RAILS_ROOT, prefix)
+          begin
+            yield dir, prefix
+          ensure
+            File.unlink(prefix)
+          end
+        end
+      end
     end
 
   private

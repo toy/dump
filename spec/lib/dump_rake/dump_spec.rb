@@ -291,4 +291,22 @@ describe Dump do
       Dump.new('').send(:schema_tables).should == %w(schema_info schema_migrations)
     end
   end
+
+  describe "assets_root_link" do
+     it "should create tem dir, chdir there, symlink RAILS_ROOT to assets, yield and unlink assets ever if something raised" do
+      Dir.should_receive(:mktmpdir).and_yield('/tmp/abc')
+      Dir.should_receive(:chdir).with('/tmp/abc').and_yield
+      File.should_receive(:symlink).with(RAILS_ROOT, 'assets')
+      File.should_receive(:unlink).with('assets')
+      proc{
+        Dump.new('').send(:assets_root_link) do |dir, prefix|
+          dir.should == '/tmp/abc'
+          prefix.should == 'assets'
+          @yielded = true
+          raise 'just test'
+        end
+      }.should raise_error('just test')
+      @yielded.should == true
+    end
+  end
 end

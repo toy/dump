@@ -386,6 +386,7 @@ describe DumpReader do
         @task = mock('task')
         Rake::Task.stub!(:[]).with('assets:delete').and_return(@task)
         @task.stub!(:invoke)
+        @dump.stub!(:assets_root_link).and_yield('/tmp', 'assets')
       end
 
       it "should not read assets if config[:assets] is nil" do
@@ -401,6 +402,10 @@ describe DumpReader do
       end
 
       describe "deleting existing assets" do
+        before do
+          @stream.stub!(:each)
+        end
+
         it "should call assets:delete" do
           @assets = %w(images videos)
           @dump.stub!(:config).and_return({:assets => @assets})
@@ -424,41 +429,75 @@ describe DumpReader do
         end
       end
 
-      it "should find assets.tar" do
-        @assets = %w(images videos)
-        @dump.stub!(:config).and_return({:assets => @assets})
-        Dir.stub!(:glob).and_return([])
-        FileUtils.stub!(:remove_entry_secure)
-
-        @dump.should_receive(:find_entry).with('assets.tar')
-        @dump.read_assets
-      end
-
-      [
-        %w(images videos),
-        {'images' => 0, 'videos' => 0},
-        {'images' => {:files => 0, :total => 0}, 'videos' => {:files => 0, :total => 0}},
-      ].each do |assets|
-        it "should rewrite rewind method to empty method - to not raise exception, open tar and extract each entry" do
-          @dump.stub!(:config).and_return({:assets => assets})
+      describe "old style" do
+        it "should find assets.tar" do
+          @assets = %w(images videos)
+          @dump.stub!(:config).and_return({:assets => @assets})
           Dir.stub!(:glob).and_return([])
           FileUtils.stub!(:remove_entry_secure)
 
-          @assets_tar = mock('assets_tar')
-          @assets_tar.stub!(:rewind).and_raise('hehe - we want to rewind to center of gzip')
-          @dump.stub!(:find_entry).and_yield(@assets_tar)
-
-          @inp = mock('inp')
-          each_excpectation = @inp.should_receive(:each)
-          @entries = %w(a b c d).map do |s|
-            file = mock("file_#{s}")
-            each_excpectation.and_yield(file)
-            @inp.should_receive(:extract_entry).with(RAILS_ROOT, file)
-            file
-          end
-          Archive::Tar::Minitar.should_receive(:open).with(@assets_tar).and_yield(@inp)
-
+          @dump.should_receive(:find_entry).with('assets.tar').and_throw(:assets)
           @dump.read_assets
+        end
+
+        [
+          %w(images videos),
+          {'images' => 0, 'videos' => 0},
+          {'images' => {:files => 0, :total => 0}, 'videos' => {:files => 0, :total => 0}},
+        ].each do |assets|
+          it "should rewrite rewind method to empty method - to not raise exception, open tar and extract each entry" do
+            @dump.stub!(:config).and_return({:assets => assets})
+            Dir.stub!(:glob).and_return([])
+            FileUtils.stub!(:remove_entry_secure)
+
+            @assets_tar = mock('assets_tar')
+            @assets_tar.stub!(:rewind).and_raise('hehe - we want to rewind to center of gzip')
+            @dump.stub!(:find_entry).and_yield(@assets_tar)
+
+            @inp = mock('inp')
+            each_excpectation = @inp.should_receive(:each)
+            @entries = %w(a b c d).map do |s|
+              file = mock("file_#{s}")
+              each_excpectation.and_yield(file)
+              @inp.should_receive(:extract_entry).with(RAILS_ROOT, file)
+              file
+            end
+            Archive::Tar::Minitar.should_receive(:open).with(@assets_tar).and_yield(@inp)
+
+            @dump.read_assets
+          end
+        end
+      end
+
+      describe "new style" do
+        before do
+          @dump.should_receive(:find_entry).with('assets.tar')
+        end
+
+        [
+          %w(images videos),
+          {'images' => 0, 'videos' => 0},
+          {'images' => {:files => 0, :total => 0}, 'videos' => {:files => 0, :total => 0}},
+        ].each do |assets|
+          it "should extract each entry" do
+            @dump.stub!(:config).and_return({:assets => assets})
+            Dir.stub!(:glob).and_return([])
+            FileUtils.stub!(:remove_entry_secure)
+
+            @dump.should_receive(:assets_root_link).and_yield('/tmp/abc', 'assets')
+            each_excpectation = @stream.should_receive(:each)
+            @entries = %w(a b c d).map do |s|
+              file = mock("file_#{s}", :full_name => "assets/#{s}")
+              each_excpectation.and_yield(file)
+              @stream.should_receive(:extract_entry).with('/tmp/abc', file)
+              file
+            end
+            other_file = mock('other_file', :full_name => 'other_file')
+            each_excpectation.and_yield(other_file)
+            @stream.should_not_receive(:extract_entry).with('/tmp/abc', other_file)
+
+            @dump.read_assets
+          end
         end
       end
     end
