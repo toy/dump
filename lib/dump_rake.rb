@@ -63,6 +63,10 @@ class DumpRake
   end
 
   def self.cleanup(options = {})
+    unless options[:leave].nil? || /^\d+$/ === options[:leave] || options[:leave].downcase == 'none'
+      raise 'LEAVE should be number or "none"'
+    end
+
     to_delete = []
 
     all_dumps = Dump.list(options.merge(:all => true))
