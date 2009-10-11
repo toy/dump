@@ -38,9 +38,11 @@ namespace :dump do
             target = sessions[server]
             user = target.options[:user]
             host = target.host
-            full_host = user.present? ? "#{user}@#{host}" : host
+            port = target.options[:port]
+            full_host = "#{"#{user}@" if user.present?}#{host}"
 
-            cmd = %W(rsync -P -e ssh --timeout=15)
+            ssh = port.present? ? "ssh -p #{port}" : 'ssh'
+            cmd = %W(rsync -P -e #{ssh} --timeout=15)
             case direction
             when :up
               cmd << from << "#{full_host}:#{to}"
