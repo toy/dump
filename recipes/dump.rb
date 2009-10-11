@@ -102,7 +102,6 @@ namespace :dump do
       case io
       when :out
         output << data
-        $stdout << data
       when :err
         $stderr << data
       end
