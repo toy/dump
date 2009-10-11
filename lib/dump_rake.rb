@@ -25,7 +25,7 @@ require_gem_or_unpacked_gem 'progress', '>= 0.1.1'
 class DumpRake
   def self.versions(options = {})
     Dump.list(options).each do |dump|
-      puts dump
+      puts DumpRake::Env[:show_size] || $stdout.tty? ? "#{dump.human_size.to_s.rjust(7)}\t#{dump}" : dump
       if options[:summary]
         begin
           if %w(full 2).include?((options[:summary] || '').downcase)

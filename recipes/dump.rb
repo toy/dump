@@ -9,9 +9,7 @@ namespace :dump do
     rake = env.delete(:rake) || 'rake'
 
     # stringify_keys! from activesupport
-    env.keys.each do |key|
-      env[key.to_s] = env.delete(key)
-    end
+    DumpRake::Env.stringify!(env)
 
     env.update(DumpRake::Env.for_command(command, true))
 
@@ -139,8 +137,10 @@ namespace :dump do
     output
   end
 
-  def last_line(out)
-    out.strip.split(/\s*[\n\r]\s*/).last
+  def last_part_of_last_line(out)
+    if line = out.strip.split(/\s*[\n\r]\s*/).last
+      line.split("\t").last
+    end
   end
 
   def fetch_rake
@@ -173,7 +173,7 @@ namespace :dump do
 
     desc "Versions of local dumps"
     task :versions, :roles => :db, :only => {:primary => true} do
-      print run_local(dump_command(:versions))
+      print run_local(dump_command(:versions, :show_size => 1))
     end
 
     desc "Cleanup local dumps"
@@ -184,7 +184,7 @@ namespace :dump do
     desc "Upload dump"
     task :upload, :roles => :db, :only => {:primary => true} do
       file = DumpRake::Env.with_env(:summary => nil) do
-        last_line(run_local(dump_command(:versions)))
+        last_part_of_last_line(run_local(dump_command(:versions)))
       end
       if file
         do_transfer :up, "dump/#{file}", "#{current_path}/dump/#{file}"
@@ -214,7 +214,7 @@ namespace :dump do
 
     desc "Versions of remote dumps"
     task :versions, :roles => :db, :only => {:primary => true} do
-      print run_remote("cd #{current_path}; #{dump_command(:versions, :rake => fetch_rake, :RAILS_ENV => fetch_rails_env, :PROGRESS_TTY => '+')}")
+      print run_remote("cd #{current_path}; #{dump_command(:versions, :rake => fetch_rake, :RAILS_ENV => fetch_rails_env, :PROGRESS_TTY => '+', :show_size => 1)}")
     end
 
     desc "Cleanup of remote dumps"
@@ -225,7 +225,7 @@ namespace :dump do
     desc "Download dump"
     task :download, :roles => :db, :only => {:primary => true} do
       file = DumpRake::Env.with_env(:summary => nil) do
-        last_line(run_remote("cd #{current_path}; #{dump_command(:versions, :rake => fetch_rake, :RAILS_ENV => fetch_rails_env, :PROGRESS_TTY => '+')}"))
+        last_part_of_last_line(run_remote("cd #{current_path}; #{dump_command(:versions, :rake => fetch_rake, :RAILS_ENV => fetch_rails_env, :PROGRESS_TTY => '+')}"))
       end
       if file
         FileUtils.mkpath('dump')

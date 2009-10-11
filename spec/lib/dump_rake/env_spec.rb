@@ -105,4 +105,12 @@ describe Env do
       end
     end
   end
+
+  describe "stringify!" do
+    it "should convert keys to strings" do
+      @env = {:desc => 'text', :tags => 'a b c', 'LEAVE' => 'none', 'OTHER' => 'data'}
+      Env.stringify!(@env)
+      @env.should == {'DESC' => 'text', 'TAGS' => 'a b c', 'LEAVE' => 'none', 'OTHER' => 'data'}
+    end
+  end
 end

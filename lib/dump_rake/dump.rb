@@ -84,6 +84,22 @@ class DumpRake
     end
     alias to_s name
 
+    def size
+      File.size(path) rescue nil
+    end
+
+    def human_size
+      number = size
+      return nil if number.nil?
+      degree = 0
+      symbols = %W(B K M G T)
+      while number >= 1000 && degree < symbols.length - 1
+        degree += 1
+        number /= 1024.0
+      end
+      "#{'%.2f' % number}#{symbols[degree]}"
+    end
+
     def inspect
       "#<%s:0x%x %s>" % [self.class, object_id, path.to_s.sub(/^.+(?=..\/[^\/]*$)/, '…')]
     end

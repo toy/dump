@@ -10,6 +10,7 @@ class DumpRake
       :tables => %w(TABLES),
       :backup => %w(BACKUP AUTOBACKUP AUTO_BACKUP),
       :transfer_via => %w(TRANSFER_VIA),
+      :show_size => %w(SHOW_SIZE),
     }.freeze
     def self.dictionary
       @dictionary
@@ -66,6 +67,12 @@ class DumpRake
         value = self[variable]
         env[strings ? dictionary[variable].first : variable] = value if value
         env
+      end
+    end
+
+    def self.stringify!(hash)
+      hash.keys.each do |key|
+        hash[dictionary[key] ? dictionary[key].first : key.to_s] = hash.delete(key)
       end
     end
   end
