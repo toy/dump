@@ -1,4 +1,5 @@
 $: << File.join(File.dirname(__FILE__), '..', 'lib')
+require 'dump_rake'
 require 'dump_rake/env'
 
 task :assets do
