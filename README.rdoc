@@ -165,7 +165,7 @@ If you are sure that there is no need for autobackup — pass <tt>BACKUP</tt>, <
 backup remote on local (create remote dump and download it):
   cap dump:backup
 
-By default task will try to transfer first using rsync, than using sftp and finally using scp
+Transferring task will try to transfer using rsync if it is present, else it will try to use sftp and scp
 You can skip those tries if you set <tt>TRANSFER_VIA</tt> to rsync, sftp or scp
   cap dump:backup TRANSFER_VIA=rsync
   cap dump:mirror:up TRANSFER_VIA=scp
