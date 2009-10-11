@@ -167,7 +167,7 @@ class DumpRake
           assets_count, assets_paths = nil, assets
         end
 
-        DumpRake::Env.with_env('ASSETS' => assets_paths.join(':')) do
+        DumpRake::Env.with_env(:assets => assets_paths.join(':')) do
           Rake::Task['assets:delete'].invoke
         end
 

@@ -372,7 +372,7 @@ describe DumpWriter do
         @task = mock('task')
         Rake::Task.stub!(:[]).and_return(@task)
         @task.stub!(:invoke)
-        DumpRake::Env.with_env('ASSETS' => 'images:videos') do
+        DumpRake::Env.with_env(:assets => 'images:videos') do
           @dump.assets_to_dump.should == %w(images videos)
         end
       end
@@ -381,14 +381,14 @@ describe DumpWriter do
         @task = mock('task')
         Rake::Task.stub!(:[]).and_return(@task)
         @task.stub!(:invoke)
-        DumpRake::Env.with_env('ASSETS' => 'images,videos') do
+        DumpRake::Env.with_env(:assets => 'images,videos') do
           @dump.assets_to_dump.should == %w(images videos)
         end
       end
 
       it "should return empty array if calling rake task assets raises an exception" do
         Rake::Task.stub!(:[]).and_raise('task assets not found')
-        DumpRake::Env.with_env('ASSETS' => 'images:videos') do
+        DumpRake::Env.with_env(:assets => 'images:videos') do
           @dump.assets_to_dump.should == []
         end
       end
