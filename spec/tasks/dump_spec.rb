@@ -95,7 +95,7 @@ describe "rake dump" do
 
     DumpRake::Env.variable_names_for_command(:cleanup) do |variable|
       DumpRake::Env.dictionary[variable].each do |name|
-        it "should pass version if it is set through environment variable #{name}" do
+        it "should pass number of dumps to leave if it is set through environment variable #{name}" do
           DumpRake.should_receive(:versions).with(variable => '21376')
           DumpRake::Env.with_env name => '21376' do
             @task.invoke
