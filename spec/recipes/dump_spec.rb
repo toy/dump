@@ -35,39 +35,57 @@ describe "cap dump" do
 
   describe "do_transfer" do
     before do
-      @cap.dump.stub!(:do_transfer_with_rsync)
       @cap.dump.stub!(:do_transfer_via)
     end
 
     [:up, :down].each do |direction|
-      describe "direction" do
-        it "should first try rsync" do
-          @cap.dump.should_receive(:do_transfer_with_rsync).and_return(true)
-          @cap.dump.should_not_receive(:do_transfer_via)
-          grab_output{ @cap.dump.do_transfer(direction, 'a.tgz', 'b.tgz') }
-        end
+      describe direction do
+        describe "if method not set" do
 
-        it "should try sftp after rsync" do
-          @cap.dump.should_receive(:do_transfer_with_rsync).and_return(false)
-          @cap.dump.should_receive(:do_transfer_via).with(:sftp, direction, 'a.tgz', 'b.tgz')
-          @cap.dump.should_not_receive(:do_transfer_via)
-          grab_output{ @cap.dump.do_transfer(direction, 'a.tgz', 'b.tgz') }
-        end
-
-        it "should try scp after sftp and rsync" do
-          @cap.dump.should_receive(:do_transfer_with_rsync).and_return(false)
-          @cap.dump.should_receive(:do_transfer_via).with(:sftp, direction, 'a.tgz', 'b.tgz').and_raise('problem using sftp')
-          @cap.dump.should_receive(:do_transfer_via).with(:scp, direction, 'a.tgz', 'b.tgz')
-          grab_output{ @cap.dump.do_transfer(direction, 'a.tgz', 'b.tgz') }
-        end
-
-        it "should not rescue if nothing works" do
-          @cap.dump.should_receive(:do_transfer_with_rsync).and_return(false)
-          @cap.dump.should_receive(:do_transfer_via).with(:sftp, direction, 'a.tgz', 'b.tgz').and_raise('problem using sftp')
-          @cap.dump.should_receive(:do_transfer_via).with(:scp, direction, 'a.tgz', 'b.tgz').and_raise('problem using scp')
-          proc{
+          it "should call got_rsync?" do
+            @cap.dump.should_receive(:got_rsync?)
             grab_output{ @cap.dump.do_transfer(direction, 'a.tgz', 'b.tgz') }
-          }.should raise_error('problem using scp')
+          end
+
+          describe "if got_rsync?" do
+            it "should use rsync" do
+              @cap.dump.stub!(:got_rsync?).and_return(true)
+              @cap.dump.should_receive(:do_transfer_via).with(:rsync, direction, 'a.tgz', 'b.tgz')
+              grab_output{ @cap.dump.do_transfer(direction, 'a.tgz', 'b.tgz') }
+            end
+
+            it "should raise if rsync fails" do
+              @cap.dump.stub!(:got_rsync?).and_return(true)
+              @cap.dump.should_receive(:do_transfer_via).with(:rsync, direction, 'a.tgz', 'b.tgz').and_raise('problem using rsync')
+              proc{
+                grab_output{ @cap.dump.do_transfer(direction, 'a.tgz', 'b.tgz') }
+              }.should raise_error('problem using rsync')
+            end
+          end
+
+          describe "unless got_rsync?" do
+            it "should try sftp" do
+              @cap.dump.stub!(:got_rsync?).and_return(false)
+              @cap.dump.should_receive(:do_transfer_via).with(:sftp, direction, 'a.tgz', 'b.tgz')
+              grab_output{ @cap.dump.do_transfer(direction, 'a.tgz', 'b.tgz') }
+            end
+
+            it "should try scp after sftp" do
+              @cap.dump.stub!(:got_rsync?).and_return(false)
+              @cap.dump.should_receive(:do_transfer_via).with(:sftp, direction, 'a.tgz', 'b.tgz').and_raise('problem using sftp')
+              @cap.dump.should_receive(:do_transfer_via).with(:scp, direction, 'a.tgz', 'b.tgz')
+              grab_output{ @cap.dump.do_transfer(direction, 'a.tgz', 'b.tgz') }
+            end
+
+            it "should not rescue if scp also fails" do
+              @cap.dump.stub!(:got_rsync?).and_return(false)
+              @cap.dump.should_receive(:do_transfer_via).with(:sftp, direction, 'a.tgz', 'b.tgz').and_raise('problem using sftp')
+              @cap.dump.should_receive(:do_transfer_via).with(:scp, direction, 'a.tgz', 'b.tgz').and_raise('problem using scp')
+              proc{
+                grab_output{ @cap.dump.do_transfer(direction, 'a.tgz', 'b.tgz') }
+              }.should raise_error('problem using scp')
+            end
+          end
         end
       end
     end

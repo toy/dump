@@ -9,6 +9,7 @@ class DumpRake
       :assets => %w(ASSETS),
       :tables => %w(TABLES),
       :backup => %w(BACKUP AUTOBACKUP AUTO_BACKUP),
+      :transfer_via => %w(TRANSFER_VIA),
     }.freeze
     def self.dictionary
       @dictionary

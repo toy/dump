@@ -24,56 +24,84 @@ namespace :dump do
     fetch(:rails_env, "production")
   end
 
-  def do_transfer_with_rsync(direction, from, to)
-    if run_local('which rsync').present? && $?.success?
-      execute_on_servers do |servers|
-        commands = servers.map do |server|
-          target = sessions[server]
-          user = target.options[:user]
-          host = target.host
-          full_host = user.present? ? "#{user}@#{host}" : host
-
-          cmd = %W(rsync -P -e ssh)
-          case direction
-          when :up
-            cmd << from << "#{full_host}:#{to}"
-          when :down
-            cmd << "#{full_host}:#{from}" << to
-          else
-            raise "Don't know how to transfer in direction #{direction}"
-          end
-          ShellEscape.command(*cmd)
-        end
-        return commands.all? do |cmd|
-          logger.info cmd if logger
-          system *cmd
-        end
-      end
-    end
+  def got_rsync?
+    `which rsync`
+    $?.success?
   end
 
   def do_transfer_via(via, direction, from, to)
-    ContiniousTimeout.timeout 10 do |thread|
-      transfer(direction, from, to, :via => via) do |channel, path, transfered, total|
-        thread.defer
-        progress = if transfered < total
-          "\e[1m%5.1f%%\e[0m" % (transfered * 100.0 / total)
-        else
-          "100%"
+    case via
+    when :rsync
+      if run_local('which rsync').present? && $?.success?
+        execute_on_servers do |servers|
+          commands = servers.map do |server|
+            target = sessions[server]
+            user = target.options[:user]
+            host = target.host
+            full_host = user.present? ? "#{user}@#{host}" : host
+
+            cmd = %W(rsync -P -e ssh --timeout=15)
+            case direction
+            when :up
+              cmd << from << "#{full_host}:#{to}"
+            when :down
+              cmd << "#{full_host}:#{from}" << to
+            else
+              raise "Don't know how to transfer in direction #{direction}"
+            end
+            ShellEscape.command(*cmd)
+          end
+          commands.each do |cmd|
+            logger.info cmd if logger
+
+            3.times do
+              break if system(cmd)
+              break unless [10, 11, 12, 23, 30, 35].include?($?.exitstatus)
+            end
+            raise "rsync returned #{$?.exitstatus}" unless $?.success?
+          end
         end
-        $stderr << "\rTransfering: #{progress}"
       end
+    when :sftp, :scp
+      ContiniousTimeout.timeout 15 do |thread|
+        transfer(direction, from, to, :via => via) do |channel, path, transfered, total|
+          thread.defer
+          progress = if transfered < total
+            "\e[1m%5.1f%%\e[0m" % (transfered * 100.0 / total)
+          else
+            "100%"
+          end
+          $stderr << "\rTransfering: #{progress}"
+        end
+      end
+    else
+      raise "Unknown transfer method #{via}"
     end
   end
 
   def do_transfer(direction, from, to)
-    unless do_transfer_with_rsync(direction, from, to)
-      puts "To transfer using rsync — make rsync binary accessible and verify that remote host can work with rsync through ssh"
-      begin
+    if via = DumpRake::Env[:transfer_via]
+      case via.downcase
+      when 'rsync'
+        do_transfer_via(:rsync, direction, from, to)
+      when 'sftp'
         do_transfer_via(:sftp, direction, from, to)
-      rescue => e
-        $stderr.puts e
+      when 'scp'
         do_transfer_via(:scp, direction, from, to)
+      else
+        raise "Unknown transfer method #{via}"
+      end
+    else
+      if got_rsync?
+        do_transfer_via(:rsync, direction, from, to)
+      else
+        $stderr.puts "To transfer using rsync — make rsync binary accessible and verify that remote host can work with rsync through ssh"
+        begin
+          do_transfer_via(:sftp, direction, from, to)
+        rescue => e
+          $stderr.puts e
+          do_transfer_via(:scp, direction, from, to)
+        end
       end
     end
   end
