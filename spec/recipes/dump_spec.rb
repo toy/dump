@@ -94,14 +94,14 @@ describe "cap dump" do
   describe "local" do
     describe "versions" do
       it "should call local rake task" do
-        @cap.dump.should_receive(:run_local).with("rake -s dump:versions SHOW_SIZE=1").and_return('')
+        @cap.dump.should_receive(:run_local).with("rake -s dump:versions SHOW_SIZE=true").and_return('')
         @cap.find_and_execute_task("dump:local:versions")
       end
 
       test_passing_environment_variables(:local, :versions, {
-        :like => "rake -s dump:versions 'LIKE=some data' SHOW_SIZE=1",
-        :tags => "rake -s dump:versions SHOW_SIZE=1 'TAGS=some data'",
-        :summary => "rake -s dump:versions SHOW_SIZE=1 'SUMMARY=some data'",
+        :like => "rake -s dump:versions 'LIKE=some data' SHOW_SIZE=true",
+        :tags => "rake -s dump:versions SHOW_SIZE=true 'TAGS=some data'",
+        :summary => "rake -s dump:versions SHOW_SIZE=true 'SUMMARY=some data'",
       })
 
       it "should print result of rake task" do
@@ -225,14 +225,14 @@ describe "cap dump" do
   describe "remote" do
     describe "versions" do
       it "should call remote rake task" do
-        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions PROGRESS_TTY=+ RAILS_ENV=production SHOW_SIZE=1").and_return('')
+        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions PROGRESS_TTY=+ RAILS_ENV=production SHOW_SIZE=true").and_return('')
         @cap.find_and_execute_task("dump:remote:versions")
       end
 
       test_passing_environment_variables(:remote, :versions, {
-        :like => "rake -s dump:versions 'LIKE=some data' PROGRESS_TTY=+ RAILS_ENV=production SHOW_SIZE=1",
-        :tags => "rake -s dump:versions PROGRESS_TTY=+ RAILS_ENV=production SHOW_SIZE=1 'TAGS=some data'",
-        :summary => "rake -s dump:versions PROGRESS_TTY=+ RAILS_ENV=production SHOW_SIZE=1 'SUMMARY=some data'",
+        :like => "rake -s dump:versions 'LIKE=some data' PROGRESS_TTY=+ RAILS_ENV=production SHOW_SIZE=true",
+        :tags => "rake -s dump:versions PROGRESS_TTY=+ RAILS_ENV=production SHOW_SIZE=true 'TAGS=some data'",
+        :summary => "rake -s dump:versions PROGRESS_TTY=+ RAILS_ENV=production SHOW_SIZE=true 'SUMMARY=some data'",
       })
 
       it "should print result of rake task" do
@@ -244,7 +244,7 @@ describe "cap dump" do
 
       it "should use custom rake binary" do
         @cap.dump.should_receive(:fetch_rake).and_return('/custom/rake')
-        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; /custom/rake -s dump:versions PROGRESS_TTY=+ RAILS_ENV=production SHOW_SIZE=1").and_return('')
+        @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; /custom/rake -s dump:versions PROGRESS_TTY=+ RAILS_ENV=production SHOW_SIZE=true").and_return('')
         @cap.find_and_execute_task("dump:remote:versions")
       end
     end

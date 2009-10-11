@@ -173,7 +173,7 @@ namespace :dump do
 
     desc "Versions of local dumps" << DumpRake::Env.explain_variables_for_command(:versions)
     task :versions, :roles => :db, :only => {:primary => true} do
-      print run_local(dump_command(:versions, :show_size => 1))
+      print run_local(dump_command(:versions, :show_size => true))
     end
 
     desc "Cleanup local dumps" << DumpRake::Env.explain_variables_for_command(:cleanup)
@@ -214,7 +214,7 @@ namespace :dump do
 
     desc "Versions of remote dumps" << DumpRake::Env.explain_variables_for_command(:versions)
     task :versions, :roles => :db, :only => {:primary => true} do
-      print run_remote("cd #{current_path}; #{dump_command(:versions, :rake => fetch_rake, :RAILS_ENV => fetch_rails_env, :PROGRESS_TTY => '+', :show_size => 1)}")
+      print run_remote("cd #{current_path}; #{dump_command(:versions, :rake => fetch_rake, :RAILS_ENV => fetch_rails_env, :PROGRESS_TTY => '+', :show_size => true)}")
     end
 
     desc "Cleanup of remote dumps" << DumpRake::Env.explain_variables_for_command(:cleanup)
