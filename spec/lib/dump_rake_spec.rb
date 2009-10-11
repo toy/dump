@@ -370,5 +370,11 @@ describe DumpRake do
         DumpRake.cleanup
       }
     end
+
+    it "should raise if called with :leave which is not a number or 'none'" do
+      proc{
+        DumpRake.cleanup(:leave => 'nothing')
+      }.should raise_error
+    end
   end
 end
