@@ -4,6 +4,7 @@ require 'pathname'
 require 'find'
 require 'fileutils'
 require 'zlib'
+require 'tempfile'
 
 require 'rake'
 
