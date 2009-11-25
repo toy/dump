@@ -48,16 +48,18 @@ class DumpRake
     end
 
     def self.variable_names_for_command(command)
-      {}.tap do |map|
-        map[:create] = [:desc, :tags, :assets, :tables]
-        map[:restore] = [:like, :tags]
-        map[:versions] = [:like, :tags, :summary]
-        map[:cleanup] = [:like, :tags, :leave]
-        map[:assets] = [:assets]
-        map[:transfer] = [:transfer_via] + map[:restore]
-        map[:mirror] = [:backup] + map[:create]
-        map[:backup] = [:transfer_via] + map[:create]
-      end[command] || []
+      mapping = {
+        :create => [:desc, :tags, :assets, :tables],
+        :restore => [:like, :tags],
+        :versions => [:like, :tags, :summary],
+        :cleanup => [:like, :tags, :leave],
+        :assets => [:assets],
+      }
+      mapping[:transfer] = [:transfer_via] + mapping[:restore]
+      mapping[:mirror] = [:backup] + mapping[:create]
+      mapping[:backup] = [:transfer_via] + mapping[:create]
+
+      mapping[command] || []
     end
 
     def self.for_command(command, strings = false)
