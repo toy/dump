@@ -2,7 +2,11 @@ $: << File.join(File.dirname(__FILE__), '..', 'lib')
 require 'dump_rake/env'
 require 'shell_escape'
 require 'continious_timeout'
-require 'activesupport'
+begin
+  require 'active_support'
+rescue LoadError
+  require 'activesupport'
+end
 
 namespace :dump do
   def dump_command(command, env = {})
