@@ -38,7 +38,7 @@ namespace :dump do
         execute_on_servers do |servers|
           commands = servers.map do |server|
             target = sessions[server]
-            user = target.options[:user]
+            user = target.options[:user] || fetch(:user, nil)
             host = target.host
             port = target.options[:port]
             full_host = "#{"#{user}@" if user.present?}#{host}"
