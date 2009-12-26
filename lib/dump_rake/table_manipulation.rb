@@ -100,12 +100,11 @@ class DumpRake
         # adapted from ActiveRecord::Batches
         primary_key = table_primary_key(table)
         quoted_primary_key = "#{quote_table_name(table)}.#{quote_column_name(primary_key)}"
-        select_where_primary_key = [
-          "SELECT * FROM #{quote_table_name(table)}",
-          "WHERE #{quoted_primary_key} %s",
-          "ORDER BY #{quoted_primary_key} ASC",
-          "LIMIT #{chunk_size}"
-        ].join(' ')
+        select_where_primary_key =
+          "SELECT * FROM #{quote_table_name(table)}" +
+            " WHERE #{quoted_primary_key} %s" +
+            " ORDER BY #{quoted_primary_key} ASC" +
+            " LIMIT #{chunk_size}"
         rows = select_all_by_sql(select_where_primary_key % '>= 0')
         until rows.blank?
           rows.each(&block)
