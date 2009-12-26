@@ -127,6 +127,10 @@ class DumpRake
       ActiveRecord::Base.connection.quote_table_name(table)
     end
 
+    def quote_column_name(column)
+      ActiveRecord::Base.connection.quote_column_name(column)
+    end
+
     def assets_root_link
       prefix = 'assets'
       Dir.mktmpdir do |dir|

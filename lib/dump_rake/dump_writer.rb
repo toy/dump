@@ -53,22 +53,25 @@ class DumpRake
     end
 
     def write_table(table)
-      rows = table_rows(table)
-      unless rows.blank?
-        config[:tables][table] = rows.length
-        Progress.start('Writing dump', 1 + rows.length) do
-          create_file("#{table}.dump") do |f|
-            column_names = rows.first.keys.sort
-            columns_by_name = ActiveRecord::Base.connection.columns(table).index_by(&:name)
-            Marshal.dump(column_names, f)
-            Progress.step
-            rows.each do |row|
-              values = column_names.map do |column|
-                columns_by_name[column].type_cast(row[column])
-              end
-              Marshal.dump(values, f)
-              Progress.step
+      row_count = table_row_count(table)
+      config[:tables][table] = row_count
+      Progress.start('Writing dump', 1 + row_count) do
+        create_file("#{table}.dump") do |f|
+          columns = table_columns(table)
+          column_names = columns.map(&:name).sort
+          columns_by_name = columns.index_by(&:name)
+
+          Marshal.dump(column_names, f)
+          Progress.step
+
+          written_rows = 0
+          each_table_row(table, row_count) do |row|
+            values = column_names.map do |column|
+              columns_by_name[column].type_cast(row[column])
             end
+            Marshal.dump(values, f)
+            Progress.step
+            written_rows += 1
           end
         end
       end
@@ -120,8 +123,59 @@ class DumpRake
       end
     end
 
-    def table_rows(table)
-      ActiveRecord::Base.connection.select_all("SELECT * FROM #{quote_table_name(table)}")
+    def table_row_count(table)
+      ActiveRecord::Base.connection.select_value("SELECT COUNT(*) FROM #{quote_table_name(table)}").to_i
+    end
+
+    def table_chunk_size(table)
+      expected_row_size = ActiveRecord::Base.connection.columns(table).map do |column|
+        case column.type
+        when :text
+          Math.sqrt(column.limit || 2_147_483_647)
+        when :string
+          Math.sqrt(column.limit || 255)
+        else
+          column.limit || 10
+        end
+      end.sum
+      [[(10_000_000 / expected_row_size).round, 100].max, 3_000].min
+    end
+
+    def table_columns(table)
+      ActiveRecord::Base.connection.columns(table)
+    end
+
+    def table_has_primary_column?(table)
+      # bad test for primary column, but primary for primary column was nil
+      table_columns(table).any?{ |column| column.name == 'id' && column.type == :integer }
+    end
+    def table_primary_key(table)
+      'id'
+    end
+
+    def each_table_row(table, row_count, &block)
+      if table_has_primary_column?(table) && row_count > (chunk_size = table_chunk_size(table))
+        # adapted from ActiveRecord::Batches
+        primary_key = table_primary_key(table)
+        quoted_primary_key = "#{quote_table_name(table)}.#{quote_column_name(table_primary_key(table))}"
+        select_where_primary_key = [
+          "SELECT * FROM #{quote_table_name(table)}",
+          "WHERE #{quoted_primary_key} %s",
+          "ORDER BY #{quoted_primary_key} ASC",
+          "LIMIT #{chunk_size}"
+        ].join(' ')
+        rows = select_all_by_sql(select_where_primary_key % '>= 0')
+        until rows.blank?
+          rows.each(&block)
+          rows = select_all_by_sql(select_where_primary_key % "> #{rows.last[primary_key].to_i}")
+        end
+      else
+        select_all_by_sql("SELECT * FROM #{quote_table_name(table)}").each(&block)
+      end
+    end
+
+    def select_all_by_sql(sql)
+      ActiveRecord::Base.connection.select_all(sql)
     end
 
     def assets_to_dump
