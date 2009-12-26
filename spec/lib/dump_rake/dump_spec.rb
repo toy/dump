@@ -214,20 +214,6 @@ describe Dump do
     end
   end
 
-  describe "verify_connection" do
-    it "should return result of ActiveRecord::Base.connection.verify!" do
-      ActiveRecord::Base.connection.should_receive(:verify!).and_return(:result)
-      Dump.new('').send(:verify_connection).should == :result
-    end
-  end
-
-  describe "quote_table_name" do
-    it "should return result of ActiveRecord::Base.connection.quote_table_name" do
-      ActiveRecord::Base.connection.should_receive(:quote_table_name).with('first').and_return('`first`')
-      Dump.new('').send(:quote_table_name, 'first').should == '`first`'
-    end
-  end
-
   describe "clean_description" do
     it "should shorten string to 50 chars and replace special symblos with '-'" do
       Dump.new('').send(:clean_description, 'Special  Dump #12837192837 (before fixind *&^*&^ photos)').should == 'Special Dump #12837192837 (before fixind _ photos)'
@@ -283,12 +269,6 @@ describe Dump do
 
     it "should accept non string" do
       Dump.new('').send(:get_filter_tags, nil).should == {:simple => [], :mandatory => [], :forbidden => []}
-    end
-  end
-
-  describe "schema_tables" do
-    it "should return schema_tables" do
-      Dump.new('').send(:schema_tables).should == %w(schema_info schema_migrations)
     end
   end
 
