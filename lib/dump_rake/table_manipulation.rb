@@ -66,8 +66,10 @@ class DumpRake
       ActiveRecord::Base.connection.select_value("SELECT COUNT(*) FROM #{quote_table_name(table)}").to_i
     end
 
+    CHUNK_SIZE_MIN = 100
+    CHUNK_SIZE_MAX = 3_000
     def table_chunk_size(table)
-      expected_row_size = ActiveRecord::Base.connection.columns(table).map do |column|
+      expected_row_size = table_columns(table).map do |column|
         case column.type
         when :text
           Math.sqrt(column.limit || 2_147_483_647)
@@ -77,7 +79,7 @@ class DumpRake
           column.limit || 10
         end
       end.sum
-      [[(10_000_000 / expected_row_size).round, 100].max, 3_000].min
+      [[(10_000_000 / expected_row_size).round, CHUNK_SIZE_MIN].max, CHUNK_SIZE_MAX].min
     end
 
     def table_columns(table)
@@ -97,7 +99,7 @@ class DumpRake
       if table_has_primary_column?(table) && row_count > (chunk_size = table_chunk_size(table))
         # adapted from ActiveRecord::Batches
         primary_key = table_primary_key(table)
-        quoted_primary_key = "#{quote_table_name(table)}.#{quote_column_name(table_primary_key(table))}"
+        quoted_primary_key = "#{quote_table_name(table)}.#{quote_column_name(primary_key)}"
         select_where_primary_key = [
           "SELECT * FROM #{quote_table_name(table)}",
           "WHERE #{quoted_primary_key} %s",
@@ -107,6 +109,7 @@ class DumpRake
         rows = select_all_by_sql(select_where_primary_key % '>= 0')
         until rows.blank?
           rows.each(&block)
+          break if rows.length < chunk_size
           rows = select_all_by_sql(select_where_primary_key % "> #{rows.last[primary_key].to_i}")
         end
       else
