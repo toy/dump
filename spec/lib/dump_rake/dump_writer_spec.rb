@@ -123,52 +123,40 @@ describe DumpWriter do
     end
 
     describe "write_table" do
-      before do
+      it "should get row count and store it to config" do
+        @dump.should_receive(:table_row_count).with('first').and_return(666)
+        @dump.stub!(:create_file)
+        @dump.write_table('first')
+        @config[:tables]['first'].should == 666
+      end
+
+      it "should create_file" do
+        @dump.stub!(:table_row_count).and_return(666)
+        @dump.should_receive(:create_file)
+        @dump.write_table('first')
+      end
+
+      it "should dump column names and values of each row" do
         @column_definitions = [
           mock('column', :name => 'id'),
           mock('column', :name => 'name'),
           mock('column', :name => 'associated_id')
         ]
         ActiveRecord::Base.connection.stub!(:columns).and_return(@column_definitions)
-        #
         @rows = [
           {'id' => 1, 'name' => 'a', 'associated_id' => 100},
           {'id' => 2, 'name' => 'b', 'associated_id' => 666},
         ]
-      end
 
-      it "should call table_rows" do
-        @dump.should_receive(:table_rows).with('first').and_return([])
-        @dump.write_table('first')
-      end
-
-      it "should not create_file if rows are empty" do
-        @dump.stub!(:table_rows).and_return([])
-        @dump.should_not_receive(:create_file)
-        @dump.write_table('first')
-      end
-
-      it "should create_file if rows are not empty" do
-        @dump.stub!(:table_rows).and_return(@rows)
-        @dump.should_receive(:create_file).with('first.dump')
-        @dump.write_table('first')
-      end
-
-      it "should add table => rows.length to config" do
-        @dump.stub!(:table_rows).and_return(@rows)
-        @dump.stub!(:create_file)
-        @dump.write_table('first')
-        @config[:tables]['first'].should == 2
-      end
-
-      it "should dump column names and values of each row" do
         @file = mock('file')
-        @dump.stub!(:table_rows).and_return(@rows)
+        @dump.stub!(:table_row_count).and_return(666)
         @dump.stub!(:create_file).and_yield(@file)
 
-        column_names = @rows.first.keys.sort
+        column_names = @column_definitions.map(&:name).sort
         @file.should_receive(:write).with(Marshal.dump(column_names)).ordered
+        each_tabler_row_yielder = @dump.should_receive(:each_table_row)
         @rows.each do |row|
+          each_tabler_row_yielder.and_yield(row)
           @file.should_receive(:write).with(Marshal.dump(row.values_at(*column_names))).ordered
           @column_definitions.each do |column_definition|
             column_definition.should_receive(:type_cast).with(row[column_definition.name]).and_return(row[column_definition.name])
@@ -301,14 +289,6 @@ describe DumpWriter do
 
         @file.should_receive(:write).with(Marshal.dump(@config))
         @dump.write_config
-      end
-    end
-
-    describe "table_rows" do
-      it "should call ActiveRecord::Base.connection.select_all with sql containing quoted table name" do
-        @dump.should_receive(:quote_table_name).and_return('`first`')
-        ActiveRecord::Base.connection.should_receive(:select_all).with("SELECT * FROM `first`")
-        @dump.table_rows('first')
       end
     end
 
