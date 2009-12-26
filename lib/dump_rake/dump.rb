@@ -155,45 +155,38 @@ class DumpRake
       Pathname(path.to_s.sub(/#{parts[:ext]}$/, ext))
     end
 
-    def self.instance_accessible_methods(*methods)
-      methods.each do |method|
-        class_eval <<-code, __FILE__, __LINE__
-          def #{method}(*args, &block)
-            self.class.#{method}(*args, &block)
-          end
-        code
+    module CleanNParse
+      def clean_str(str, additional = nil)
+        str.to_s.strip.gsub(/\s+/, ' ').gsub(/[^A-Za-z0-9 \-_#{Regexp.escape(additional.to_s) if additional}]+/, '_')
       end
-    end
-
-    def self.clean_str(str, additional = nil)
-      str.to_s.strip.gsub(/\s+/, ' ').gsub(/[^A-Za-z0-9 \-_#{Regexp.escape(additional.to_s) if additional}]+/, '_')
-    end
-    def self.clean_description(description)
-      clean_str(description, '()#')[0, 50].strip
-    end
-    def self.clean_tag(tag)
-      clean_str(tag).downcase.sub(/^\-+/, '')[0, 20].strip
-    end
-    def self.clean_tags(tags)
-      tags.to_s.split(',').map{ |tag| clean_tag(tag) }.uniq.reject(&:blank?).sort
-    end
-    def self.get_filter_tags(tags)
-      groups = Hash.new{ |hash, key| hash[key] = SortedSet.new }
-      tags.to_s.split(',').each do |tag|
-        if m = tag.strip.match(/^(\-|\+)?(.*)$/)
-          type = {'+' => :mandatory, '-' => :forbidden}[m[1]] || :simple
-          unless (claned_tag = clean_tag(m[2])).blank?
-            groups[type] << claned_tag
+      def clean_description(description)
+        clean_str(description, '()#')[0, 50].strip
+      end
+      def clean_tag(tag)
+        clean_str(tag).downcase.sub(/^\-+/, '')[0, 20].strip
+      end
+      def clean_tags(tags)
+        tags.to_s.split(',').map{ |tag| clean_tag(tag) }.uniq.reject(&:blank?).sort
+      end
+      def get_filter_tags(tags)
+        groups = Hash.new{ |hash, key| hash[key] = SortedSet.new }
+        tags.to_s.split(',').each do |tag|
+          if m = tag.strip.match(/^(\-|\+)?(.*)$/)
+            type = {'+' => :mandatory, '-' => :forbidden}[m[1]] || :simple
+            unless (claned_tag = clean_tag(m[2])).blank?
+              groups[type] << claned_tag
+            end
           end
         end
-      end
-      [:simple, :mandatory].each do |type|
-        if (clashing = (groups[type] & groups[:forbidden])).present?
-          raise "#{type} tags clashes with forbidden ones: #{clashing}"
+        [:simple, :mandatory].each do |type|
+          if (clashing = (groups[type] & groups[:forbidden])).present?
+            raise "#{type} tags clashes with forbidden ones: #{clashing}"
+          end
         end
+        groups.each_with_object({}){ |(key, value), hsh| hsh[key] = value.to_a }
       end
-      groups.each_with_object({}){ |(key, value), hsh| hsh[key] = value.to_a }
     end
-    instance_accessible_methods :clean_str, :clean_description, :clean_tag, :clean_tags, :get_filter_tags
+    include CleanNParse
+    extend CleanNParse
   end
 end
