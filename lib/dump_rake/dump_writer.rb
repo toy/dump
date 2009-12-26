@@ -64,14 +64,12 @@ class DumpRake
           Marshal.dump(column_names, f)
           Progress.step
 
-          written_rows = 0
           each_table_row(table, row_count) do |row|
             values = column_names.map do |column|
               columns_by_name[column].type_cast(row[column])
             end
             Marshal.dump(values, f)
             Progress.step
-            written_rows += 1
           end
         end
       end
