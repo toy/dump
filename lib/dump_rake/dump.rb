@@ -2,6 +2,7 @@ require 'backported_tmpdir' unless Dir.respond_to?(:mktmpdir)
 
 class DumpRake
   class Dump
+    include TableManipulation
     def self.list(options = {})
       dumps = Dir[File.join(RAILS_ROOT, 'dump', options[:all] ? '*.*' : '*.tgz')].sort.select{ |path| File.file?(path) }.map{ |path| new(path) }
       dumps = dumps.select{ |dump| dump.name[options[:like]] } if options[:like]
@@ -119,18 +120,6 @@ class DumpRake
 
   protected
 
-    def verify_connection
-      ActiveRecord::Base.connection.verify!(0)
-    end
-
-    def quote_table_name(table)
-      ActiveRecord::Base.connection.quote_table_name(table)
-    end
-
-    def quote_column_name(column)
-      ActiveRecord::Base.connection.quote_column_name(column)
-    end
-
     def assets_root_link
       prefix = 'assets'
       Dir.mktmpdir do |dir|
@@ -143,12 +132,6 @@ class DumpRake
           end
         end
       end
-    end
-
-  private
-
-    def schema_tables
-      %w(schema_info schema_migrations)
     end
 
     def path_with_ext(ext)

@@ -201,36 +201,5 @@ class DumpRake
         end
       end
     end
-
-  protected
-
-    def clear_table(table_sql)
-      ActiveRecord::Base.connection.delete("DELETE FROM #{table_sql}", 'Clearing table')
-    end
-
-    def quote_column_name(column)
-      ActiveRecord::Base.connection.quote_column_name(column)
-    end
-
-    def quote_value(value)
-      ActiveRecord::Base.connection.quote(value)
-    end
-
-    def join_for_sql(quoted)
-      "(#{quoted.join(',')})"
-    end
-
-    def insert_into_table(table_sql, columns_sql, values_sql)
-      values_sql = values_sql.join(',') if values_sql.is_a?(Array)
-      ActiveRecord::Base.connection.insert("INSERT INTO #{table_sql} #{columns_sql} VALUES #{values_sql}", 'Loading dump')
-    end
-
-    def columns_insert_sql(columns)
-      join_for_sql(columns.map{ |column| quote_column_name(column) })
-    end
-
-    def values_insert_sql(values)
-      join_for_sql(values.map{ |column| quote_value(column) })
-    end
   end
 end
