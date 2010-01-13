@@ -4,11 +4,13 @@ class DumpRake
 
     def self.restore(path)
       new(path).open do |dump|
-        dump.read_config
-        dump.read_schema
+        ActiveRecord::Base.logger.silence do
+          dump.read_config
+          dump.read_schema
 
-        dump.read_tables
-        dump.read_assets
+          dump.read_tables
+          dump.read_assets
+        end
       end
     end
 
