@@ -162,8 +162,9 @@ class DumpRake
 
     def read_tables
       verify_connection
+      skip_tables = (ENV['SKIP_TABLES'] ? ENV['SKIP_TABLES'].split(/,/) : []).map { |t| t.gsub(/^-/, '') }
       config[:tables].each_with_progress('Tables') do |table, rows|
-        read_table(table, rows)
+        read_table(table, rows) unless skip_tables.include?(table)
       end
     end
 

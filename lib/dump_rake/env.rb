@@ -52,7 +52,7 @@ class DumpRake
     def self.variable_names_for_command(command)
       mapping = {
         :create => [:desc, :tags, :assets, :tables],
-        :restore => [:like, :tags, :migrate_down],
+        :restore => [:like, :tags, :skip_tables, :migrate_down],
         :versions => [:like, :tags, :summary],
         :cleanup => [:like, :tags, :leave],
         :assets => [:assets],
@@ -88,6 +88,7 @@ class DumpRake
       :assets => 'comma or colon separated list of paths or globs to dump',
       :tables => 'comma separated list of tables to dump or if prefixed by "-" — to skip; by default only sessions table is skipped; schema_info and schema_migrations are always included if they are present',
       :backup => 'no autobackup if you pass "0", "no" or "false"',
+      :skip_tables => 'comma separated list of tables to not restore contents',
       :transfer_via => 'transfer method (rsync, sftp or scp)',
       :migrate_down => 'don\'t run down for migrations not present in dumpif you pass "0", "no" or "false"',
     }.freeze
