@@ -59,7 +59,7 @@ describe DumpWriter do
       @dump = DumpWriter.new('123.tgz')
       @dump.stub!(:stream).and_return(@stream)
       @dump.stub!(:config).and_return(@config)
-      Progress.io = StringIO.new
+      Progress.stub!(:io).and_return(StringIO.new)
     end
 
     describe "create_file" do

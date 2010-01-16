@@ -225,7 +225,7 @@ describe DumpReader do
       @stream = mock('stream')
       @dump = DumpReader.new('123.tgz')
       @dump.stub!(:stream).and_return(@stream)
-      Progress.io = StringIO.new
+      Progress.stub!(:io).and_return(StringIO.new)
     end
 
     describe "read_config" do
