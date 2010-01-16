@@ -3,7 +3,8 @@ require File.dirname(__FILE__) + '/spec_helper.rb'
 describe Progress do
   before :each do
     @io = StringIO.new
-    Progress.io = @io
+    Progress.stub!(:io).and_return(@io)
+    Progress.stub!(:time_to_print?).and_return(true)
   end
 
   def io_pop
@@ -173,7 +174,7 @@ describe Progress do
           end
         end
       end
-      io_pop.should == "\n"
+      io_pop.should == "A: ......\n\n"
     end
   end
 
@@ -186,7 +187,7 @@ describe Progress do
         end
         io_pop.should == "A: %5.1f%% > B: 100.0%%\n" % [(a + 1) / _a.to_f * 100.0]
       end
-      io_pop.should == "A: 100.0%\n\n"
+      io_pop.should == "A: 100.0%\nA: 100.0%\n\n"
     end
 
     it "should not overlap outer progress if inner exceeds [#{_a}, #{_b}]" do
@@ -200,7 +201,7 @@ describe Progress do
         end
         io_pop.should == "A: %5.1f%% > B: 200.0%%\n" % [(a + 1) / _a.to_f * 100.0]
       end
-      io_pop.should == "A: 100.0%\n\n"
+      io_pop.should == "A: 100.0%\nA: 100.0%\n\n"
     end
 
     it "should allow step with block to validly count custom progresses [#{_a}, #{_b}]" do
@@ -218,7 +219,7 @@ describe Progress do
         end
         Progress.step _a
       end
-      io_pop.should == "A: 100.0%\n\n"
+      io_pop.should == "A: 100.0%\nA: 100.0%\n\n"
     end
   end
 

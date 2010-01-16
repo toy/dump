@@ -64,7 +64,7 @@ class Progress
     #   Progress.highlight = true
     def start(title, total = 1)
       levels << new(title, total)
-      print_message
+      print_message(true)
       if block_given?
         begin
           yield
@@ -97,13 +97,13 @@ class Progress
 
     def stop
       if levels.last
-        print_message if levels.last.step_if_blank
+        print_message(true) if levels.last.step_if_blank || levels.length == 1
         levels.pop
         io.puts if levels.empty?
       end
     end
 
-    attr_writer :io, :lines, :highlight # :nodoc:
+    attr_writer :lines, :highlight # :nodoc:
 
   private
 
@@ -112,8 +112,10 @@ class Progress
     end
 
     def io
-      @io ||= $stderr
-      @io.sync = true
+      unless @io
+        @io = $stderr
+        @io.sync = true
+      end
       @io
     end
 
@@ -129,29 +131,45 @@ class Progress
       @highlight.nil? ? io_tty? : @highlight
     end
 
-    def print_message
-      messages = []
-      inner = 0
-      levels.reverse.each do |l|
-        current = l.to_f(inner)
-        value = current == 0 ? '......' : '%5.1f%%' % (current * 100.0)
-        messages << "#{l.title}: #{!highlight? || value == '100.0%' ? value : "\e[1m#{value}\e[0m"}"
-        inner = current
-      end
-      message = messages.reverse * ' > '
-
-      unless lines?
-        previous_length = @previous_length || 0
-        message_cl = if highlight?
-          message.gsub(/\033\[(0|1)m/, '')
+    def time_to_print?
+      if @previous
+        if @previous < Time.now - 0.3
+          @previous = Time.now
+          true
         else
-          message
+          false
         end
-        @previous_length = message_cl.length
-        message = "#{message}#{' ' * [previous_length - message_cl.length, 0].max}\r"
+      else
+        @previous = Time.now
+        true
       end
+    end
 
-      lines? ? io.puts(message) : io.print(message)
+    def print_message(force = false)
+      if force || time_to_print?
+        messages = []
+        inner = 0
+        levels.reverse.each do |l|
+          current = l.to_f(inner)
+          value = current == 0 ? '......' : '%5.1f%%' % (current * 100.0)
+          messages << "#{l.title}: #{!highlight? || value == '100.0%' ? value : "\e[1m#{value}\e[0m"}"
+          inner = current
+        end
+        message = messages.reverse * ' > '
+
+        unless lines?
+          previous_length = @previous_length || 0
+          message_cl = if highlight?
+            message.gsub(/\033\[(0|1)m/, '')
+          else
+            message
+          end
+          @previous_length = message_cl.length
+          message = "#{message}#{' ' * [previous_length - message_cl.length, 0].max}\r"
+        end
+
+        lines? ? io.puts(message) : io.print(message)
+      end
     end
   end
 end
