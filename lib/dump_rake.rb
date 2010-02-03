@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'rubygems'
 
 require 'pathname'
@@ -15,7 +16,7 @@ def require_gem_or_unpacked_gem(name, version = nil)
     gem name, version if version
     require name
   rescue Gem::LoadError, MissingSourceFile
-    $: << Pathname.glob(unpacked_gems_path + "#{name.gsub('/', '-')}*").last + 'lib'
+    $: << Pathname.glob((unpacked_gems_path + "#{name.to_s.gsub('/', '-')}*").to_s).last + 'lib'
     require name
   end
 end
