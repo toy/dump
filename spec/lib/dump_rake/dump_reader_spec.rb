@@ -33,6 +33,7 @@ describe DumpReader do
       DumpReader.stub!(:new).and_return(@dump)
 
       @dump.should_receive(:read_config).ordered
+      @dump.should_receive(:migrate_down).ordered
       @dump.should_receive(:read_schema).ordered
       @dump.should_receive(:read_tables).ordered
       @dump.should_receive(:read_assets).ordered
