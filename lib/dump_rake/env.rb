@@ -12,6 +12,7 @@ class DumpRake
       :backup => %w(BACKUP AUTOBACKUP AUTO_BACKUP),
       :transfer_via => %w(TRANSFER_VIA),
       :show_size => %w(SHOW_SIZE),
+      :migrate_down => %w(MIGRATE_DOWN),
     }.freeze
 
     def self.dictionary
@@ -51,7 +52,7 @@ class DumpRake
     def self.variable_names_for_command(command)
       mapping = {
         :create => [:desc, :tags, :assets, :tables],
-        :restore => [:like, :tags],
+        :restore => [:like, :tags, :migrate_down],
         :versions => [:like, :tags, :summary],
         :cleanup => [:like, :tags, :leave],
         :assets => [:assets],
@@ -88,6 +89,7 @@ class DumpRake
       :tables => 'comma separated list of tables to dump or if prefixed by "-" — to skip; by default only sessions table is skipped; schema_info and schema_migrations are always included if they are present',
       :backup => 'no autobackup (pass 0 or something starting with "n" or "f")',
       :transfer_via => 'transfer method (rsync, sftp or scp)',
+      :migrate_down => 'don\'t run down for migrations not present in dumpif you pass 0 or something starting with "n" or "f"',
     }.freeze
 
     def self.explain_variables_for_command(command)

@@ -6,6 +6,7 @@ class DumpRake
       new(path).open do |dump|
         ActiveRecord::Base.logger.silence do
           dump.read_config
+          dump.migrate_down
           dump.read_schema
 
           dump.read_tables
@@ -109,6 +110,39 @@ class DumpRake
 
     def read_config
       @config = Marshal.load(read_entry('config'))
+    end
+
+    def migrate_down
+      if migrate_down?
+        find_entry("schema_migrations.dump") do |entry|
+          migrated = table_rows('schema_migrations').map{ |row| row['version'] }
+
+          dump_migrations = []
+          Marshal.load(entry) # skip header
+          dump_migrations << Marshal.load(entry).first until entry.eof?
+
+          migrate_down = (migrated - dump_migrations)
+
+          unless migrate_down.empty?
+            migrate_down.with_progress('Migrating down').reverse.each do |version|
+              DumpRake::Env.with_env('VERSION' => version) do
+                Rake::Task['db:migrate:down'].tap do |task|
+                  begin
+                    task.invoke
+                  rescue ActiveRecord::IrreversibleMigration
+                    STDERR.puts "Irreversible migration: #{version}"
+                  end
+                  task.reenable
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+
+    def migrate_down?
+      !%w(0 n f).include?((DumpRake::Env[:migrate_down] || '').downcase.strip[0, 1])
     end
 
     def read_schema

@@ -112,8 +112,12 @@ class DumpRake
           rows = select_all_by_sql(select_where_primary_key % "> #{rows.last[primary_key].to_i}")
         end
       else
-        select_all_by_sql("SELECT * FROM #{quote_table_name(table)}").each(&block)
+        table_rows(table).each(&block)
       end
+    end
+
+    def table_rows(table)
+      select_all_by_sql("SELECT * FROM #{quote_table_name(table)}")
     end
 
     def select_all_by_sql(sql)
