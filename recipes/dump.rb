@@ -232,6 +232,7 @@ namespace :dump do
         last_part_of_last_line(run_remote("cd #{current_path}; #{dump_command(:versions, :rake => fetch_rake, :RAILS_ENV => fetch_rails_env, :PROGRESS_TTY => '+')}"))
       end
       if file
+        require 'fileutils'
         FileUtils.mkpath('dump')
         do_transfer :down, "#{current_path}/dump/#{file}", "dump/#{file}"
       end
