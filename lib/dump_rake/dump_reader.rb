@@ -113,7 +113,7 @@ class DumpRake
     end
 
     def migrate_down
-      if migrate_down?
+      if migrate_down? && avaliable_tables.include?('schema_migrations')
         find_entry("schema_migrations.dump") do |entry|
           migrated = table_rows('schema_migrations').map{ |row| row['version'] }
 

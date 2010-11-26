@@ -46,8 +46,11 @@ class DumpRake
     end
 
 
+    def avaliable_tables
+      ActiveRecord::Base.connection.tables
+    end
+
     def tables_to_dump
-      avaliable_tables = ActiveRecord::Base.connection.tables
       if DumpRake::Env[:tables]
         env_tables = DumpRake::Env[:tables].dup
         prefix = env_tables.slice!(/^\-/)
