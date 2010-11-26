@@ -2,10 +2,18 @@ $: << File.join(File.dirname(__FILE__), '..', 'lib')
 require 'dump_rake/env'
 require 'shell_escape'
 require 'continious_timeout'
+
 begin
-  require 'active_support'
-rescue LoadError
-  require 'activesupport'
+  nil.blank?
+rescue
+  Object.class_eval do
+    def blank?
+      respond_to?(:empty?) ? empty? : !self
+    end
+    def present?
+      !blank?
+    end
+  end
 end
 
 namespace :dump do
