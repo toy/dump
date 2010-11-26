@@ -18,9 +18,8 @@ begin
   task 'ghost' do
     gem_path = Pathname(Gem.searcher.find(name).full_gem_path)
     current_path = Pathname('.').expand_path
-    cmd = gem_path.writable? && gem_path.parent.writable? ? %w() : %w(sudo)
-    system(*cmd + %W[rm -r #{gem_path}])
-    system(*cmd + %W[ln -s #{current_path} #{gem_path}])
+    system('rm', '-r', gem_path)
+    system('ln', '-s', current_path, gem_path)
   end
 
 rescue LoadError

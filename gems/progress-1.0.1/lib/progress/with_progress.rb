@@ -23,8 +23,9 @@ class Progress
     include Enumerable
     def each(*args, &block)
       __getobj__.each(*args) do |*yielded|
-        block.call(*yielded)
-        Progress.step
+        Progress.step do
+          block.call(*yielded)
+        end
       end
     end
 

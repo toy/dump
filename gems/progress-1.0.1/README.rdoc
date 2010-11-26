@@ -13,7 +13,7 @@ Class to show progress during console script run
 
 == SYNOPSIS:
 
-  1000.times_with_progress('Wait') do |time|
+  1000.times_with_progress('Wait') do |time| # title is optional
     puts time
   end
 
@@ -53,6 +53,7 @@ Class to show progress during console script run
 
 or just
 
+  symbols = []
   Progress('Input 100 symbols', 100) do
     while symbols.length < 100
       input = gets.scan(/\S/)
@@ -71,26 +72,22 @@ Note - you will get WRONG progress if you use something like this:
 But you can use this:
 
   10.times_with_progress('A') do |time|
-    Progress('B,C', 2) do
-      Progress.step do
-        10.times_with_progress('B'){ … }
-      end
-      Progress.step do
-        10.times_with_progress('C'){ … }
-      end
+    Progress.step 1, 2 do
+      10.times_with_progress('B'){ … }
+    end
+    Progress.step 1, 2 do
+      10.times_with_progress('C'){ … }
     end
   end
 
 Or if you know that B runs 10 times faster than C:
 
   10.times_with_progress('A') do |time|
-    Progress('B,C', 11) do
-      Progress.step 1 do
-        10.times_with_progress('B'){ … }
-      end
-      Progress.step 10 do
-        10.times_with_progress('C'){ … }
-      end
+    Progress.step 1, 11 do
+      10.times_with_progress('B'){ … }
+    end
+    Progress.step 10, 11 do
+      10.times_with_progress('C'){ … }
     end
   end
 
