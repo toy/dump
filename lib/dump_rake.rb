@@ -28,18 +28,18 @@ class DumpRake
   def self.versions(options = {})
     Dump.list(options).each do |dump|
       puts DumpRake::Env[:show_size] || $stdout.tty? ? "#{dump.human_size.to_s.rjust(7)}\t#{dump}" : dump
-      if options[:summary]
-        begin
-          if %w(full 2).include?((options[:summary] || '').downcase)
-            puts DumpReader.summary(dump.path, :schema => true)
-          else
-            puts DumpReader.summary(dump.path)
-          end
+      begin
+        case options[:summary].to_s.downcase[0, 1]
+        when '1', 't', 'y'
+          puts DumpReader.summary(dump.path)
           puts
-        rescue => e
-          $stderr.puts "Error reading dump: #{e}"
-          $stderr.puts
+        when '2', 's'
+          puts DumpReader.summary(dump.path, :schema => true)
+          puts
         end
+      rescue => e
+        $stderr.puts "Error reading dump: #{e}"
+        $stderr.puts
       end
     end
   end

@@ -84,7 +84,7 @@ class DumpRake
       :desc => 'free form description of dump',
       :tags => 'comma separated list of tags',
       :leave => 'number of dumps to leave',
-      :summary => 'output info about dump',
+      :summary => 'output info about dump: "1", "true" or "yes" for basic info, "2" or "schema" to view also schema',
       :assets => 'comma or colon separated list of paths or globs to dump',
       :tables => 'comma separated list of tables to dump or if prefixed by "-" — to skip; by default only sessions table is skipped; schema_info and schema_migrations are always included if they are present',
       :backup => 'no autobackup if you pass 0 or something starting with "n" or "f"',
