@@ -51,19 +51,21 @@ class DumpRake
         }
 
         assets = dump.config[:assets]
-        sum.header 'Assets'
-        sum.data assets.sort.map{ |entry|
-          if String === entry
-            entry
-          else
-            asset, paths = entry
-            if Hash === paths
-              "#{asset}: #{Summary.pluralize paths[:files], 'file'} (#{Summary.pluralize paths[:total], 'entry'} total)"
+        if assets.present?
+          sum.header 'Assets'
+          sum.data assets.sort.map{ |entry|
+            if String === entry
+              entry
             else
-              "#{asset}: #{Summary.pluralize paths, 'entry'}"
+              asset, paths = entry
+              if Hash === paths
+                "#{asset}: #{Summary.pluralize paths[:files], 'file'} (#{Summary.pluralize paths[:total], 'entry'} total)"
+              else
+                "#{asset}: #{Summary.pluralize paths, 'entry'}"
+              end
             end
-          end
-        }
+          }
+        end
 
         if options[:schema]
           sum.header 'Schema'
