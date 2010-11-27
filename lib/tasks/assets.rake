@@ -1,6 +1,5 @@
 $: << File.join(File.dirname(__FILE__), '..', '..', 'lib')
 require 'dump_rake'
-require 'dump_rake/env'
 
 task :assets do
   rails_root = (Object.const_defined?('Rails') ? Rails.root : RAILS_ROOT).to_s

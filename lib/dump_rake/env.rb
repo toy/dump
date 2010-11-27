@@ -126,5 +126,3 @@ class DumpRake
     end
   end
 end
-
-require 'dump_rake/env/filter'

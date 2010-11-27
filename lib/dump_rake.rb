@@ -6,6 +6,7 @@ require 'find'
 require 'fileutils'
 require 'zlib'
 require 'tempfile'
+require 'backported_tmpdir' unless Dir.respond_to?(:mktmpdir)
 
 require 'rake'
 
@@ -91,4 +92,8 @@ class DumpRake
       end
     end
   end
+end
+
+%w[table_manipulation dump dump_reader dump_writer env env/filter].each do |file|
+  require "dump_rake/#{file}"
 end

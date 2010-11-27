@@ -1,4 +1,3 @@
-require 'rake'
 require 'spec/rake/spectask'
 
 desc 'Default: run specs.'

@@ -1,5 +1,3 @@
-require 'backported_tmpdir' unless Dir.respond_to?(:mktmpdir)
-
 class DumpRake
   class Dump
     include TableManipulation
