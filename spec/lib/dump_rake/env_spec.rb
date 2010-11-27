@@ -67,6 +67,29 @@ describe Env do
     end
   end
 
+  describe "filter" do
+    before do
+      Env.instance_variable_set(:@filters, nil)
+    end
+
+    it "should return Filter" do
+      ENV['TABLES'] = 'a,b,c'
+      filter = Env.filter('TABLES')
+      filter.should be_instance_of(Env::Filter)
+      filter.invert.should be_false
+      filter.values.should == %w[a b c]
+    end
+
+    it "should cache created filter" do
+      ENV['TABLES'] = 'a,b,c'
+      ENV['TABLES2'] = 'a,b,c'
+      Env::Filter.should_receive(:new).with('a,b,c').once
+      Env.filter('TABLES')
+      Env.filter('TABLES')
+      Env.filter('TABLES2')
+    end
+  end
+
   describe "for_command" do
     describe "when no vars present" do
       it "should return empty hash for every command" do

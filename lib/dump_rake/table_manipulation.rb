@@ -52,13 +52,8 @@ class DumpRake
 
     def tables_to_dump
       if DumpRake::Env[:tables]
-        env_tables = DumpRake::Env[:tables].dup
-        prefix = env_tables.slice!(/^\-/)
-        candidates = env_tables.split(',').map(&:strip).map(&:downcase).uniq.reject(&:blank?)
-        if prefix
-          avaliable_tables - (candidates - schema_tables)
-        else
-          avaliable_tables & (candidates | schema_tables)
+        DumpRake::Env.filter(:tables).filter(avaliable_tables) do |table|
+          schema_tables.include?(table)
         end
       else
         avaliable_tables - %w(sessions)

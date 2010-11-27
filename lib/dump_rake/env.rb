@@ -50,6 +50,11 @@ class DumpRake
       end
     end
 
+    def self.filter(key)
+      @filters ||= Hash.new{ |hash, key| hash[key] = Filter.new(key) }
+      @filters[self[key]]
+    end
+
     def self.variable_names_for_command(command)
       m = {
         :select => [:like, :tags],
@@ -109,3 +114,5 @@ class DumpRake
     end
   end
 end
+
+require 'dump_rake/env/filter'
