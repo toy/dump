@@ -247,6 +247,16 @@ namespace :dump do
     end
   end
 
+  desc "Shorthand for dump:local:upload" << DumpRake::Env.explain_variables_for_command(:transfer)
+  task :upload, :roles => :db, :only => {:primary => true} do
+    local.upload
+  end
+
+  desc "Shorthand for dump:remote:download" << DumpRake::Env.explain_variables_for_command(:transfer)
+  task :download, :roles => :db, :only => {:primary => true} do
+    remote:download
+  end
+
   namespace :mirror do
     desc "Creates local dump, uploads and restores on remote" << DumpRake::Env.explain_variables_for_command(:mirror)
     task :up, :roles => :db, :only => {:primary => true} do
