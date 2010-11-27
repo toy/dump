@@ -309,6 +309,15 @@ namespace :dump do
 
     desc "Uploads dump with backup tag and restores it on remote" << DumpRake::Env.explain_variables_for_command(:backup_restore)
     task :restore, :roles => :db, :only => {:primary => true} do
+      file = with_additional_tags('backup') do
+        last_part_of_last_line(run_local(dump_command(:versions)))
+      end
+      if file.present?
+        DumpRake::Env.with_clean_env(:like => file) do
+          local.upload
+          remote.restore
+        end
+      end
     end
   end
 end
