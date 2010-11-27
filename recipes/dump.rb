@@ -289,15 +289,26 @@ namespace :dump do
     end
   end
 
-  desc "Creates remote dump and downloads to local (desc defaults to 'backup')" << DumpRake::Env.explain_variables_for_command(:backup)
-  task :backup, :roles => :db, :only => {:primary => true} do
-    file = with_additional_tags('backup') do
-      remote.create
+  namespace :backup do
+    desc "Shorthand for dump:backup:create" << DumpRake::Env.explain_variables_for_command(:backup)
+    task :default, :roles => :db, :only => {:primary => true} do
+      create
     end
-    if file.present?
-      DumpRake::Env.with_clean_env(:like => file) do
-        remote.download
+
+    desc "Creates remote dump and downloads to local (desc defaults to 'backup')" << DumpRake::Env.explain_variables_for_command(:backup)
+    task :create, :roles => :db, :only => {:primary => true} do
+      file = with_additional_tags('backup') do
+        remote.create
       end
+      if file.present?
+        DumpRake::Env.with_clean_env(:like => file) do
+          remote.download
+        end
+      end
+    end
+
+    desc "Uploads dump with backup tag and restores it on remote" << DumpRake::Env.explain_variables_for_command(:backup_restore)
+    task :restore, :roles => :db, :only => {:primary => true} do
     end
   end
 end
