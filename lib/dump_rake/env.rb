@@ -98,7 +98,7 @@ class DumpRake
       :backup => 'no autobackup if you pass "0", "no" or "false"',
       :skip_tables => 'comma separated list of tables to skip when restoring dump',
       :transfer_via => 'transfer method (rsync, sftp or scp)',
-      :migrate_down => 'don\'t run down for migrations not present in dumpif you pass "0", "no" or "false"',
+      :migrate_down => 'don\'t run down for migrations not present in dump if you pass "0", "no" or "false"',
     }.freeze
 
     def self.explain_variables_for_command(command)
