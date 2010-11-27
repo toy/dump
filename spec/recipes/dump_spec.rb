@@ -10,7 +10,7 @@ describe "cap dump" do
   end
 
   def all_dictionary_variables
-    DumpRake::Env.dictionary.each_with_object({}) do |(key, value), filled_env|
+    DumpRake::Env::DICTIONARY.each_with_object({}) do |(key, value), filled_env|
       filled_env[key] = value.join(' ')
     end
   end
@@ -18,7 +18,7 @@ describe "cap dump" do
   def self.test_passing_environment_variables(place, command, command_strings, options = {})
     DumpRake::Env.variable_names_for_command(command).each do |variable|
       command_string = command_strings[variable]
-      DumpRake::Env.dictionary[variable].each do |name|
+      DumpRake::Env::DICTIONARY[variable].each do |name|
         it "should pass #{variable} if it is set through environment variable #{name}" do
           violated "command_string not specified" unless command_string
           full_command_string = command_string
@@ -374,7 +374,7 @@ describe "cap dump" do
 
       it "should block sending summary to versions" do
         @cap.dump.should_receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions PROGRESS_TTY=+ RAILS_ENV=production").and_return('')
-        DumpRake::Env.dictionary[:summary].each do |name|
+        DumpRake::Env::DICTIONARY[:summary].each do |name|
           DumpRake::Env.with_env name => 'true' do
             @cap.find_and_execute_task("dump:remote:download")
           end

@@ -28,7 +28,7 @@ describe "rake dump" do
     end
 
     DumpRake::Env.variable_names_for_command(:versions) do |variable|
-      DumpRake::Env.dictionary[variable].each do |name|
+      DumpRake::Env::DICTIONARY[variable].each do |name|
         it "should pass version if it is set through environment variable #{name}" do
           DumpRake.should_receive(:versions).with(variable => '21376')
           DumpRake::Env.with_env name => '21376' do
@@ -50,7 +50,7 @@ describe "rake dump" do
     end
 
     DumpRake::Env.variable_names_for_command(:create) do |variable|
-      DumpRake::Env.dictionary[variable].each do |name|
+      DumpRake::Env::DICTIONARY[variable].each do |name|
         it "should pass description if it is set through environment variable #{name}" do
           DumpRake.should_receive(:create).with(variable => 'simple dump')
           DumpRake::Env.with_env name => 'simple dump' do
@@ -72,7 +72,7 @@ describe "rake dump" do
     end
 
     DumpRake::Env.variable_names_for_command(:restore) do |variable|
-      DumpRake::Env.dictionary[variable].each do |name|
+      DumpRake::Env::DICTIONARY[variable].each do |name|
         it "should pass version if it is set through environment variable #{name}" do
           DumpRake.should_receive(:restore).with(variable => '21378')
           DumpRake::Env.with_env name => '21378' do
@@ -94,7 +94,7 @@ describe "rake dump" do
     end
 
     DumpRake::Env.variable_names_for_command(:cleanup) do |variable|
-      DumpRake::Env.dictionary[variable].each do |name|
+      DumpRake::Env::DICTIONARY[variable].each do |name|
         it "should pass number of dumps to leave if it is set through environment variable #{name}" do
           DumpRake.should_receive(:versions).with(variable => '21376')
           DumpRake::Env.with_env name => '21376' do

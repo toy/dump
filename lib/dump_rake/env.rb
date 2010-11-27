@@ -1,7 +1,7 @@
 # encoding: utf-8
 class DumpRake
   module Env
-    @dictionary = {
+    DICTIONARY = {
       :like => %w(LIKE VER VERSION),
       :desc => %w(DESC DESCRIPTION),
       :tags => %w(TAGS TAG),
@@ -14,85 +14,9 @@ class DumpRake
       :show_size => %w(SHOW_SIZE),
       :migrate_down => %w(MIGRATE_DOWN),
       :skip_tables => %w(SKIP_TABLES),
-    }.freeze
+    }.freeze unless defined? DICTIONARY
 
-    def self.dictionary
-      @dictionary
-    end
-
-    def self.with_env(hash)
-      old = {}
-      hash.each do |key, value|
-        key = dictionary[key].first if dictionary[key]
-        old[key] = ENV[key]
-        ENV[key] = value
-      end
-      begin
-        yield
-      ensure
-        old.each do |key, value|
-          ENV[key] = value
-        end
-      end
-    end
-
-    def self.with_clean_env(hash = {}, &block)
-      empty_env = {}
-      dictionary.keys.each{ |key| empty_env[key] = nil }
-      with_env(empty_env.merge(hash), &block)
-    end
-
-    def self.[](key)
-      if dictionary[key]
-        ENV.values_at(*dictionary[key]).compact.first
-      else
-        ENV[key]
-      end
-    end
-
-    def self.filter(key)
-      @filters ||= Hash.new{ |hash, key| hash[key] = Filter.new(key) }
-      @filters[self[key]]
-    end
-
-    def self.variable_names_for_command(command)
-      m = {
-        :select => [:like, :tags],
-        :assets => [:assets],
-        :restore_options => [:skip_tables, :migrate_down],
-        :transfer_options => [:transfer_via]
-      }
-
-      m[:versions] = m[:select] | [:summary]
-      m[:create] = [:desc, :tags, :tables] | m[:assets]
-      m[:restore] = m[:select] | m[:restore_options]
-      m[:cleanup] = m[:select] | [:leave]
-
-      m[:transfer] = m[:select] | m[:transfer_options]
-
-      m[:mirror] = [:backup] | m[:create] | m[:transfer_options] | m[:restore_options]
-      m[:backup] = m[:create] | [:transfer_via]
-      m[:backup_restore] = m[:transfer] | m[:restore_options]
-
-      m[command] || []
-    end
-
-    def self.for_command(command, strings = false)
-      variables = variable_names_for_command(command)
-      variables.inject({}) do |env, variable|
-        value = self[variable]
-        env[strings ? dictionary[variable].first : variable] = value if value
-        env
-      end
-    end
-
-    def self.stringify!(hash)
-      hash.keys.each do |key|
-        hash[dictionary[key] ? dictionary[key].first : key.to_s] = hash.delete(key)
-      end
-    end
-
-    @explanations = {
+    EXPLANATIONS = {
       :like => 'filter dumps by full dump name',
       :desc => 'free form description of dump',
       :tags => 'comma separated list of tags',
@@ -104,13 +28,87 @@ class DumpRake
       :skip_tables => 'comma separated list of tables to skip when restoring dump',
       :transfer_via => 'transfer method (rsync, sftp or scp)',
       :migrate_down => 'don\'t run down for migrations not present in dump if you pass "0", "no" or "false"',
-    }.freeze
+    }.freeze unless defined? EXPLANATIONS
 
-    def self.explain_variables_for_command(command)
-      ".\n" <<
-      variable_names_for_command(command).map do |variable_name|
-        "  #{dictionary[variable_name].join(', ')} — #{@explanations[variable_name]}\n"
-      end.join('')
+    class << self
+      def with_env(hash)
+        old = {}
+        hash.each do |key, value|
+          key = DICTIONARY[key].first if DICTIONARY[key]
+          old[key] = ENV[key]
+          ENV[key] = value
+        end
+        begin
+          yield
+        ensure
+          old.each do |key, value|
+            ENV[key] = value
+          end
+        end
+      end
+
+      def with_clean_env(hash = {}, &block)
+        empty_env = {}
+        DICTIONARY.keys.each{ |key| empty_env[key] = nil }
+        with_env(empty_env.merge(hash), &block)
+      end
+
+      def [](key)
+        if DICTIONARY[key]
+          ENV.values_at(*DICTIONARY[key]).compact.first
+        else
+          ENV[key]
+        end
+      end
+
+      def filter(key)
+        @filters ||= Hash.new{ |hash, key| hash[key] = Filter.new(key) }
+        @filters[self[key]]
+      end
+
+      def variable_names_for_command(command)
+        m = {
+          :select => [:like, :tags],
+          :assets => [:assets],
+          :restore_options => [:skip_tables, :migrate_down],
+          :transfer_options => [:transfer_via]
+        }
+
+        m[:versions] = m[:select] | [:summary]
+        m[:create] = [:desc, :tags, :tables] | m[:assets]
+        m[:restore] = m[:select] | m[:restore_options]
+        m[:cleanup] = m[:select] | [:leave]
+
+        m[:transfer] = m[:select] | m[:transfer_options]
+
+        m[:mirror] = [:backup] | m[:create] | m[:transfer_options] | m[:restore_options]
+        m[:backup] = m[:create] | [:transfer_via]
+        m[:backup_restore] = m[:transfer] | m[:restore_options]
+
+        m[command] || []
+      end
+
+      def for_command(command, strings = false)
+        variables = variable_names_for_command(command)
+        variables.inject({}) do |env, variable|
+          value = self[variable]
+          env[strings ? DICTIONARY[variable].first : variable] = value if value
+          env
+        end
+      end
+
+      def stringify!(hash)
+        hash.keys.each do |key|
+          hash[DICTIONARY[key] ? DICTIONARY[key].first : key.to_s] = hash.delete(key)
+        end
+      end
+
+      def explain_variables_for_command(command)
+        ".\n" <<
+        variable_names_for_command(command).map do |variable_name|
+          "  #{DICTIONARY[variable_name].join(', ')} — #{EXPLANATIONS[variable_name]}\n"
+        end.join('')
+      end
     end
   end
 end
