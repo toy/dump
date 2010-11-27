@@ -51,18 +51,25 @@ class DumpRake
     end
 
     def self.variable_names_for_command(command)
-      mapping = {
-        :create => [:desc, :tags, :assets, :tables],
-        :restore => [:like, :tags, :assets, :skip_tables, :migrate_down],
-        :versions => [:like, :tags, :summary],
-        :cleanup => [:like, :tags, :leave],
+      m = {
+        :select => [:like, :tags],
         :assets => [:assets],
+        :restore_options => [:skip_tables, :migrate_down],
+        :transfer_options => [:transfer_via]
       }
-      mapping[:transfer] = [:transfer_via] + mapping[:restore]
-      mapping[:mirror] = [:backup] + mapping[:create]
-      mapping[:backup] = [:transfer_via] + mapping[:create]
 
-      mapping[command] || []
+      m[:versions] = m[:select] | [:summary]
+      m[:create] = [:desc, :tags, :tables] | m[:assets]
+      m[:restore] = m[:select] | m[:restore_options]
+      m[:cleanup] = m[:select] | [:leave]
+
+      m[:transfer] = m[:select] | m[:transfer_options]
+
+      m[:mirror] = [:backup] | m[:create] | m[:transfer_options] | m[:restore_options]
+      m[:backup] = m[:create] | [:transfer_via]
+      m[:backup_restore] = m[:transfer] | m[:restore_options]
+
+      m[command] || []
     end
 
     def self.for_command(command, strings = false)
