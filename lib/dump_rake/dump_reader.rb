@@ -115,7 +115,7 @@ class DumpRake
     end
 
     def migrate_down
-      if migrate_down? && avaliable_tables.include?('schema_migrations')
+      if !DumpRake::Env.no?(:migrate_down) && avaliable_tables.include?('schema_migrations')
         find_entry("schema_migrations.dump") do |entry|
           migrated = table_rows('schema_migrations').map{ |row| row['version'] }
 
@@ -141,10 +141,6 @@ class DumpRake
           end
         end
       end
-    end
-
-    def migrate_down?
-      !DumpRake::Env.no?(:migrate_down)
     end
 
     def read_schema
