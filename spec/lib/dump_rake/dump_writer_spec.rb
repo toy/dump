@@ -113,7 +113,7 @@ describe DumpWriter do
 
       it "should call write_table for each table returned by tables_to_dump" do
         @dump.stub!(:verify_connection)
-        @dump.stub!(:tables_to_dump).and_return(%w(first second))
+        @dump.stub!(:tables_to_dump).and_return(%w[first second])
 
         @dump.should_receive(:write_table).with('first')
         @dump.should_receive(:write_table).with('second')
@@ -179,7 +179,7 @@ describe DumpWriter do
 
       it "should change root to RAILS_ROOT" do
         @file = mock('file')
-        @dump.stub!(:assets_to_dump).and_return(%w(images videos))
+        @dump.stub!(:assets_to_dump).and_return(%w[images videos])
         @dump.stub!(:create_file).and_yield(@file)
 
         Dir.should_receive(:chdir).with(RAILS_ROOT)
@@ -188,13 +188,13 @@ describe DumpWriter do
 
       it "should put assets to config" do
         @file = mock('file')
-        @dump.stub!(:assets_to_dump).and_return(%w(images/* videos))
+        @dump.stub!(:assets_to_dump).and_return(%w[images/* videos])
         @dump.stub!(:create_file).and_yield(@file)
         Dir.stub!(:chdir).and_yield
         @tar = mock('tar_writer')
         Archive::Tar::Minitar::Output.stub!(:open).and_yield(@tar)
         Dir.stub!(:[]).and_return([])
-        Dir.should_receive(:[]).with(*%w(images/* videos)).and_return(%w(images/a images/b videos))
+        Dir.should_receive(:[]).with(*%w[images/* videos]).and_return(%w[images/a images/b videos])
 
         @dump.write_assets
         counts = {:files => 0, :total => 0}
@@ -203,13 +203,13 @@ describe DumpWriter do
 
       it "should use glob to find files" do
         @file = mock('file')
-        @dump.stub!(:assets_to_dump).and_return(%w(images/* videos))
+        @dump.stub!(:assets_to_dump).and_return(%w[images/* videos])
         @dump.stub!(:create_file).and_yield(@file)
         Dir.stub!(:chdir).and_yield
         @tar = mock('tar_writer')
         Archive::Tar::Minitar::Output.stub!(:open).and_yield(@tar)
 
-        Dir.should_receive(:[]).with(*%w(images/* videos)).and_return(%w(images/a images/b videos))
+        Dir.should_receive(:[]).with(*%w[images/* videos]).and_return(%w[images/a images/b videos])
         Dir.should_receive(:[]).with('images/a/**/*').and_return([])
         Dir.should_receive(:[]).with('images/b/**/*').and_return([])
         Dir.should_receive(:[]).with('videos/**/*').and_return([])
@@ -219,13 +219,13 @@ describe DumpWriter do
 
       it "should pack each file from assets_root_link" do
         @file = mock('file')
-        @dump.stub!(:assets_to_dump).and_return(%w(images/* videos))
+        @dump.stub!(:assets_to_dump).and_return(%w[images/* videos])
         @dump.stub!(:create_file).and_yield(@file)
         Dir.stub!(:chdir).and_yield
         @tar = mock('tar_writer')
         Archive::Tar::Minitar::Output.stub!(:open).and_yield(@tar)
 
-        Dir.should_receive(:[]).with(*%w(images/* videos)).and_return(%w(images/a images/b videos))
+        Dir.should_receive(:[]).with(*%w[images/* videos]).and_return(%w[images/a images/b videos])
         Dir.should_receive(:[]).with('images/a/**/*').and_return([])
         Dir.should_receive(:[]).with('images/b/**/*').and_return([])
         Dir.should_receive(:[]).with('videos/**/*').and_return([])
@@ -237,18 +237,18 @@ describe DumpWriter do
 
       it "should pack each file" do
         @file = mock('file')
-        @dump.stub!(:assets_to_dump).and_return(%w(images/* videos))
+        @dump.stub!(:assets_to_dump).and_return(%w[images/* videos])
         @dump.stub!(:create_file).and_yield(@file)
         Dir.stub!(:chdir).and_yield
         @tar = mock('tar_writer')
         Archive::Tar::Minitar::Output.stub!(:open).and_yield(@tar)
 
-        Dir.should_receive(:[]).with(*%w(images/* videos)).and_return(%w(images/a images/b videos))
-        Dir.should_receive(:[]).with('images/a/**/*').and_return(%w(a.jpg b.jpg))
-        Dir.should_receive(:[]).with('images/b/**/*').and_return(%w(c.jpg d.jpg))
-        Dir.should_receive(:[]).with('videos/**/*').and_return(%w(a.mov b.mov))
+        Dir.should_receive(:[]).with(*%w[images/* videos]).and_return(%w[images/a images/b videos])
+        Dir.should_receive(:[]).with('images/a/**/*').and_return(%w[a.jpg b.jpg])
+        Dir.should_receive(:[]).with('images/b/**/*').and_return(%w[c.jpg d.jpg])
+        Dir.should_receive(:[]).with('videos/**/*').and_return(%w[a.mov b.mov])
 
-        %w(a.jpg b.jpg c.jpg d.jpg a.mov b.mov).each do |file_name|
+        %w[a.jpg b.jpg c.jpg d.jpg a.mov b.mov].each do |file_name|
           Archive::Tar::Minitar.should_receive(:pack_file).with("assets/#{file_name}", @stream)
         end
 
@@ -257,14 +257,14 @@ describe DumpWriter do
 
       it "should not raise if something fails when packing" do
         @file = mock('file')
-        @dump.stub!(:assets_to_dump).and_return(%w(videos))
+        @dump.stub!(:assets_to_dump).and_return(%w[videos])
         @dump.stub!(:create_file).and_yield(@file)
         Dir.stub!(:chdir).and_yield
         @tar = mock('tar_writer')
         Archive::Tar::Minitar::Output.stub!(:open).and_yield(@tar)
 
-        Dir.should_receive(:[]).with(*%w(videos)).and_return(%w(videos))
-        Dir.should_receive(:[]).with('videos/**/*').and_return(%w(a.mov b.mov))
+        Dir.should_receive(:[]).with(*%w[videos]).and_return(%w[videos])
+        Dir.should_receive(:[]).with('videos/**/*').and_return(%w[a.mov b.mov])
 
         Archive::Tar::Minitar.should_receive(:pack_file).with('assets/a.mov', @stream).and_raise('file not found')
         Archive::Tar::Minitar.should_receive(:pack_file).with('assets/b.mov', @stream)
@@ -285,7 +285,7 @@ describe DumpWriter do
       it "should dump column names and values of each row" do
         @file = mock('file')
         @dump.stub!(:create_file).and_yield(@file)
-        @config.replace({:tables => {'first' => 1, 'second' => 2}, :assets => %w(images videos)})
+        @config.replace({:tables => {'first' => 1, 'second' => 2}, :assets => %w[images videos]})
 
         @file.should_receive(:write).with(Marshal.dump(@config))
         @dump.write_config
@@ -305,7 +305,7 @@ describe DumpWriter do
         Rake::Task.stub!(:[]).and_return(@task)
         @task.stub!(:invoke)
         DumpRake::Env.with_env(:assets => 'images:videos') do
-          @dump.assets_to_dump.should == %w(images videos)
+          @dump.assets_to_dump.should == %w[images videos]
         end
       end
 
@@ -314,7 +314,7 @@ describe DumpWriter do
         Rake::Task.stub!(:[]).and_return(@task)
         @task.stub!(:invoke)
         DumpRake::Env.with_env(:assets => 'images,videos') do
-          @dump.assets_to_dump.should == %w(images videos)
+          @dump.assets_to_dump.should == %w[images videos]
         end
       end
 

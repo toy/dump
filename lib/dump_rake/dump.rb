@@ -93,7 +93,7 @@ class DumpRake
       number = size
       return nil if number.nil?
       degree = 0
-      symbols = %W(B K M G T)
+      symbols = %W[B K M G T]
       while number >= 1000 && degree < symbols.length - 1
         degree += 1
         number /= 1024.0

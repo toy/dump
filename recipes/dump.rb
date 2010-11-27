@@ -25,7 +25,7 @@ namespace :dump do
 
     env.update(DumpRake::Env.for_command(command, true))
 
-    cmd = %W(#{rake} -s dump:#{command})
+    cmd = %W[#{rake} -s dump:#{command}]
     cmd += env.sort.map{ |key, value| "#{key}=#{value}" }
     ShellEscape.command(*cmd)
   end
@@ -52,7 +52,7 @@ namespace :dump do
             full_host = "#{"#{user}@" if user.present?}#{host}"
 
             ssh = port.present? ? "ssh -p #{port}" : 'ssh'
-            cmd = %W(rsync -P -e #{ssh} --timeout=15)
+            cmd = %W[rsync -P -e #{ssh} --timeout=15]
             case direction
             when :up
               cmd << from << "#{full_host}:#{to}"
@@ -160,7 +160,7 @@ namespace :dump do
   end
 
   def auto_backup?
-    !%w(0 n f).include?((DumpRake::Env[:backup] || '').downcase.strip[0, 1])
+    !%w[0 n f].include?((DumpRake::Env[:backup] || '').downcase.strip[0, 1])
   end
 
   namespace :local do

@@ -67,14 +67,14 @@ describe DumpRake do
     end
 
     it "should print versions" do
-      DumpRake::Dump.should_receive(:list).and_return(%w(123.tgz 456.tgz))
+      DumpRake::Dump.should_receive(:list).and_return(%w[123.tgz 456.tgz])
       grab_output{
         DumpRake.versions
       }[:stdout].should == "123.tgz\n456.tgz\n"
     end
 
     it "should not show summary if not asked for" do
-      dumps = %w(123.tgz 456.tgz).map do |s|
+      dumps = %w[123.tgz 456.tgz].map do |s|
         dump = mock("dump_#{s}", :path => mock("dump_#{s}_path"))
         DumpRake::DumpReader.should_not_receive(:summary)
         dump
@@ -88,7 +88,7 @@ describe DumpRake do
     end
 
     it "should show summary if asked for" do
-      dumps = %w(123.tgz 456.tgz).map do |s|
+      dumps = %w[123.tgz 456.tgz].map do |s|
         dump = mock("dump_#{s}", :path => mock("dump_#{s}_path"))
         DumpRake::DumpReader.should_receive(:summary).with(dump.path)
         dump
@@ -102,7 +102,7 @@ describe DumpRake do
     end
 
     it "should show summary with scmema if asked for" do
-      dumps = %w(123.tgz 456.tgz).map do |s|
+      dumps = %w[123.tgz 456.tgz].map do |s|
         dump = mock("dump_#{s}", :path => mock("dump_#{s}_path"))
         DumpRake::DumpReader.should_receive(:summary).with(dump.path, :schema => true)
         dump
@@ -117,7 +117,7 @@ describe DumpRake do
 
     it "should show output to stderr if summary raises error" do
       DumpRake::DumpReader.stub!(:summary)
-      dumps = %w(123.tgz 456.tgz).map do |s|
+      dumps = %w[123.tgz 456.tgz].map do |s|
         mock("dump_#{s}", :path => mock("dump_#{s}_path"))
       end
       DumpRake::DumpReader.should_receive(:summary).with(dumps[1].path).and_raise('terrible error')
@@ -321,10 +321,10 @@ describe DumpRake do
       {:leave => 'none'} => [0..9],
     }.each do |options, ids|
       it "should call delete #{ids} dumps when called with #{options}" do
-        dumps = %w(a b c d e f g h i j).map do |s|
+        dumps = %w[a b c d e f g h i j].map do |s|
           mock("dump_#{s}", :ext => 'tgz', :path => mock("dump_#{s}_path"))
         end
-        tmp_dumps = %w(a b c).map do |s|
+        tmp_dumps = %w[a b c].map do |s|
           mock("tmp_dump_#{s}", :ext => 'tmp', :path => mock("tmp_dump_#{s}_path"))
         end
         all_dumps = tmp_dumps[0, 1] + dumps[0, 5] + tmp_dumps[1, 1] + dumps[5, 5] + tmp_dumps[2, 1]
@@ -351,7 +351,7 @@ describe DumpRake do
     end
 
     it "should print to stderr if can not delete dump" do
-      dumps = %w(a b c d e f g h i j).map do |s|
+      dumps = %w[a b c d e f g h i j].map do |s|
         dump = mock("dump_#{s}", :ext => 'tgz', :path => mock("dump_#{s}_path"))
         dump.stub!(:lock).and_yield
         dump.path.stub!(:unlink)

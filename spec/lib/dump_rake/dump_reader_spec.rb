@@ -48,7 +48,7 @@ describe DumpReader do
       it "should format text" do
         @summary = Summary.new
         @summary.header 'One'
-        @summary.data(%w(fff ggg jjj ppp qqq www))
+        @summary.data(%w[fff ggg jjj ppp qqq www])
         @summary.header 'Two'
         @summary.data([['fff', 234], ['ggg', 321], ['jjj', 666], ['ppp', 678], ['qqq', 123], ['www', 345]].map{ |entry| entry.join(': ') })
 
@@ -88,7 +88,7 @@ describe DumpReader do
     {
       {'path/a' => {:total => 20, :files => 10}, 'path/b' => {:total => 20, :files => 10}} => ['path/a: 10 files (20 entries total)', 'path/b: 10 files (20 entries total)'],
       {'path/a' => 10, 'path/b' => 20} => ['path/a: 10 entries', 'path/b: 20 entries'],
-      %w(path/a path/b) => %w(path/a path/b),
+      %w[path/a path/b] => %w[path/a path/b],
     }.each do |assets, formatted_assets|
       it "should call dump subroutines and create summary" do
         tables = {'a' => 10, 'b' => 20, 'c' => 666}
@@ -114,7 +114,7 @@ describe DumpReader do
     it "should call dump subroutines and create summary with schema" do
       tables = {'a' => 10, 'b' => 20, 'c' => 666}
       formatted_tables = ['a: 10 rows', 'b: 20 rows', 'c: 666 rows']
-      assets = formatted_assets = %w(path/a path/b)
+      assets = formatted_assets = %w[path/a path/b]
 
       schema = mock('schema')
       schema_lines = mock('schema_lines')
@@ -231,7 +231,7 @@ describe DumpReader do
 
     describe "read_config" do
       it "should read config" do
-        @data = {:tables => {:first => 1}, :assets => %w(images videos)}
+        @data = {:tables => {:first => 1}, :assets => %w[images videos]}
         @dump.should_receive(:read_entry).with('config').and_return(Marshal.dump(@data))
 
         @dump.read_config
@@ -334,7 +334,7 @@ describe DumpReader do
         def create_entry(rows_count)
           @entry = StringIO.new
 
-          @columns = %w(id name)
+          @columns = %w[id name]
           @rows = []
           Marshal.dump(@columns, @entry)
           (1..rows_count).each do |i|
@@ -408,7 +408,7 @@ describe DumpReader do
         end
 
         it "should call assets:delete" do
-          @assets = %w(images videos)
+          @assets = %w[images videos]
           @dump.stub!(:config).and_return({:assets => @assets})
           @dump.stub!(:find_entry)
 
@@ -418,7 +418,7 @@ describe DumpReader do
         end
 
         it "should call assets:delete with ASSETS set to config[:assets] joined with :" do
-          @assets = %w(images videos)
+          @assets = %w[images videos]
           @dump.stub!(:config).and_return({:assets => @assets})
           @dump.stub!(:find_entry)
 
@@ -432,7 +432,7 @@ describe DumpReader do
 
       describe "old style" do
         it "should find assets.tar" do
-          @assets = %w(images videos)
+          @assets = %w[images videos]
           @dump.stub!(:config).and_return({:assets => @assets})
           Dir.stub!(:glob).and_return([])
           FileUtils.stub!(:remove_entry)
@@ -442,7 +442,7 @@ describe DumpReader do
         end
 
         [
-          %w(images videos),
+          %w[images videos],
           {'images' => 0, 'videos' => 0},
           {'images' => {:files => 0, :total => 0}, 'videos' => {:files => 0, :total => 0}},
         ].each do |assets|
@@ -457,7 +457,7 @@ describe DumpReader do
 
             @inp = mock('inp')
             each_excpectation = @inp.should_receive(:each)
-            @entries = %w(a b c d).map do |s|
+            @entries = %w[a b c d].map do |s|
               file = mock("file_#{s}")
               each_excpectation.and_yield(file)
               @inp.should_receive(:extract_entry).with(RAILS_ROOT, file)
@@ -476,7 +476,7 @@ describe DumpReader do
         end
 
         [
-          %w(images videos),
+          %w[images videos],
           {'images' => 0, 'videos' => 0},
           {'images' => {:files => 0, :total => 0}, 'videos' => {:files => 0, :total => 0}},
         ].each do |assets|
@@ -487,7 +487,7 @@ describe DumpReader do
 
             @dump.should_receive(:assets_root_link).and_yield('/tmp/abc', 'assets')
             each_excpectation = @stream.should_receive(:each)
-            @entries = %w(a b c d).map do |s|
+            @entries = %w[a b c d].map do |s|
               file = mock("file_#{s}", :full_name => "assets/#{s}")
               each_excpectation.and_yield(file)
               @stream.should_receive(:extract_entry).with('/tmp/abc', file)

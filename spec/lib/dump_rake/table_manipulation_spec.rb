@@ -9,7 +9,7 @@ describe TableManipulation do
 
   describe "schema_tables" do
     it "should return schema_tables" do
-      schema_tables.should == %w(schema_info schema_migrations)
+      schema_tables.should == %w[schema_info schema_migrations]
     end
   end
 
@@ -63,7 +63,7 @@ describe TableManipulation do
 
   describe "join_for_sql" do
     it "should convert array ['`a`', '`b`'] to \"(`a`,`b`)\"" do
-      join_for_sql(%w(`a` `b`)).should == '(`a`,`b`)'
+      join_for_sql(%w[`a` `b`]).should == '(`a`,`b`)'
     end
   end
 
@@ -72,7 +72,7 @@ describe TableManipulation do
       should_receive(:quote_column_name).with('a').and_return('`a`')
       should_receive(:quote_column_name).with('b').and_return('`b`')
 
-      columns_insert_sql(%w(a b)).should == '(`a`,`b`)'
+      columns_insert_sql(%w[a b]).should == '(`a`,`b`)'
     end
   end
 
@@ -81,7 +81,7 @@ describe TableManipulation do
       should_receive(:quote_value).with('a').and_return('`a`')
       should_receive(:quote_value).with('b').and_return('`b`')
 
-      values_insert_sql(%w(a b)).should == '(`a`,`b`)'
+      values_insert_sql(%w[a b]).should == '(`a`,`b`)'
     end
   end
 
@@ -93,42 +93,42 @@ describe TableManipulation do
     end
 
     it "should exclude sessions table from result" do
-      ActiveRecord::Base.connection.should_receive(:tables).and_return(%w(first second schema_info schema_migrations sessions))
-      tables_to_dump.should == %w(first second schema_info schema_migrations)
+      ActiveRecord::Base.connection.should_receive(:tables).and_return(%w[first second schema_info schema_migrations sessions])
+      tables_to_dump.should == %w[first second schema_info schema_migrations]
     end
 
     describe "with user defined tables" do
       before do
-        ActiveRecord::Base.connection.should_receive(:tables).and_return(%w(first second schema_info schema_migrations sessions))
+        ActiveRecord::Base.connection.should_receive(:tables).and_return(%w[first second schema_info schema_migrations sessions])
       end
 
       it "should select certain tables" do
         DumpRake::Env.with_env(:tables => 'first,third,-fifth') do
-          tables_to_dump.should == %w(first schema_info schema_migrations)
+          tables_to_dump.should == %w[first schema_info schema_migrations]
         end
       end
 
       it "should select skip certain tables" do
         DumpRake::Env.with_env(:tables => '-first,third,-fifth') do
-          tables_to_dump.should == %w(second schema_info schema_migrations sessions)
+          tables_to_dump.should == %w[second schema_info schema_migrations sessions]
         end
       end
 
       it "should not exclude sessions table from result if asked to exclude nothing" do
         DumpRake::Env.with_env(:tables => '-') do
-          tables_to_dump.should == %w(first second schema_info schema_migrations sessions)
+          tables_to_dump.should == %w[first second schema_info schema_migrations sessions]
         end
       end
 
       it "should not exclude schema tables" do
         DumpRake::Env.with_env(:tables => '-second,schema_info,schema_migrations') do
-          tables_to_dump.should == %w(first schema_info schema_migrations sessions)
+          tables_to_dump.should == %w[first schema_info schema_migrations sessions]
         end
       end
 
       it "should not exclude schema tables ever if asked to dump only certain tables" do
         DumpRake::Env.with_env(:tables => 'second') do
-          tables_to_dump.should == %w(second schema_info schema_migrations)
+          tables_to_dump.should == %w[second schema_info schema_migrations]
         end
       end
     end

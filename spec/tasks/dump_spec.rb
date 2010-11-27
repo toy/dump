@@ -9,7 +9,7 @@ describe "rake dump" do
     Rake::Task.define_task(:environment)
   end
 
-  %w(versions create restore cleanup).each do |task|
+  %w[versions create restore cleanup].each do |task|
     describe task do
       it "should require environment task" do
         @rake["dump:#{task}"].prerequisites.should include("environment")

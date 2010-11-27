@@ -2,18 +2,18 @@
 class DumpRake
   module Env
     DICTIONARY = {
-      :like => %w(LIKE VER VERSION),
-      :desc => %w(DESC DESCRIPTION),
-      :tags => %w(TAGS TAG),
-      :leave => %w(LEAVE),
-      :summary => %w(SUMMARY),
-      :assets => %w(ASSETS),
-      :tables => %w(TABLES),
-      :backup => %w(BACKUP AUTOBACKUP AUTO_BACKUP),
-      :skip_tables => %w(SKIP_TABLES),
-      :transfer_via => %w(TRANSFER_VIA),
-      :migrate_down => %w(MIGRATE_DOWN),
-      :show_size => %w(SHOW_SIZE), # internal
+      :like => %w[LIKE VER VERSION],
+      :desc => %w[DESC DESCRIPTION],
+      :tags => %w[TAGS TAG],
+      :leave => %w[LEAVE],
+      :summary => %w[SUMMARY],
+      :assets => %w[ASSETS],
+      :tables => %w[TABLES],
+      :backup => %w[BACKUP AUTOBACKUP AUTO_BACKUP],
+      :skip_tables => %w[SKIP_TABLES],
+      :transfer_via => %w[TRANSFER_VIA],
+      :migrate_down => %w[MIGRATE_DOWN],
+      :show_size => %w[SHOW_SIZE], # internal
     }.freeze unless defined? DICTIONARY
 
     EXPLANATIONS = {

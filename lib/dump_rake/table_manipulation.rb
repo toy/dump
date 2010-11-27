@@ -3,7 +3,7 @@ class DumpRake
   protected
 
     def schema_tables
-      %w(schema_info schema_migrations)
+      %w[schema_info schema_migrations]
     end
 
     def verify_connection
@@ -56,7 +56,7 @@ class DumpRake
           schema_tables.include?(table)
         end
       else
-        avaliable_tables - %w(sessions)
+        avaliable_tables - %w[sessions]
       end
     end
 

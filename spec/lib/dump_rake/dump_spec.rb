@@ -96,7 +96,7 @@ describe Dump do
   describe "versions" do
     describe "list" do
       def stub_glob
-        paths = %w(123 345 567).map do |name|
+        paths = %w[123 345 567].map do |name|
           path = dump_path("#{name}.tgz")
           File.should_receive(:file?).with(path).at_least(1).and_return(true)
           path
@@ -123,7 +123,7 @@ describe Dump do
     describe "with tags" do
       before do
         #             0        1  2    3      4      5        6    7    8      9  10   11   12     13 14 15   16
-        dumps_tags = [''] + %w(a  a,d  a,d,o  a,d,s  a,d,s,o  a,o  a,s  a,s,o  d  d,o  d,s  d,s,o  o  s  s,o  z)
+        dumps_tags = [''] + %w[a  a,d  a,d,o  a,d,s  a,d,s,o  a,o  a,s  a,s,o  d  d,o  d,s  d,s,o  o  s  s,o  z]
         paths = dumps_tags.enum_with_index.map do |dump_tags, i|
           path = dump_path("196504140659#{10 + i}@#{dump_tags}.tgz")
           File.should_receive(:file?).with(path).at_least(1).and_return(true)
@@ -170,7 +170,7 @@ describe Dump do
       [dump.time, dump.description, dump.tags, dump.ext]
     end
 
-    %w(tmp tgz).each do |ext|
+    %w[tmp tgz].each do |ext|
       it "should return empty results for dump with wrong name" do
         dump_name_parts("196504140659.#{ext}").should == [nil, '', [], nil]
         dump_name_parts("196504140659-lala.#{ext}").should == [nil, '', [], nil]
@@ -257,11 +257,11 @@ describe Dump do
 
   describe "get_filter_tags" do
     it "should split string and return uniq non blank sorted tags" do
-      Dump.new('').send(:get_filter_tags, 'a,+b,+c,-d').should == {:simple => %w(a), :mandatory => %w(b c), :forbidden => %w(d)}
-      Dump.new('').send(:get_filter_tags, ' a , + b , + c , - d ').should == {:simple => %w(a), :mandatory => %w(b c), :forbidden => %w(d)}
-      Dump.new('').send(:get_filter_tags, ' a , + c , + b , - d ').should == {:simple => %w(a), :mandatory => %w(b c), :forbidden => %w(d)}
-      Dump.new('').send(:get_filter_tags, ' a , + b , + , - ').should == {:simple => %w(a), :mandatory => %w(b), :forbidden => []}
-      Dump.new('').send(:get_filter_tags, ' a , a , + b , + b , - d , - d ').should == {:simple => %w(a), :mandatory => %w(b), :forbidden => %w(d)}
+      Dump.new('').send(:get_filter_tags, 'a,+b,+c,-d').should == {:simple => %w[a], :mandatory => %w[b c], :forbidden => %w[d]}
+      Dump.new('').send(:get_filter_tags, ' a , + b , + c , - d ').should == {:simple => %w[a], :mandatory => %w[b c], :forbidden => %w[d]}
+      Dump.new('').send(:get_filter_tags, ' a , + c , + b , - d ').should == {:simple => %w[a], :mandatory => %w[b c], :forbidden => %w[d]}
+      Dump.new('').send(:get_filter_tags, ' a , + b , + , - ').should == {:simple => %w[a], :mandatory => %w[b], :forbidden => []}
+      Dump.new('').send(:get_filter_tags, ' a , a , + b , + b , - d , - d ').should == {:simple => %w[a], :mandatory => %w[b], :forbidden => %w[d]}
       proc{ Dump.new('').send(:get_filter_tags, 'a,+a') }.should_not raise_error
       proc{ Dump.new('').send(:get_filter_tags, 'a,-a') }.should raise_error
       proc{ Dump.new('').send(:get_filter_tags, '+a,-a') }.should raise_error
