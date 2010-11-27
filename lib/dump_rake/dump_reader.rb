@@ -115,26 +115,32 @@ class DumpRake
     end
 
     def migrate_down
-      if !DumpRake::Env.no?(:migrate_down) && avaliable_tables.include?('schema_migrations')
-        find_entry("schema_migrations.dump") do |entry|
-          migrated = table_rows('schema_migrations').map{ |row| row['version'] }
+      case
+      when DumpRake::Env.downcase(:migrate_down) == 'reset'
+        Rake::Task['db:drop'].invoke
+        Rake::Task['db:create'].invoke
+      when !DumpRake::Env.no?(:migrate_down)
+        if avaliable_tables.include?('schema_migrations')
+          find_entry("schema_migrations.dump") do |entry|
+            migrated = table_rows('schema_migrations').map{ |row| row['version'] }
 
-          dump_migrations = []
-          Marshal.load(entry) # skip header
-          dump_migrations << Marshal.load(entry).first until entry.eof?
+            dump_migrations = []
+            Marshal.load(entry) # skip header
+            dump_migrations << Marshal.load(entry).first until entry.eof?
 
-          migrate_down = (migrated - dump_migrations)
+            migrate_down = (migrated - dump_migrations)
 
-          unless migrate_down.empty?
-            migrate_down.with_progress('Migrating down').reverse.each do |version|
-              DumpRake::Env.with_env('VERSION' => version) do
-                Rake::Task['db:migrate:down'].tap do |task|
-                  begin
-                    task.invoke
-                  rescue ActiveRecord::IrreversibleMigration
-                    $stderr.puts "Irreversible migration: #{version}"
+            unless migrate_down.empty?
+              migrate_down.with_progress('Migrating down').reverse.each do |version|
+                DumpRake::Env.with_env('VERSION' => version) do
+                  Rake::Task['db:migrate:down'].tap do |task|
+                    begin
+                      task.invoke
+                    rescue ActiveRecord::IrreversibleMigration
+                      $stderr.puts "Irreversible migration: #{version}"
+                    end
+                    task.reenable
                   end
-                  task.reenable
                 end
               end
             end

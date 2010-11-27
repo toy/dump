@@ -27,7 +27,7 @@ class DumpRake
       :backup => 'no autobackup if you pass "0", "no" or "false"',
       :skip_tables => 'comma separated list of tables to skip when restoring dump',
       :transfer_via => 'transfer method (rsync, sftp or scp)',
-      :migrate_down => 'don\'t run down for migrations not present in dump if you pass "0", "no" or "false"',
+      :migrate_down => 'don\'t run down for migrations not present in dump if you pass "0", "no" or "false"; pass "reset" to recreate (drop and create) db',
     }.freeze unless defined? EXPLANATIONS
 
     class << self
@@ -72,6 +72,10 @@ class DumpRake
 
       def no?(key)
         %w[0 n f].include?(first_char(key))
+      end
+
+      def downcase(key)
+        self[key].to_s.downcase.strip
       end
 
       def variable_names_for_command(command)
@@ -121,7 +125,7 @@ class DumpRake
     private
 
       def first_char(key)
-        self[key].to_s.downcase.strip[0, 1]
+        downcase(key)[0, 1]
       end
     end
   end
