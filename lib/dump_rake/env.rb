@@ -53,7 +53,7 @@ class DumpRake
     def self.variable_names_for_command(command)
       mapping = {
         :create => [:desc, :tags, :assets, :tables],
-        :restore => [:like, :tags, :skip_tables, :migrate_down],
+        :restore => [:like, :tags, :assets, :skip_tables, :migrate_down],
         :versions => [:like, :tags, :summary],
         :cleanup => [:like, :tags, :leave],
         :assets => [:assets],
