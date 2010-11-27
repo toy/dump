@@ -103,9 +103,7 @@ skip dumps with tags mirror and archive:
 select dumps with tags photos or videos, with tag important and without mirror:
   rake dump:restore TAGS='photos,videos,+important,-mirror'
 
-<tt>SKIP_TABLES</tt> - comma separated list of tables to ignore when restoring contents
-The tables specified will still be created, they will just be empty.  Tables can optionally
-be prefixed with '-', which will be stripped.
+<tt>SKIP_TABLES</tt> - comma separated list of tables to ignore when restoring contents. The tables specified will still be created, they will just be empty. Table names can be prefixed with '-', which will be ignored.
 
 ==== For listing dumps:
 
