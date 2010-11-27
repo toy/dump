@@ -10,10 +10,10 @@ class DumpRake
       :assets => %w(ASSETS),
       :tables => %w(TABLES),
       :backup => %w(BACKUP AUTOBACKUP AUTO_BACKUP),
-      :transfer_via => %w(TRANSFER_VIA),
-      :show_size => %w(SHOW_SIZE),
-      :migrate_down => %w(MIGRATE_DOWN),
       :skip_tables => %w(SKIP_TABLES),
+      :transfer_via => %w(TRANSFER_VIA),
+      :migrate_down => %w(MIGRATE_DOWN),
+      :show_size => %w(SHOW_SIZE), # internal
     }.freeze unless defined? DICTIONARY
 
     EXPLANATIONS = {
