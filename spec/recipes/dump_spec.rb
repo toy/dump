@@ -159,8 +159,8 @@ describe "cap dump" do
       test_passing_environment_variables(:local, :create, {
         :desc => "rake -s dump:create 'DESC=some data' TAGS=local",
         :tags => "rake -s dump:create 'TAGS=local,some data'",
-        :assets => "rake -s dump:create 'ASSETS=some data' TAGS=local",
         :tables => "rake -s dump:create 'TABLES=some data' TAGS=local",
+        :assets => "rake -s dump:create 'ASSETS=some data' TAGS=local",
       }, :return_value => '123.tgz')
 
       it "should print result of rake task" do
@@ -187,6 +187,7 @@ describe "cap dump" do
       test_passing_environment_variables(:local, :restore, {
         :like => "rake -s dump:restore 'LIKE=some data'",
         :tags => "rake -s dump:restore 'TAGS=some data'",
+        :skip_tables => "rake -s dump:restore 'SKIP_TABLES=some data'",
         :migrate_down => "rake -s dump:restore 'MIGRATE_DOWN=some data'",
       })
     end
@@ -197,10 +198,11 @@ describe "cap dump" do
         @cap.find_and_execute_task("dump:local:upload")
       end
 
-      test_passing_environment_variables(:local, :versions, {
+      test_passing_environment_variables(:local, :transfer, {
         :like => "rake -s dump:versions 'LIKE=some data'",
         :tags => "rake -s dump:versions 'TAGS=some data'",
         :summary => "rake -s dump:versions", # block sending summary to versions
+        :transfer_via => "rake -s dump:versions", # tranfer_via is used internally
       }, :cap_task => 'dump:local:upload')
 
       it "should not upload anything if there are no versions avaliable" do
@@ -353,6 +355,7 @@ describe "cap dump" do
       test_passing_environment_variables(:remote, :restore, {
         :like => "rake -s dump:restore 'LIKE=some data' PROGRESS_TTY=+ RAILS_ENV=production",
         :tags => "rake -s dump:restore PROGRESS_TTY=+ RAILS_ENV=production 'TAGS=some data'",
+        :skip_tables => "rake -s dump:restore PROGRESS_TTY=+ RAILS_ENV=production 'SKIP_TABLES=some data'",
         :migrate_down => "rake -s dump:restore 'MIGRATE_DOWN=some data' PROGRESS_TTY=+ RAILS_ENV=production",
       })
 
@@ -378,10 +381,11 @@ describe "cap dump" do
         end
       end
 
-      test_passing_environment_variables(:remote, :download, {
+      test_passing_environment_variables(:remote, :transfer, {
         :like => "rake -s dump:versions 'LIKE=some data' PROGRESS_TTY=+ RAILS_ENV=production",
         :tags => "rake -s dump:versions PROGRESS_TTY=+ RAILS_ENV=production 'TAGS=some data'",
         :summary => "rake -s dump:versions PROGRESS_TTY=+ RAILS_ENV=production", # block sending summary to versions
+        :transfer_via => "rake -s dump:versions PROGRESS_TTY=+ RAILS_ENV=production", # tranfer_via is used internally
       }, :cap_task => "dump:remote:download")
 
       it "should not download anything if there are no versions avaliable" do

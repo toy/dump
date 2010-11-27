@@ -5,7 +5,7 @@ describe "rake assets" do
   before do
     @rake = Rake::Application.new
     Rake.application = @rake
-    load File.dirname(__FILE__) + '/../../tasks/assets.rake'
+    load File.dirname(__FILE__) + '/../../lib/tasks/assets.rake'
     ENV['ASSETS'] = nil
   end
 
@@ -82,6 +82,7 @@ describe "rake assets" do
         ENV.stub!(:[]).with('ASSETS').and_return(@assets.join(':'))
 
         Dir.should_receive(:[]).with(File.join(RAILS_ROOT, 'images', '*')).and_return([])
+        Dir.should_receive(:[]).with(File.join(RAILS_ROOT, '*')).and_return([])
         FileUtils.should_not_receive(:remove_entry)
 
         @rake["assets:delete"].invoke

@@ -97,7 +97,7 @@ describe DumpRake do
       DumpRake::Dump.should_receive(:list).and_return(dumps)
       grab_output{
         $stderr.should_not_receive(:puts)
-        DumpRake.versions(:summary => 'true')
+        DumpRake.versions(:summary => '1')
       }
     end
 
@@ -111,7 +111,7 @@ describe DumpRake do
       DumpRake::Dump.should_receive(:list).and_return(dumps)
       grab_output{
         $stderr.should_not_receive(:puts)
-        DumpRake.versions(:summary => 'full')
+        DumpRake.versions(:summary => '2')
       }
     end
 

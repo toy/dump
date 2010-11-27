@@ -24,6 +24,7 @@ def in_temp_rails_app
   RAILS_ROOT.replace(File.join(PLUGIN_SPEC_DIR, 'temp_rails_app'))
   FileUtils.remove_entry(RAILS_ROOT) if File.exist?(RAILS_ROOT)
   FileUtils.mkpath(RAILS_ROOT)
+  Progress.stub!(:io).and_return(StringIO.new)
   yield
 ensure
   FileUtils.remove_entry(RAILS_ROOT) if File.exist?(RAILS_ROOT)
@@ -65,8 +66,8 @@ end
 def reset_rake!
   @rake = Rake::Application.new
   Rake.application = @rake
-  load File.dirname(__FILE__) + '/../tasks/assets.rake'
-  load File.dirname(__FILE__) + '/../tasks/dump.rake'
+  load File.dirname(__FILE__) + '/../lib/tasks/assets.rake'
+  load File.dirname(__FILE__) + '/../lib/tasks/dump.rake'
   Rake::Task.define_task('environment')
   Rake::Task.define_task('db:schema:dump') do
     File.open(DUMMY_SCHEMA_PATH, 'r') do |r|
@@ -163,20 +164,16 @@ describe 'full cycle' do
           call_rake_create(:description => adapter)
         end
 
-        dumps = {}
-        Dump.list.each do |dump|
-          dumps[dump.name] = {
+        dumps = Dump.list.map do |dump|
+          {
             :path => dump.path,
             :hash => Digest::SHA1.hexdigest(File.read(dump.path)),
           }
         end
 
-        dumps.keys.each do |dump_a|
-          dumps.keys.each do |dump_b|
-            next unless dump_a < dump_b
-            dumps[dump_a][:path].should_not == dumps[dump_b][:path]
-            dumps[dump_a][:hash].should == dumps[dump_b][:hash]
-          end
+        dumps.combination(2) do |dump_a, dump_b|
+          dumps[dump_a][:path].should_not == dumps[dump_b][:path]
+          dumps[dump_a][:hash].should == dumps[dump_b][:hash]
         end
       end
     end
