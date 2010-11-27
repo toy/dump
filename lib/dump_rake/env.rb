@@ -21,7 +21,7 @@ class DumpRake
       :desc => 'free form description of dump',
       :tags => 'comma separated list of tags',
       :leave => 'number of dumps to leave',
-      :summary => 'output info about dump: "1", "true" or "yes" for basic info, "2" or "schema" to view also schema',
+      :summary => 'output info about dump: "1", "true" or "yes" for basic info, "2" or "schema" to display schema as well',
       :assets => 'comma or colon separated list of paths or globs to dump',
       :tables => 'comma separated list of tables to dump or if prefixed by "-" — to skip; by default only sessions table is skipped; schema_info and schema_migrations are always included if they are present',
       :backup => 'no autobackup if you pass "0", "no" or "false"',
@@ -66,6 +66,14 @@ class DumpRake
         @filters[self[key]]
       end
 
+      def yes?(key)
+        %w[1 y t].include?(first_char(key))
+      end
+
+      def no?(key)
+        %w[0 n f].include?(first_char(key))
+      end
+
       def variable_names_for_command(command)
         m = {
           :select => [:like, :tags],
@@ -108,6 +116,12 @@ class DumpRake
         variable_names_for_command(command).map do |variable_name|
           "  #{DICTIONARY[variable_name].join(', ')} — #{EXPLANATIONS[variable_name]}\n"
         end.join('')
+      end
+
+    private
+
+      def first_char(key)
+        self[key].to_s.downcase.strip[0, 1]
       end
     end
   end

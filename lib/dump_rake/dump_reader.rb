@@ -144,7 +144,7 @@ class DumpRake
     end
 
     def migrate_down?
-      !%w[0 n f].include?((DumpRake::Env[:migrate_down] || '').downcase.strip[0, 1])
+      !DumpRake::Env.no?(:migrate_down)
     end
 
     def read_schema

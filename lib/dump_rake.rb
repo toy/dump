@@ -31,10 +31,10 @@ class DumpRake
         puts DumpRake::Env[:show_size] || $stdout.tty? ? "#{dump.human_size.to_s.rjust(7)}\t#{dump}" : dump
         begin
           case options[:summary].to_s.downcase[0, 1]
-          when '1', 't', 'y'
+          when *%w[1 t y]
             puts DumpReader.summary(dump.path)
             puts
-          when '2', 's'
+          when *%w[2 s]
             puts DumpReader.summary(dump.path, :schema => true)
             puts
           end
