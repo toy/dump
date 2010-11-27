@@ -22,11 +22,11 @@ end
 def in_temp_rails_app
   old_rails_root = RAILS_ROOT.dup
   RAILS_ROOT.replace(File.join(PLUGIN_SPEC_DIR, 'temp_rails_app'))
-  FileUtils.remove_entry_secure(RAILS_ROOT) if File.exist?(RAILS_ROOT)
+  FileUtils.remove_entry(RAILS_ROOT) if File.exist?(RAILS_ROOT)
   FileUtils.mkpath(RAILS_ROOT)
   yield
 ensure
-  FileUtils.remove_entry_secure(RAILS_ROOT) if File.exist?(RAILS_ROOT)
+  FileUtils.remove_entry(RAILS_ROOT) if File.exist?(RAILS_ROOT)
   RAILS_ROOT.replace(old_rails_root)
 end
 

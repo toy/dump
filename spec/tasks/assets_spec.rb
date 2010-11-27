@@ -45,7 +45,7 @@ describe "rake assets" do
 
   describe "delete" do
     before do
-      FileUtils.stub!(:remove_entry_secure)
+      FileUtils.stub!(:remove_entry)
     end
 
     it "should require assets task" do
@@ -70,7 +70,7 @@ describe "rake assets" do
           paths = %w(file1 file2 dir).map{ |file| File.join(RAILS_ROOT, asset, file) }
           Dir.should_receive(:[]).with(mask).and_return([paths[0], paths[1], paths[2]])
           paths.each do |path|
-            FileUtils.should_receive(:remove_entry_secure).with(path)
+            FileUtils.should_receive(:remove_entry).with(path)
           end
         end
 
@@ -82,7 +82,7 @@ describe "rake assets" do
         ENV.stub!(:[]).with('ASSETS').and_return(@assets.join(':'))
 
         Dir.should_receive(:[]).with(File.join(RAILS_ROOT, 'images', '*')).and_return([])
-        FileUtils.should_not_receive(:remove_entry_secure)
+        FileUtils.should_not_receive(:remove_entry)
 
         @rake["assets:delete"].invoke
       end

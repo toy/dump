@@ -15,7 +15,7 @@ namespace :assets do
       path = File.expand_path(asset, rails_root)
       if path[0, rails_root.length] == rails_root # asset must be in rails root
         Dir[File.join(path, '*')].each do |child|
-          FileUtils.remove_entry_secure(child)
+          FileUtils.remove_entry(child)
         end
       end
     end

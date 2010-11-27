@@ -435,7 +435,7 @@ describe DumpReader do
           @assets = %w(images videos)
           @dump.stub!(:config).and_return({:assets => @assets})
           Dir.stub!(:glob).and_return([])
-          FileUtils.stub!(:remove_entry_secure)
+          FileUtils.stub!(:remove_entry)
 
           @dump.should_receive(:find_entry).with('assets.tar').and_throw(:assets)
           @dump.read_assets
@@ -449,7 +449,7 @@ describe DumpReader do
           it "should rewrite rewind method to empty method - to not raise exception, open tar and extract each entry" do
             @dump.stub!(:config).and_return({:assets => assets})
             Dir.stub!(:glob).and_return([])
-            FileUtils.stub!(:remove_entry_secure)
+            FileUtils.stub!(:remove_entry)
 
             @assets_tar = mock('assets_tar')
             @assets_tar.stub!(:rewind).and_raise('hehe - we want to rewind to center of gzip')
@@ -483,7 +483,7 @@ describe DumpReader do
           it "should extract each entry" do
             @dump.stub!(:config).and_return({:assets => assets})
             Dir.stub!(:glob).and_return([])
-            FileUtils.stub!(:remove_entry_secure)
+            FileUtils.stub!(:remove_entry)
 
             @dump.should_receive(:assets_root_link).and_yield('/tmp/abc', 'assets')
             each_excpectation = @stream.should_receive(:each)
