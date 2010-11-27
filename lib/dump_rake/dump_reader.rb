@@ -132,7 +132,7 @@ class DumpRake
                   begin
                     task.invoke
                   rescue ActiveRecord::IrreversibleMigration
-                    STDERR.puts "Irreversible migration: #{version}"
+                    $stderr.puts "Irreversible migration: #{version}"
                   end
                   task.reenable
                 end
