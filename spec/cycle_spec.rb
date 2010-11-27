@@ -172,8 +172,8 @@ describe 'full cycle' do
         end
 
         dumps.combination(2) do |dump_a, dump_b|
-          dumps[dump_a][:path].should_not == dumps[dump_b][:path]
-          dumps[dump_a][:hash].should == dumps[dump_b][:hash]
+          dump_a[:path].should_not == dump_b[:path]
+          dump_a[:hash].should == dump_b[:hash]
         end
       end
     end
