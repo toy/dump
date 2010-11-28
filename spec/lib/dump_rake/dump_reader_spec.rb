@@ -307,18 +307,11 @@ describe DumpReader do
         @dump.read_table('first', 10)
       end
 
-      it "should read table if entry found for table" do
+      it "should clear table and read table if entry found for table" do
         @entry = mock('entry', :to_str => Marshal.dump('data'), :eof? => true)
         @dump.should_receive(:find_entry).with('first.dump').and_yield(@entry)
-        @dump.should_receive(:quote_table_name).with('first')
-        @dump.read_table('first', 10)
-      end
-
-      it "should not call clear_table for basic tables" do
-        @entry = mock('entry', :to_str => Marshal.dump('data'), :eof? => true)
-        @dump.should_receive(:find_entry).with('first.dump').and_yield(@entry)
-        @dump.should_receive(:quote_table_name).with('first')
-        @dump.should_not_receive(:clear_table)
+        @dump.should_receive(:quote_table_name).with('first').and_return('`first`')
+        @dump.should_receive(:clear_table).with('`first`')
         @dump.read_table('first', 10)
       end
 
@@ -348,6 +341,7 @@ describe DumpReader do
         end
         it "should read to eof" do
           create_entry(2500)
+          @dump.stub!(:clear_table)
           @dump.stub!(:insert_into_table)
           @dump.read_table('first', 2500)
           @entry.eof?.should be_true
@@ -355,6 +349,7 @@ describe DumpReader do
 
         it "should try to insert rows in slices of 1000 rows" do
           create_entry(2500)
+          @dump.stub!(:clear_table)
           @dump.should_receive(:insert_into_table).with(anything, anything, object_of_length(1000)).twice
           @dump.should_receive(:insert_into_table).with(anything, anything, object_of_length(500)).once
 
@@ -363,6 +358,7 @@ describe DumpReader do
 
         it "should try to insert row by row if slice method fails" do
           create_entry(2500)
+          @dump.stub!(:clear_table)
           @dump.should_receive(:insert_into_table).with(anything, anything, kind_of(Array)).exactly(3).times.and_raise('sql error')
           @dump.should_receive(:insert_into_table).with(anything, anything, kind_of(String)).exactly(2500).times
           @dump.read_table('first', 2500)
@@ -370,6 +366,7 @@ describe DumpReader do
 
         it "should quote table, columns and values and send them to insert_into_table" do
           create_entry(100)
+          @dump.stub!(:clear_table)
           @dump.should_receive(:quote_table_name).with('first').and_return('`first`')
           @dump.should_receive(:columns_insert_sql).with(@columns).and_return('(`id`, `name`)')
           @rows.each do |row|
