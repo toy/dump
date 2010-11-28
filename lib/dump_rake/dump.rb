@@ -2,7 +2,7 @@ class DumpRake
   class Dump
     include TableManipulation
     def self.list(options = {})
-      dumps = Dir[File.join(RAILS_ROOT, 'dump', options[:all] ? '*.*' : '*.tgz')].sort.select{ |path| File.file?(path) }.map{ |path| new(path) }
+      dumps = Dir[File.join(DumpRake::RailsRoot, 'dump', options[:all] ? '*.*' : '*.tgz')].sort.select{ |path| File.file?(path) }.map{ |path| new(path) }
       dumps = dumps.select{ |dump| dump.name[options[:like]] } if options[:like]
       if options[:tags]
         tags = get_filter_tags(options[:tags])
@@ -122,7 +122,7 @@ class DumpRake
       prefix = 'assets'
       Dir.mktmpdir do |dir|
         Dir.chdir(dir) do
-          File.symlink(RAILS_ROOT, prefix)
+          File.symlink(DumpRake::RailsRoot, prefix)
           begin
             yield dir, prefix
           ensure

@@ -81,7 +81,7 @@ class DumpRake
       assets = assets_to_dump
       if assets.present?
         config[:assets] = {}
-        Dir.chdir(RAILS_ROOT) do
+        Dir.chdir(DumpRake::RailsRoot) do
           assets = Dir[*assets].uniq
           assets.with_progress('Assets').each do |asset|
             paths = Dir[File.join(asset, '**', '*')]

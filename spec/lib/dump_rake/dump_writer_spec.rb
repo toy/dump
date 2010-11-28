@@ -177,12 +177,12 @@ describe DumpWriter do
         @dump.write_assets
       end
 
-      it "should change root to RAILS_ROOT" do
+      it "should change root to rails app root" do
         @file = mock('file')
         @dump.stub!(:assets_to_dump).and_return(%w[images videos])
         @dump.stub!(:create_file).and_yield(@file)
 
-        Dir.should_receive(:chdir).with(RAILS_ROOT)
+        Dir.should_receive(:chdir).with(DumpRake::RailsRoot)
         @dump.write_assets
       end
 

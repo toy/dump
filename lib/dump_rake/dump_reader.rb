@@ -229,7 +229,7 @@ class DumpRake
               end
               Archive::Tar::Minitar.open(assets_tar) do |inp|
                 inp.each do |entry|
-                  inp.extract_entry(RAILS_ROOT, entry)
+                  inp.extract_entry(DumpRake::RailsRoot, entry)
                   Progress.step if assets_count
                 end
               end

@@ -3,7 +3,7 @@ require File.dirname(__FILE__) + '/../../spec_helper'
 Dump = DumpRake::Dump
 describe Dump do
   def dump_path(file_name)
-    File.join(RAILS_ROOT, 'dump', file_name)
+    File.join(DumpRake::RailsRoot, 'dump', file_name)
   end
 
   def new_dump(file_name)
@@ -190,7 +190,7 @@ describe Dump do
 
   describe "path" do
     it "should return path" do
-      new_dump("19650414065945.tgz").path.should == Pathname(File.join(RAILS_ROOT, 'dump', "19650414065945.tgz"))
+      new_dump("19650414065945.tgz").path.should == Pathname(File.join(DumpRake::RailsRoot, 'dump', "19650414065945.tgz"))
     end
   end
 
@@ -273,10 +273,10 @@ describe Dump do
   end
 
   describe "assets_root_link" do
-     it "should create tem dir, chdir there, symlink RAILS_ROOT to assets, yield and unlink assets ever if something raised" do
+    it "should create tem dir, chdir there, symlink rails app root to assets, yield and unlink assets ever if something raised" do
       Dir.should_receive(:mktmpdir).and_yield('/tmp/abc')
       Dir.should_receive(:chdir).with('/tmp/abc').and_yield
-      File.should_receive(:symlink).with(RAILS_ROOT, 'assets')
+      File.should_receive(:symlink).with(DumpRake::RailsRoot, 'assets')
       File.should_receive(:unlink).with('assets')
       proc{
         Dump.new('').send(:assets_root_link) do |dir, prefix|

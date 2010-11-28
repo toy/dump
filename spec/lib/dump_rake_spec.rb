@@ -135,10 +135,10 @@ describe DumpRake do
 
   describe "create" do
     describe "naming" do
-      it "should create file in RAILS_ROOT/dump" do
+      it "should create file in 'rails app root'/dump" do
         File.stub!(:rename)
         DumpRake::DumpWriter.should_receive(:create) do |path|
-          File.dirname(path).should == File.join(RAILS_ROOT, 'dump')
+          File.dirname(path).should == File.join(DumpRake::RailsRoot, 'dump')
         end
         grab_output{
           DumpRake.create

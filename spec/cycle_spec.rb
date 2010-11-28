@@ -20,15 +20,15 @@ def load_schema
 end
 
 def in_temp_rails_app
-  old_rails_root = RAILS_ROOT.dup
-  RAILS_ROOT.replace(File.join(PLUGIN_SPEC_DIR, 'temp_rails_app'))
-  FileUtils.remove_entry(RAILS_ROOT) if File.exist?(RAILS_ROOT)
-  FileUtils.mkpath(RAILS_ROOT)
+  old_rails_root = DumpRake::RailsRoot.dup
+  DumpRake::RailsRoot.replace(File.join(PLUGIN_SPEC_DIR, 'temp_rails_app'))
+  FileUtils.remove_entry(DumpRake::RailsRoot) if File.exist?(DumpRake::RailsRoot)
+  FileUtils.mkpath(DumpRake::RailsRoot)
   Progress.stub!(:io).and_return(StringIO.new)
   yield
 ensure
-  FileUtils.remove_entry(RAILS_ROOT) if File.exist?(RAILS_ROOT)
-  RAILS_ROOT.replace(old_rails_root)
+  FileUtils.remove_entry(DumpRake::RailsRoot) if File.exist?(DumpRake::RailsRoot)
+  DumpRake::RailsRoot.replace(old_rails_root)
 end
 
 def create_chickens!(options = {})

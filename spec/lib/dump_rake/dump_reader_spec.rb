@@ -544,7 +544,7 @@ describe DumpReader do
             @entries = %w[a b c d].map do |s|
               file = mock("file_#{s}")
               each_excpectation.and_yield(file)
-              @inp.should_receive(:extract_entry).with(RAILS_ROOT, file)
+              @inp.should_receive(:extract_entry).with(DumpRake::RailsRoot, file)
               file
             end
             Archive::Tar::Minitar.should_receive(:open).with(@assets_tar).and_yield(@inp)

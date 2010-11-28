@@ -14,7 +14,7 @@ describe "rake assets" do
       public/images/a
       public/images/b
     end_src
-    File.should_receive(:readlines).with(File.join(RAILS_ROOT, 'config', 'assets')).and_return(StringIO.new(data).readlines)
+    File.should_receive(:readlines).with(File.join(DumpRake::RailsRoot, 'config', 'assets')).and_return(StringIO.new(data).readlines)
     @rake["assets"].invoke
     ENV['ASSETS'].should == 'public/images/a:public/images/b'
   end
@@ -56,8 +56,8 @@ describe "rake assets" do
       it "should go through each asset from config" do
         ENV.stub!(:[]).with('ASSETS').and_return('images:videos')
 
-        File.should_receive(:expand_path).with('images', RAILS_ROOT).and_return('')
-        File.should_receive(:expand_path).with('videos', RAILS_ROOT).and_return('')
+        File.should_receive(:expand_path).with('images', DumpRake::RailsRoot).and_return('')
+        File.should_receive(:expand_path).with('videos', DumpRake::RailsRoot).and_return('')
 
         @rake["assets:delete"].invoke
       end
@@ -66,8 +66,8 @@ describe "rake assets" do
         @assets = %w[images videos]
         ENV.stub!(:[]).with('ASSETS').and_return(@assets.join(':'))
         @assets.each do |asset|
-          mask = File.join(RAILS_ROOT, asset, '*')
-          paths = %w[file1 file2 dir].map{ |file| File.join(RAILS_ROOT, asset, file) }
+          mask = File.join(DumpRake::RailsRoot, asset, '*')
+          paths = %w[file1 file2 dir].map{ |file| File.join(DumpRake::RailsRoot, asset, file) }
           Dir.should_receive(:[]).with(mask).and_return([paths[0], paths[1], paths[2]])
           paths.each do |path|
             FileUtils.should_receive(:remove_entry).with(path)
@@ -81,8 +81,8 @@ describe "rake assets" do
         @assets = %w[images / /private ../ ../.. ./../ dir/.. dir/../..]
         ENV.stub!(:[]).with('ASSETS').and_return(@assets.join(':'))
 
-        Dir.should_receive(:[]).with(File.join(RAILS_ROOT, 'images', '*')).and_return([])
-        Dir.should_receive(:[]).with(File.join(RAILS_ROOT, '*')).and_return([])
+        Dir.should_receive(:[]).with(File.join(DumpRake::RailsRoot, 'images', '*')).and_return([])
+        Dir.should_receive(:[]).with(File.join(DumpRake::RailsRoot, '*')).and_return([])
         FileUtils.should_not_receive(:remove_entry)
 
         @rake["assets:delete"].invoke

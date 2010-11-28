@@ -47,7 +47,7 @@ class DumpRake
     end
 
     def create(options = {})
-      dump = Dump.new(options.merge(:dir => File.join(RAILS_ROOT, 'dump')))
+      dump = Dump.new(options.merge(:dir => File.join(DumpRake::RailsRoot, 'dump')))
 
       DumpWriter.create(dump.tmp_path)
 
@@ -94,6 +94,6 @@ class DumpRake
   end
 end
 
-%w[table_manipulation dump dump_reader dump_writer env env/filter].each do |file|
+%w[rails_root table_manipulation dump dump_reader dump_writer env env/filter].each do |file|
   require "dump_rake/#{file}"
 end
