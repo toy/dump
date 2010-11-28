@@ -2,21 +2,19 @@
 class DumpRake
   module Env
     class Filter
-      attr_reader :invert, :values
+      attr_reader :invert, :values, :transparent
       def initialize(s)
-        s = s.dup
-        @invert = !!s.sub!(/^-/, '')
-        @values = s.split(',').map(&:strip).map(&:downcase).uniq.select(&:present?)
+        if s
+          s = s.dup
+          @invert = !!s.sub!(/^-/, '')
+          @values = s.split(',').map(&:strip).map(&:downcase).uniq.select(&:present?)
+        else
+          @transparent = true
+        end
       end
 
       def pass?(value)
-        invert ^ values.include?(value.to_s.downcase)
-      end
-
-      def filter(values)
-        values.select do |value|
-          pass?(value) || (block_given? && yield(value))
-        end
+        transparent || (invert ^ values.include?(value.to_s.downcase))
       end
     end
   end

@@ -52,8 +52,8 @@ class DumpRake
 
     def tables_to_dump
       if DumpRake::Env[:tables]
-        DumpRake::Env.filter(:tables).filter(avaliable_tables) do |table|
-          schema_tables.include?(table)
+        avaliable_tables.select do |table|
+          schema_tables.include?(table) || DumpRake::Env.filter(:tables).pass?(table)
         end
       else
         avaliable_tables - %w[sessions]
