@@ -3,6 +3,8 @@ require File.dirname(__FILE__) + '/../../spec_helper'
 require File.dirname(__FILE__) + '/../../../lib/dump_rake'
 require File.dirname(__FILE__) + '/../../../lib/dump_rake/dump_reader'
 
+require 'active_record/migration'
+
 def object_of_length(required_length)
   LengthConstraint.new(required_length)
 end
@@ -236,6 +238,91 @@ describe DumpReader do
 
         @dump.read_config
         @dump.config.should == @data
+      end
+    end
+
+    describe "migrate_down" do
+      it "should not invoke rake tasks or find_entry if migrate_down is 0, no or false" do
+        Rake::Task.should_not_receive(:[])
+        @dump.should_not_receive(:find_entry)
+
+        DumpRake::Env.with_env(:migrate_down => '0') do
+          @dump.migrate_down
+        end
+        DumpRake::Env.with_env(:migrate_down => 'no') do
+          @dump.migrate_down
+        end
+        DumpRake::Env.with_env(:migrate_down => 'false') do
+          @dump.migrate_down
+        end
+      end
+
+      it "should invoke db:drop and db:create if migrate_down is reset" do
+        @load_task = mock('drop_task')
+        @dump_task = mock('create_task')
+        Rake::Task.should_receive(:[]).with('db:drop').and_return(@load_task)
+        Rake::Task.should_receive(:[]).with('db:create').and_return(@dump_task)
+        @load_task.should_receive(:invoke)
+        @dump_task.should_receive(:invoke)
+
+        DumpRake::Env.with_env(:migrate_down => 'reset') do
+          @dump.migrate_down
+        end
+      end
+
+      [nil, '1'].each do |migrate_down_value|
+        describe "when migrate_down is #{migrate_down_value.inspect}" do
+          it "should not find_entry if table schema_migrations is not present" do
+            @dump.stub!(:avaliable_tables).and_return(%w[first])
+            @dump.should_not_receive(:find_entry)
+
+            DumpRake::Env.with_env(:migrate_down => migrate_down_value) do
+              @dump.migrate_down
+            end
+          end
+
+          it "should find schema_migrations.dump if table schema_migrations is present" do
+            @dump.stub!(:avaliable_tables).and_return(%w[schema_migrations first])
+            @dump.should_receive(:find_entry).with('schema_migrations.dump')
+
+            DumpRake::Env.with_env(:migrate_down => migrate_down_value) do
+              @dump.migrate_down
+            end
+          end
+
+          it "should call migrate down for each version not present in schema_migrations table" do
+            @entry = StringIO.new
+            Marshal.dump(['version'], @entry)
+            %w[1 2 3 4].each do |i|
+              Marshal.dump(i, @entry)
+            end
+            @entry.rewind
+
+            @dump.stub!(:avaliable_tables).and_return(%w[schema_migrations first])
+            @dump.should_receive(:find_entry).with('schema_migrations.dump').and_yield(@entry)
+            @dump.should_receive('table_rows').with('schema_migrations').and_return(%w[1 2 4 5 6 7].map{ |version| {'version' => version} })
+
+            @versions = []
+            @migrate_down_task = mock('migrate_down_task')
+            @migrate_down_task.should_receive('invoke').exactly(2).times.with do
+              version = DumpRake::Env['VERSION']
+              @versions << version
+              if version == '6'
+                raise ActiveRecord::IrreversibleMigration
+              end
+            end
+            @migrate_down_task.should_receive('reenable').exactly(3).times
+
+            $stderr.should_receive('puts').with("Irreversible migration: 6")
+
+            Rake::Task.should_receive(:[]).with('db:migrate:down').exactly(3).times.and_return(@migrate_down_task)
+
+            DumpRake::Env.with_env(:migrate_down => migrate_down_value) do
+              @dump.migrate_down
+            end
+            @versions.should == %w[5 6 7].reverse
+          end
+        end
       end
     end
 
