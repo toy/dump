@@ -10,10 +10,10 @@ class DumpRake
       :assets => %w[ASSETS],
       :tables => %w[TABLES],
       :backup => %w[BACKUP AUTOBACKUP AUTO_BACKUP],
-      :skip_tables => %w[SKIP_TABLES],
       :transfer_via => %w[TRANSFER_VIA],
       :migrate_down => %w[MIGRATE_DOWN],
       :restore_schema => %w[RESTORE_SCHEMA],
+      :restore_tables => %w[RESTORE_TABLES],
       :show_size => %w[SHOW_SIZE], # internal
     }.freeze unless defined? DICTIONARY
 
@@ -26,10 +26,10 @@ class DumpRake
       :assets => 'comma or colon separated list of paths or globs to dump',
       :tables => 'comma separated list of tables to dump or if prefixed by "-" — to skip; by default only sessions table is skipped; schema_info and schema_migrations are always included if they are present',
       :backup => 'no autobackup if you pass "0", "no" or "false"',
-      :skip_tables => 'comma separated list of tables to skip when restoring dump',
       :transfer_via => 'transfer method (rsync, sftp or scp)',
       :migrate_down => 'don\'t run down for migrations not present in dump if you pass "0", "no" or "false"; pass "reset" to recreate (drop and create) db',
       :restore_schema => 'don\'t read/change schema if you pass "0", "no" or "false" (useful to just restore data for table)',
+      :restore_tables => 'works as TABLES, but for restoring',
     }.freeze unless defined? EXPLANATIONS
 
     class << self
@@ -84,7 +84,7 @@ class DumpRake
         m = {
           :select => [:like, :tags],
           :assets => [:assets],
-          :restore_options => [:skip_tables, :migrate_down, :restore_schema],
+          :restore_options => [:migrate_down, :restore_schema, :restore_tables],
           :transfer_options => [:transfer_via]
         }
 

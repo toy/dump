@@ -166,9 +166,10 @@ class DumpRake
 
     def read_tables
       verify_connection
-      skip_tables = DumpRake::Env[:skip_tables].to_s.split(',').map{ |t| t.strip.sub(/^-/, '') }
       config[:tables].each_with_progress('Tables') do |table, rows|
-        read_table(table, rows) unless skip_tables.include?(table)
+        if !DumpRake::Env[:restore_tables] || DumpRake::Env.filter(:restore_tables).pass?(table) || schema_tables.include?(table)
+          read_table(table, rows)
+        end
       end
     end
 

@@ -187,9 +187,9 @@ describe "cap dump" do
       test_passing_environment_variables(:local, :restore, {
         :like => "rake -s dump:restore 'LIKE=some data'",
         :tags => "rake -s dump:restore 'TAGS=some data'",
-        :skip_tables => "rake -s dump:restore 'SKIP_TABLES=some data'",
         :migrate_down => "rake -s dump:restore 'MIGRATE_DOWN=some data'",
         :restore_schema => "rake -s dump:restore 'RESTORE_SCHEMA=some data'",
+        :restore_tables => "rake -s dump:restore 'RESTORE_TABLES=some data'",
       })
     end
 
@@ -356,9 +356,9 @@ describe "cap dump" do
       test_passing_environment_variables(:remote, :restore, {
         :like => "rake -s dump:restore 'LIKE=some data' PROGRESS_TTY=+ RAILS_ENV=production",
         :tags => "rake -s dump:restore PROGRESS_TTY=+ RAILS_ENV=production 'TAGS=some data'",
-        :skip_tables => "rake -s dump:restore PROGRESS_TTY=+ RAILS_ENV=production 'SKIP_TABLES=some data'",
         :migrate_down => "rake -s dump:restore 'MIGRATE_DOWN=some data' PROGRESS_TTY=+ RAILS_ENV=production",
         :restore_schema => "rake -s dump:restore PROGRESS_TTY=+ RAILS_ENV=production 'RESTORE_SCHEMA=some data'",
+        :restore_tables => "rake -s dump:restore PROGRESS_TTY=+ RAILS_ENV=production 'RESTORE_TABLES=some data'",
       })
 
       it "should use custom rake binary" do
