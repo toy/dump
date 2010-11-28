@@ -173,7 +173,7 @@ class DumpRake
     def read_table(table, rows_count)
       find_entry("#{table}.dump") do |entry|
         table_sql = quote_table_name(table)
-        clear_table(table_sql) if schema_tables.include?(table)
+        clear_table(table_sql)
 
         columns = Marshal.load(entry)
         columns_sql = columns_insert_sql(columns)
