@@ -189,6 +189,7 @@ describe "cap dump" do
         :tags => "rake -s dump:restore 'TAGS=some data'",
         :skip_tables => "rake -s dump:restore 'SKIP_TABLES=some data'",
         :migrate_down => "rake -s dump:restore 'MIGRATE_DOWN=some data'",
+        :restore_schema => "rake -s dump:restore 'RESTORE_SCHEMA=some data'",
       })
     end
 
@@ -357,6 +358,7 @@ describe "cap dump" do
         :tags => "rake -s dump:restore PROGRESS_TTY=+ RAILS_ENV=production 'TAGS=some data'",
         :skip_tables => "rake -s dump:restore PROGRESS_TTY=+ RAILS_ENV=production 'SKIP_TABLES=some data'",
         :migrate_down => "rake -s dump:restore 'MIGRATE_DOWN=some data' PROGRESS_TTY=+ RAILS_ENV=production",
+        :restore_schema => "rake -s dump:restore PROGRESS_TTY=+ RAILS_ENV=production 'RESTORE_SCHEMA=some data'",
       })
 
       it "should use custom rake binary" do
