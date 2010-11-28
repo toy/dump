@@ -13,6 +13,7 @@ class DumpRake
       :skip_tables => %w[SKIP_TABLES],
       :transfer_via => %w[TRANSFER_VIA],
       :migrate_down => %w[MIGRATE_DOWN],
+      :restore_schema => %w[RESTORE_SCHEMA],
       :show_size => %w[SHOW_SIZE], # internal
     }.freeze unless defined? DICTIONARY
 
@@ -28,6 +29,7 @@ class DumpRake
       :skip_tables => 'comma separated list of tables to skip when restoring dump',
       :transfer_via => 'transfer method (rsync, sftp or scp)',
       :migrate_down => 'don\'t run down for migrations not present in dump if you pass "0", "no" or "false"; pass "reset" to recreate (drop and create) db',
+      :restore_schema => 'don\'t read/change schema if you pass "0", "no" or "false" (useful to just restore data for table)',
     }.freeze unless defined? EXPLANATIONS
 
     class << self
@@ -82,7 +84,7 @@ class DumpRake
         m = {
           :select => [:like, :tags],
           :assets => [:assets],
-          :restore_options => [:skip_tables, :migrate_down],
+          :restore_options => [:skip_tables, :migrate_down, :restore_schema],
           :transfer_options => [:transfer_via]
         }
 

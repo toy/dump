@@ -150,11 +150,13 @@ class DumpRake
     end
 
     def read_schema
-      read_entry_to_file('schema.rb') do |f|
-        DumpRake::Env.with_env('SCHEMA' => f.path) do
-          Rake::Task['db:schema:load'].invoke
+      if !DumpRake::Env.no?(:restore_schema)
+        read_entry_to_file('schema.rb') do |f|
+          DumpRake::Env.with_env('SCHEMA' => f.path) do
+            Rake::Task['db:schema:load'].invoke
+          end
+          Rake::Task['db:schema:dump'].invoke
         end
-        Rake::Task['db:schema:dump'].invoke
       end
     end
 
