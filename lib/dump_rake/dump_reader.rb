@@ -149,8 +149,12 @@ class DumpRake
       end
     end
 
+    def restore_schema?
+      !DumpRake::Env.no?(:restore_schema)
+    end
+
     def read_schema
-      if !DumpRake::Env.no?(:restore_schema)
+      if restore_schema?
         read_entry_to_file('schema.rb') do |f|
           DumpRake::Env.with_env('SCHEMA' => f.path) do
             Rake::Task['db:schema:load'].invoke
@@ -167,7 +171,7 @@ class DumpRake
     def read_tables
       verify_connection
       config[:tables].each_with_progress('Tables') do |table, rows|
-        if !DumpRake::Env[:restore_tables] || DumpRake::Env.filter(:restore_tables).pass?(table) || schema_tables.include?(table)
+        if (restore_schema? && schema_tables.include?(table)) || DumpRake::Env.filter(:restore_tables).pass?(table)
           read_table(table, rows)
         end
       end

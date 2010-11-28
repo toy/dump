@@ -28,7 +28,7 @@ class DumpRake
       :backup => 'no autobackup if you pass "0", "no" or "false"',
       :transfer_via => 'transfer method (rsync, sftp or scp)',
       :migrate_down => 'don\'t run down for migrations not present in dump if you pass "0", "no" or "false"; pass "reset" to recreate (drop and create) db',
-      :restore_schema => 'don\'t read/change schema if you pass "0", "no" or "false" (useful to just restore data for table)',
+      :restore_schema => 'don\'t read/change schema if you pass "0", "no" or "false" (useful to just restore data for table; note that schema info tables are also not restored)',
       :restore_tables => 'works as TABLES, but for restoring',
     }.freeze unless defined? EXPLANATIONS
 
