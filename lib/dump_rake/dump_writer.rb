@@ -110,7 +110,7 @@ class DumpRake
     def assets_to_dump
       begin
         Rake::Task['assets'].invoke
-        DumpRake::Env[:assets].split(/[:,]/)
+        DumpRake::Env[:assets].split(DumpRake::Assets::SPLITTER)
       rescue
         []
       end

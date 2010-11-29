@@ -1,6 +1,8 @@
 # encoding: utf-8
 class DumpRake
   module Assets
+    SPLITTER = /[:,]/
+
     class << self
       def assets
         File.readlines(File.join(DumpRake::RailsRoot, 'config/assets')).map(&:strip).grep(/^[^#]/).join(':')
