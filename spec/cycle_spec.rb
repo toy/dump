@@ -1,5 +1,7 @@
 require File.dirname(__FILE__) + '/spec_helper'
 
+require File.dirname(__FILE__) + '/../lib/dump_rake'
+
 def database_configs
   YAML::load(IO.read(PLUGIN_SPEC_DIR + "/db/database.yml"))
 end
@@ -158,22 +160,28 @@ describe 'full cycle' do
 
     it "should create same dump for all adapters" do
       in_temp_rails_app do
+        dumps = []
         adapters.each do |adapter|
           use_adapter(adapter)
           load_schema
-          call_rake_create(:description => adapter)
-        end
 
-        dumps = Dump.list.map do |dump|
-          {
-            :path => dump.path,
-            :hash => Digest::SHA1.hexdigest(File.read(dump.path)),
-          }
+          dump_name = call_rake_create(:desc => adapter)[:stdout].strip
+          dump_path = File.join(DumpRake::RailsRoot, 'dump', dump_name)
+
+          data = []
+          Zlib::GzipReader.open(dump_path) do |gzip|
+            Archive::Tar::Minitar.open(gzip, 'r') do |stream|
+              stream.each do |entry|
+                data << [entry.full_name, entry.read]
+              end
+            end
+          end
+          dumps << {:path => dump_path, :data => data.sort}
         end
 
         dumps.combination(2) do |dump_a, dump_b|
           dump_a[:path].should_not == dump_b[:path]
-          dump_a[:hash].should == dump_b[:hash]
+          dump_a[:data].should == dump_b[:data]
         end
       end
     end
