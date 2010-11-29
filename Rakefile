@@ -29,3 +29,26 @@ task :unpack_gems do
     sh *%W[gem unpack #{gem_name} --target=gems]
   end
 end
+
+desc 'update readme from env'
+task :update_readme do
+  $: << File.join(File.dirname(__FILE__), 'lib')
+  require 'pathname'
+  require 'dump_rake'
+
+  readme = Pathname('README.rdoc')
+  lines = readme.readlines.map(&:rstrip)
+  readme.open('w') do |f|
+    lines.each do |line|
+      line.sub!(/^<tt>(.+?)<\/tt>.*—.*$/) do
+        key, names = DumpRake::Env::DICTIONARY.find{ |key, values| values.include?($1) }
+        if key
+          names = names.map{ |name| "<tt>#{name}</tt>" }.join(', ')
+          explanation = DumpRake::Env::EXPLANATIONS[key]
+          "#{names} — #{explanation}"
+        end
+      end
+      f.puts line
+    end
+  end
+end

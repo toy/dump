@@ -52,11 +52,11 @@ Also you can set custom remote rake binary in your deploy.rb like:
 
 ==== While creating dumps:
 
-<tt>DESC</tt> or <tt>DESCRIPTION</tt> — free form description of dump
+<tt>DESC</tt>, <tt>DESCRIPTION</tt> — free form description of dump
 
   rake dump DESC='uploaded photos'
 
-<tt>TAG</tt> or <tt>TAGS</tt> — comma separated list of tags
+<tt>TAG</tt>, <tt>TAGS</tt> — comma separated list of tags
 
   rake dump TAGS='photos,videos'
 
@@ -65,7 +65,7 @@ Also you can set custom remote rake binary in your deploy.rb like:
   rake dump ASSETS='public/system:public/images/masks/*'
   rake dump ASSETS='public/system,public/images/masks/*'
 
-<tt>TABLES</tt> — comma separated list of tables to dump or if prefixed by '-' — to skip; by default only sessions table is skipped; schema_info and schema_migrations are included in any case if they are present
+<tt>TABLES</tt> — comma separated list of tables to dump or if prefixed by "-" — to skip; by default only sessions table is skipped; schema_info and schema_migrations are always included if they are present
 
 dump all tables except sessions:
   rake dump
@@ -86,7 +86,7 @@ dump all tables except people and pages:
   rake dump:versions LIKE='2009'
   rake dump:restore LIKE='2009' # restores last dump matching 2009
 
-<tt>TAG</tt> or <tt>TAGS</tt> — comma separated list of tags
+<tt>TAG</tt>, <tt>TAGS</tt> — comma separated list of tags
 without '+' or '-' — dump should have any of such tags
 prefixed with '+' — dump should have every tag with prefix
 prefixed with '-' — dump should not have any of tags with prefix
@@ -103,7 +103,7 @@ skip dumps with tags mirror and archive:
 select dumps with tags photos or videos, with tag important and without mirror:
   rake dump:restore TAGS='photos,videos,+important,-mirror'
 
-<tt>MIGRATE_DOWN</tt> —
+<tt>MIGRATE_DOWN</tt> — don't run down for migrations not present in dump if you pass "0", "no" or "false"; pass "reset" to recreate (drop and create) db
 by default all migrations which are not present in dump are ran down
 
 don't run down for migrations:
@@ -112,12 +112,12 @@ don't run down for migrations:
 reset database:
   rake dump:restore MIGRATE_DOWN=reset
 
-<tt>RESTORE_SCHEMA</tt> —
+<tt>RESTORE_SCHEMA</tt> — don't read/change schema if you pass "0", "no" or "false" (useful to just restore data for table; note that schema info tables are also not restored)
 
 don't restore schema:
   rake dump:restore RESTORE_SCHEMA=no
 
-<tt>RESTORE_TABLES</tt> —
+<tt>RESTORE_TABLES</tt> — works as TABLES, but for restoring
 
 restores only people, pages and photos tables:
   rake dump RESTORE_TABLES='people,pages,photos'
@@ -125,7 +125,7 @@ restores only people, pages and photos tables:
 restores all tables except people and pages:
   rake dump TABLES='-people,pages'
 
-<tt>RESTORE_ASSETS</tt> —
+<tt>RESTORE_ASSETS</tt> — works as ASSETS, but for restoring
 
   rake dump RESTORE_ASSETS='public/system/a,public/system/b'
   rake dump RESTORE_ASSETS='public/system/a:public/images/masks/*/new*'
@@ -134,7 +134,7 @@ restores all tables except people and pages:
 
 <tt>LIKE</tt>, <tt>VER</tt>, <tt>VERSION</tt> and <tt>TAG</tt>, <tt>TAGS</tt> as for restoring
 
-<tt>SUMMARY</tt> — output info about dump
+<tt>SUMMARY</tt> — output info about dump: "1", "true" or "yes" for basic info, "2" or "schema" to display schema as well
 
   rake dump:versions SUMMARY=1
   rake dump:versions SUMMARY=full # output schema too
@@ -152,14 +152,14 @@ restores all tables except people and pages:
 
 For all cap commands environment variables are same as for rake tasks
 
-<tt>TRANSFER_VIA</tt> —
+<tt>TRANSFER_VIA</tt> — transfer method (rsync, sftp or scp)
 By default transferring task will try to transfer using rsync if it is present, else it will try to use sftp and scp
 
 force transfer using scp:
   cap dump:remote:download TRANSFER_VIA=scp
   cap dump:mirror:down TRANSFER_VIA=scp
 
-<tt>BACKUP</tt>, <tt>AUTOBACKUP</tt>, <tt>AUTO_BACKUP</tt> —
+<tt>BACKUP</tt>, <tt>AUTOBACKUP</tt>, <tt>AUTO_BACKUP</tt> — no autobackup if you pass "0", "no" or "false"
 by default backup is created before mirroring
 
 don't create backup:

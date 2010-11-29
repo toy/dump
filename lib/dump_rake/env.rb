@@ -6,7 +6,7 @@ class DumpRake
     DICTIONARY = {
       :desc => %w[DESC DESCRIPTION],
       :like => %w[LIKE VER VERSION],
-      :tags => %w[TAGS TAG],
+      :tags => %w[TAG TAGS],
       :leave => %w[LEAVE],
       :summary => %w[SUMMARY],
       :assets => %w[ASSETS],
