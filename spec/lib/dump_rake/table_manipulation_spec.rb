@@ -1,7 +1,6 @@
 require File.dirname(__FILE__) + '/../../spec_helper'
 
 require File.dirname(__FILE__) + '/../../../lib/dump_rake'
-require File.dirname(__FILE__) + '/../../../lib/dump_rake/table_manipulation'
 
 TableManipulation = DumpRake::TableManipulation
 describe TableManipulation do

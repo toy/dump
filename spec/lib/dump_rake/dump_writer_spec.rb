@@ -1,7 +1,6 @@
 require File.dirname(__FILE__) + '/../../spec_helper'
 
 require File.dirname(__FILE__) + '/../../../lib/dump_rake'
-require File.dirname(__FILE__) + '/../../../lib/dump_rake/dump_writer'
 
 DumpWriter = DumpRake::DumpWriter
 describe DumpWriter do
