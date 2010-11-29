@@ -3,6 +3,8 @@ require 'shell_escape'
 require 'continious_timeout'
 require 'fileutils'
 
+require 'dump_rake/env'
+
 begin
   nil.blank?
 rescue

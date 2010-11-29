@@ -1,4 +1,6 @@
 # encoding: utf-8
+require 'dump_rake/env/filter'
+
 class DumpRake
   module Env
     DICTIONARY = {
