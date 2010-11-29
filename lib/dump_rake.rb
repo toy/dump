@@ -94,6 +94,6 @@ class DumpRake
   end
 end
 
-%w[rails_root table_manipulation dump dump_reader dump_writer env env/filter].each do |file|
+%w[rails_root assets table_manipulation dump dump_reader dump_writer env env/filter].each do |file|
   require "dump_rake/#{file}"
 end
