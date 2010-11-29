@@ -63,9 +63,9 @@ class DumpRake
         end
       end
 
-      def filter(key)
-        @filters ||= Hash.new{ |hash, key| hash[key] = Filter.new(key) }
-        @filters[self[key]]
+      def filter(key, splitter = nil)
+        @filters ||= Hash.new{ |hash, key| hash[key] = Filter.new(*key) }
+        @filters[[self[key], splitter]]
       end
 
       def yes?(key)

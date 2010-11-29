@@ -43,4 +43,14 @@ describe Filter do
       filter.pass?('d').should be_true
     end
   end
+
+  describe "custom_pass?" do
+    it "should pass only when any call to block returns true" do
+      filter = Filter.new('a,c')
+      filter.custom_pass?{ |value| value == 'a' }.should be_true
+      filter.custom_pass?{ |value| value == 'b' }.should be_false
+      filter.custom_pass?{ |value| value == 'c' }.should be_true
+      filter.custom_pass?{ |value| value == 'd' }.should be_false
+    end
+  end
 end
