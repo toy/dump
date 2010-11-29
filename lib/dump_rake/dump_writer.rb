@@ -84,7 +84,7 @@ class DumpRake
         Dir.chdir(DumpRake::RailsRoot) do
           assets = Dir[*assets].uniq
           assets.with_progress('Assets').each do |asset|
-            paths = Dir[File.join(asset, '**', '*')]
+            paths = Dir[File.join(asset, '**/*')]
             files = paths.select{ |path| File.file?(path) }
             config[:assets][asset] = {:total => paths.length, :files => files.length}
             assets_root_link do |tmpdir, prefix|

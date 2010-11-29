@@ -1,8 +1,8 @@
-$: << File.join(File.dirname(__FILE__), '..', '..', 'lib')
+$: << File.join(File.dirname(__FILE__), '../../lib')
 require 'dump_rake'
 
 task :assets do
-  ENV['ASSETS'] ||= File.readlines(File.join(DumpRake::RailsRoot, 'config', 'assets')).map(&:strip).grep(/^[^#]/).join(':')
+  ENV['ASSETS'] ||= File.readlines(File.join(DumpRake::RailsRoot, 'config/assets')).map(&:strip).grep(/^[^#]/).join(':')
 end
 
 namespace :assets do

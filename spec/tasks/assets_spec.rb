@@ -14,7 +14,7 @@ describe "rake assets" do
       public/images/a
       public/images/b
     end_src
-    File.should_receive(:readlines).with(File.join(DumpRake::RailsRoot, 'config', 'assets')).and_return(StringIO.new(data).readlines)
+    File.should_receive(:readlines).with(File.join(DumpRake::RailsRoot, 'config/assets')).and_return(StringIO.new(data).readlines)
     @rake["assets"].invoke
     ENV['ASSETS'].should == 'public/images/a:public/images/b'
   end
@@ -81,7 +81,7 @@ describe "rake assets" do
         @assets = %w[images / /private ../ ../.. ./../ dir/.. dir/../..]
         ENV.stub!(:[]).with('ASSETS').and_return(@assets.join(':'))
 
-        Dir.should_receive(:[]).with(File.join(DumpRake::RailsRoot, 'images', '*')).and_return([])
+        Dir.should_receive(:[]).with(File.join(DumpRake::RailsRoot, 'images/*')).and_return([])
         Dir.should_receive(:[]).with(File.join(DumpRake::RailsRoot, '*')).and_return([])
         FileUtils.should_not_receive(:remove_entry)
 
