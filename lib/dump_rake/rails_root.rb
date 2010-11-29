@@ -1,4 +1,11 @@
 # encoding: utf-8
 class DumpRake
-  RailsRoot = (Object.const_defined?('Rails') ? Rails.root : RAILS_ROOT).to_s
+  RailsRoot = case
+  when defined?(Rails)
+    Rails.root
+  when defined?(RAILS_ROOT)
+    RAILS_ROOT
+  else
+    Dir.pwd
+  end.to_s
 end
