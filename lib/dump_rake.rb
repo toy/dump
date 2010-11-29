@@ -23,7 +23,7 @@ def require_gem_or_unpacked_gem(name, version = nil)
 end
 
 require_gem_or_unpacked_gem 'archive/tar/minitar'
-require_gem_or_unpacked_gem 'progress', '>= 0.1.1'
+require_gem_or_unpacked_gem 'progress', '>= 1.0.0'
 
 class DumpRake
   class << self

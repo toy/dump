@@ -4,8 +4,8 @@ require 'dump_rake/env/filter'
 class DumpRake
   module Env
     DICTIONARY = {
-      :like => %w[LIKE VER VERSION],
       :desc => %w[DESC DESCRIPTION],
+      :like => %w[LIKE VER VERSION],
       :tags => %w[TAGS TAG],
       :leave => %w[LEAVE],
       :summary => %w[SUMMARY],
@@ -21,8 +21,8 @@ class DumpRake
     }.freeze unless defined? DICTIONARY
 
     EXPLANATIONS = {
-      :like => 'filter dumps by full dump name',
       :desc => 'free form description of dump',
+      :like => 'filter dumps by full dump name',
       :tags => 'comma separated list of tags',
       :leave => 'number of dumps to leave',
       :summary => 'output info about dump: "1", "true" or "yes" for basic info, "2" or "schema" to display schema as well',
