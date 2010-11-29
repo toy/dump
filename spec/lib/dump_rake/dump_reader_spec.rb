@@ -520,8 +520,9 @@ describe DumpReader do
           @dump.stub!(:config).and_return({:assets => @assets})
           Dir.stub!(:glob).and_return([])
           FileUtils.stub!(:remove_entry)
+          @stream.stub!(:each)
 
-          @dump.should_receive(:find_entry).with('assets.tar').and_throw(:assets)
+          @dump.should_receive(:find_entry).with('assets.tar')
           @dump.read_assets
         end
 
