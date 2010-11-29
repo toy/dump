@@ -190,6 +190,7 @@ describe "cap dump" do
         :migrate_down => "rake -s dump:restore 'MIGRATE_DOWN=some data'",
         :restore_schema => "rake -s dump:restore 'RESTORE_SCHEMA=some data'",
         :restore_tables => "rake -s dump:restore 'RESTORE_TABLES=some data'",
+        :restore_assets => "rake -s dump:restore 'RESTORE_ASSETS=some data'",
       })
     end
 
@@ -359,6 +360,7 @@ describe "cap dump" do
         :migrate_down => "rake -s dump:restore 'MIGRATE_DOWN=some data' PROGRESS_TTY=+ RAILS_ENV=production",
         :restore_schema => "rake -s dump:restore PROGRESS_TTY=+ RAILS_ENV=production 'RESTORE_SCHEMA=some data'",
         :restore_tables => "rake -s dump:restore PROGRESS_TTY=+ RAILS_ENV=production 'RESTORE_TABLES=some data'",
+        :restore_assets => "rake -s dump:restore PROGRESS_TTY=+ RAILS_ENV=production 'RESTORE_ASSETS=some data'",
       })
 
       it "should use custom rake binary" do

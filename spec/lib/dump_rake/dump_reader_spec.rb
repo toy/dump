@@ -512,6 +512,33 @@ describe DumpReader do
 
           @dump.read_assets
         end
+
+        describe "when called with restore_assets" do
+          it "should delete files and dirs only in requested paths" do
+            @assets = %w[images videos]
+            @dump.stub!(:config).and_return({:assets => @assets})
+
+            DumpRake::Assets.should_receive('glob_asset_children').with('images', '**/*').and_return(%w[images images/a.jpg images/b.jpg])
+            DumpRake::Assets.should_receive('glob_asset_children').with('videos', '**/*').and_return(%w[videos videos/a.mov])
+
+            @dump.should_receive('read_asset?').with('images/b.jpg', DumpRake::RailsRoot).ordered.and_return(false)
+            @dump.should_receive('read_asset?').with('images/a.jpg', DumpRake::RailsRoot).ordered.and_return(true)
+            @dump.should_receive('read_asset?').with('images', DumpRake::RailsRoot).ordered.and_return(true)
+            @dump.should_receive('read_asset?').with('videos/a.mov', DumpRake::RailsRoot).ordered.and_return(false)
+            @dump.should_receive('read_asset?').with('videos', DumpRake::RailsRoot).ordered.and_return(false)
+
+            File.should_receive('file?').with('images/a.jpg').and_return(true)
+            File.should_receive('unlink').with('images/a.jpg')
+            File.should_not_receive('file?').with('images/b.jpg')
+            File.should_receive('file?').with('images').and_return(false)
+            File.should_receive('directory?').with('images').and_return(true)
+            Dir.should_receive('unlink').with('images').and_raise(Errno::ENOTEMPTY)
+
+            DumpRake::Env.with_env(:restore_assets => 'images/a.*:stylesheets') do
+              @dump.read_assets
+            end
+          end
+        end
       end
 
       describe "old style" do
@@ -584,6 +611,25 @@ describe DumpReader do
 
             @dump.read_assets
           end
+        end
+      end
+    end
+
+    describe "read_asset?" do
+      it "should create filter and call custom_pass? on it" do
+        @filter = mock('filter')
+        @filter.stub!('custom_pass?')
+
+        DumpRake::Env.should_receive('filter').with(:restore_assets, DumpRake::Assets::SPLITTER).and_return(@filter)
+
+        @dump.read_asset?('a', 'b')
+      end
+
+      it "should test path usint fnmatch" do
+        DumpRake::Env.with_env(:restore_assets => '[a-b]') do
+          @dump.read_asset?('x/a', 'x').should be_true
+          @dump.read_asset?('x/b/file', 'x').should be_true
+          @dump.read_asset?('x/c', 'x').should be_false
         end
       end
     end

@@ -14,6 +14,7 @@ class DumpRake
       :migrate_down => %w[MIGRATE_DOWN],
       :restore_schema => %w[RESTORE_SCHEMA],
       :restore_tables => %w[RESTORE_TABLES],
+      :restore_assets => %w[RESTORE_ASSETS],
       :show_size => %w[SHOW_SIZE], # internal
     }.freeze unless defined? DICTIONARY
 
@@ -30,6 +31,7 @@ class DumpRake
       :migrate_down => 'don\'t run down for migrations not present in dump if you pass "0", "no" or "false"; pass "reset" to recreate (drop and create) db',
       :restore_schema => 'don\'t read/change schema if you pass "0", "no" or "false" (useful to just restore data for table; note that schema info tables are also not restored)',
       :restore_tables => 'works as TABLES, but for restoring',
+      :restore_assets => 'works as ASSETS, but for restoring',
     }.freeze unless defined? EXPLANATIONS
 
     class << self
@@ -84,7 +86,7 @@ class DumpRake
         m = {
           :select => [:like, :tags],
           :assets => [:assets],
-          :restore_options => [:migrate_down, :restore_schema, :restore_tables],
+          :restore_options => [:migrate_down, :restore_schema, :restore_tables, :restore_assets],
           :transfer_options => [:transfer_via]
         }
 

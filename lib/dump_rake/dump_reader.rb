@@ -215,34 +215,69 @@ class DumpRake
           assets_count, assets_paths = nil, assets
         end
 
-        DumpRake::Env.with_env(:assets => assets_paths.join(':')) do
-          Rake::Task['assets:delete'].invoke
+        if DumpRake::Env[:restore_assets]
+          assets_paths.each do |asset|
+            DumpRake::Assets.glob_asset_children(asset, '**/*').reverse.each do |child|
+              if read_asset?(child, DumpRake::RailsRoot)
+                case
+                when File.file?(child)
+                  File.unlink(child)
+                when File.directory?(child)
+                  begin
+                    Dir.unlink(child)
+                  rescue Errno::ENOTEMPTY
+                    nil
+                  end
+                end
+              end
+            end
+          end
+        else
+          DumpRake::Env.with_env(:assets => assets_paths.join(':')) do
+            Rake::Task['assets:delete'].invoke
+          end
         end
 
-        Progress.start('Assets', assets_count || 1) do
-          catch :assets do
-            # old style — in separate tar
-            find_entry('assets.tar') do |assets_tar|
-              def assets_tar.rewind
-                # rewind will fail - it must go to center of gzip
-                # also we don't need it - this is last step in dump restore
-              end
-              Archive::Tar::Minitar.open(assets_tar) do |inp|
-                inp.each do |entry|
-                  inp.extract_entry(DumpRake::RailsRoot, entry)
-                  Progress.step if assets_count
-                end
-              end
-              throw :assets
-            end
+        read_assets_entries(assets_paths, assets_count) do |stream, root, entry, prefix|
+          if !DumpRake::Env[:restore_assets] || read_asset?(entry.full_name, prefix)
+            stream.extract_entry(root, entry)
+          end
+        end
+      end
+    end
 
-            # new style — in same tar
-            assets_root_link do |tmpdir, prefix|
-              stream.each do |entry|
-                if entry.full_name.starts_with?("#{prefix}/")
-                  stream.extract_entry(tmpdir, entry)
-                  Progress.step if assets_count
-                end
+    def read_asset?(path, prefix)
+      DumpRake::Env.filter(:restore_assets, DumpRake::Assets::SPLITTER).custom_pass? do |value|
+        File.fnmatch(File.join(prefix, value), path) ||
+        File.fnmatch(File.join(prefix, value, '**'), path)
+      end
+    end
+
+    def read_assets_entries(assets_paths, assets_count)
+      Progress.start('Assets', assets_count || 1) do
+        found_assets = false
+        # old style — in separate tar
+        find_entry('assets.tar') do |assets_tar|
+          def assets_tar.rewind
+            # rewind will fail - it must go to center of gzip
+            # also we don't need it - this is last step in dump restore
+          end
+          Archive::Tar::Minitar.open(assets_tar) do |inp|
+            inp.each do |entry|
+              yield inp, DumpRake::RailsRoot, entry, nil
+              Progress.step if assets_count
+            end
+          end
+          found_assets = true
+        end
+
+        unless found_assets
+          # new style — in same tar
+          assets_root_link do |tmpdir, prefix|
+            stream.each do |entry|
+              if entry.full_name.starts_with?("#{prefix}/")
+                yield stream, tmpdir, entry, prefix
+                Progress.step if assets_count
               end
             end
           end
