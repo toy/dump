@@ -83,7 +83,7 @@ describe Env do
     it "should cache created filter" do
       ENV['TABLES'] = 'a,b,c'
       ENV['TABLES2'] = 'a,b,c'
-      Env::Filter.should_receive(:new).with('a,b,c').once
+      Env::Filter.should_receive(:new).with('a,b,c', nil).once
       Env.filter('TABLES')
       Env.filter('TABLES')
       Env.filter('TABLES2')
