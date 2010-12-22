@@ -1,5 +1,14 @@
-.DS_Store
-/rdoc
+/pkg/
+
+/doc/
+/rdoc/
+/.yardoc/
+/coverage/
+
+Makefile
+*.o
+*.bundle
+/tmp/
+
 /spec/debug.log
 /spec/db/database.yml
-/coverage
