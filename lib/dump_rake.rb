@@ -1,6 +1,4 @@
 # encoding: utf-8
-require 'rubygems'
-
 require 'pathname'
 require 'find'
 require 'fileutils'
