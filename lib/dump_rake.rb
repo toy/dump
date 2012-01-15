@@ -9,21 +9,8 @@ require 'tempfile'
 require 'backported_tmpdir' unless Dir.respond_to?(:mktmpdir)
 
 require 'rake'
-
-def require_gem_or_unpacked_gem(name, version = nil)
-  unpacked_gems_path = Pathname(__FILE__).dirname.parent + 'gems'
-
-  begin
-    gem name, version if version
-    require name
-  rescue Gem::LoadError, MissingSourceFile
-    $: << Pathname.glob((unpacked_gems_path + "#{name.to_s.gsub('/', '-')}*").to_s).last + 'lib'
-    require name
-  end
-end
-
-require_gem_or_unpacked_gem 'archive/tar/minitar'
-require_gem_or_unpacked_gem 'progress', '>= 1.0.0'
+require 'archive/tar/minitar'
+require 'progress'
 
 class DumpRake
   class << self
