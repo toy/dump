@@ -1,206 +1,216 @@
-= DumpRake
+# DumpRake
 
 Tasks to create and restore dumps of database and assets.
 
-== Install
+## Install
 
-  script/plugin install git://github.com/toy/dump.git
+    script/plugin install git://github.com/toy/dump.git
 
-Put paths of dirs you want to dump in file <tt>config/assets</tt>.
+Put paths of dirs you want to dump in file `config/assets`.
 
-Example
-
-  public/audios
-  public/flash
-  public/images/upload
-  public/videos
+    public/audios
+    public/flash
+    public/images/upload
+    public/videos
 
 When using cap tasks — be sure to link dump folder to persistent place on deploy, or you will lose all dumps every deploy.
 
-This plugin requires gems (but to reduce problems on shared hostings, unpacked versions of archive-tar-minitar-0.5.2 and progress-1.0.1 are used if they are not present):
-
-  archive/tar/minitar
-  progress (version 1.0.0 or later)
-
-To install:
-
-  gem install archive-tar-minitar progress
-
-== Capistrano integration
+## Capistrano integration
 
 You can use cap dump:* tasks to control dumps on remote server. Don't forget to deploy application to remote server before using dump:remote tasks.
 Also you can set custom remote rake binary in your deploy.rb like:
 
-  set :rake, "/custom/rake"
+    set :rake, "/custom/rake"
 
-== Usage
+## Usage
 
-  # create dump
-  rake dump
-  rake dump:create
+    # create dump
+    rake dump
+    rake dump:create
 
-  # list avaliable dumps
-  rake dump:versions
+    # list avaliable dumps
+    rake dump:versions
 
-  # restore dump
-  rake dump:restore
+    # restore dump
+    rake dump:restore
 
-  # delete old and unfinished dumps (all non tgz files will be deleted if they are not locked)
-  rake dump:cleanup
+    # delete old and unfinished dumps (all non tgz files will be deleted if they are not locked)
+    rake dump:cleanup
 
-=== Environment variables
+### Environment variables
 
-==== While creating dumps:
+#### While creating dumps:
 
-<tt>DESC</tt>, <tt>DESCRIPTION</tt> — free form description of dump
+`DESC`, `DESCRIPTION` — free form description of dump
 
-  rake dump DESC='uploaded photos'
+    rake dump DESC='uploaded photos'
 
-<tt>TAG</tt>, <tt>TAGS</tt> — comma separated list of tags
+`TAG`, `TAGS` — comma separated list of tags
 
-  rake dump TAGS='photos,videos'
+    rake dump TAGS='photos,videos'
 
-<tt>ASSETS</tt> — comma or colon separated list of paths or globs to dump
+`ASSETS` — comma or colon separated list of paths or globs to dump
 
-  rake dump ASSETS='public/system:public/images/masks/*'
-  rake dump ASSETS='public/system,public/images/masks/*'
+    rake dump ASSETS='public/system:public/images/masks/*'
+    rake dump ASSETS='public/system,public/images/masks/*'
 
-<tt>TABLES</tt> — comma separated list of tables to dump or if prefixed by "-" — to skip; by default only sessions table is skipped; schema_info and schema_migrations are always included if they are present
+`TABLES` — comma separated list of tables to dump or if prefixed by "-" — to skip; by default only sessions table is skipped; schema_info and schema_migrations are always included if they are present
 
 dump all tables except sessions:
-  rake dump
+
+    rake dump
 
 dump all tables:
-  rake dump TABLES='-'
+
+    rake dump TABLES='-'
 
 dump only people, pages and photos tables:
-  rake dump TABLES='people,pages,photos'
+
+    rake dump TABLES='people,pages,photos'
 
 dump all tables except people and pages:
-  rake dump TABLES='-people,pages'
 
-==== While restoring dumps:
+    rake dump TABLES='-people,pages'
 
-<tt>LIKE</tt>, <tt>VER</tt>, <tt>VERSION</tt> — filter dumps by full dump name
+#### While restoring dumps:
 
-  rake dump:versions LIKE='2009'
-  rake dump:restore LIKE='2009' # restores last dump matching 2009
+`LIKE`, `VER`, `VERSION` — filter dumps by full dump name
 
-<tt>TAG</tt>, <tt>TAGS</tt> — comma separated list of tags
+    rake dump:versions LIKE='2009'
+    rake dump:restore LIKE='2009' # restores last dump matching 2009
+
+`TAG`, `TAGS` — comma separated list of tags
 without '+' or '-' — dump should have any of such tags
 prefixed with '+' — dump should have every tag with prefix
 prefixed with '-' — dump should not have any of tags with prefix
 
 select dumps with tags photos or videos:
-  rake dump:restore TAGS='photos,videos'
+
+    rake dump:restore TAGS='photos,videos'
 
 select dumps with tags photos and videos:
-  rake dump:restore TAGS='+photos,+videos'
+
+    rake dump:restore TAGS='+photos,+videos'
 
 skip dumps with tags mirror and archive:
-  rake dump:restore TAGS='-mirror,-archive'
+
+    rake dump:restore TAGS='-mirror,-archive'
 
 select dumps with tags photos or videos, with tag important and without mirror:
-  rake dump:restore TAGS='photos,videos,+important,-mirror'
 
-<tt>MIGRATE_DOWN</tt> — don't run down for migrations not present in dump if you pass "0", "no" or "false"; pass "reset" to recreate (drop and create) db
+    rake dump:restore TAGS='photos,videos,+important,-mirror'
+
+`MIGRATE_DOWN` — don't run down for migrations not present in dump if you pass "0", "no" or "false"; pass "reset" to recreate (drop and create) db
 by default all migrations which are not present in dump are ran down
 
 don't run down for migrations:
-  rake dump:restore MIGRATE_DOWN=no
+
+    rake dump:restore MIGRATE_DOWN=no
 
 reset database:
-  rake dump:restore MIGRATE_DOWN=reset
 
-<tt>RESTORE_SCHEMA</tt> — don't read/change schema if you pass "0", "no" or "false" (useful to just restore data for table; note that schema info tables are also not restored)
+    rake dump:restore MIGRATE_DOWN=reset
+
+`RESTORE_SCHEMA` — don't read/change schema if you pass "0", "no" or "false" (useful to just restore data for table; note that schema info tables are also not restored)
 
 don't restore schema:
-  rake dump:restore RESTORE_SCHEMA=no
 
-<tt>RESTORE_TABLES</tt> — works as TABLES, but for restoring
+    rake dump:restore RESTORE_SCHEMA=no
+
+`RESTORE_TABLES` — works as TABLES, but for restoring
 
 restores only people, pages and photos tables:
-  rake dump RESTORE_TABLES='people,pages,photos'
+
+    rake dump RESTORE_TABLES='people,pages,photos'
 
 restores all tables except people and pages:
-  rake dump TABLES='-people,pages'
 
-<tt>RESTORE_ASSETS</tt> — works as ASSETS, but for restoring
+    rake dump TABLES='-people,pages'
 
-  rake dump RESTORE_ASSETS='public/system/a,public/system/b'
-  rake dump RESTORE_ASSETS='public/system/a:public/images/masks/*/new*'
+`RESTORE_ASSETS` — works as ASSETS, but for restoring
 
-==== For listing dumps:
+    rake dump RESTORE_ASSETS='public/system/a,public/system/b'
+    rake dump RESTORE_ASSETS='public/system/a:public/images/masks/*/new*'
 
-<tt>LIKE</tt>, <tt>VER</tt>, <tt>VERSION</tt> and <tt>TAG</tt>, <tt>TAGS</tt> as for restoring
+#### For listing dumps:
 
-<tt>SUMMARY</tt> — output info about dump: "1", "true" or "yes" for basic info, "2" or "schema" to display schema as well
+`LIKE`, `VER`, `VERSION` and `TAG`, `TAGS` as for restoring
 
-  rake dump:versions SUMMARY=1
-  rake dump:versions SUMMARY=full # output schema too
+`SUMMARY` — output info about dump: "1", "true" or "yes" for basic info, "2" or "schema" to display schema as well
 
-==== For cleanup:
+    rake dump:versions SUMMARY=1
+    rake dump:versions SUMMARY=full # output schema too
 
-<tt>LIKE</tt>, <tt>VER</tt>, <tt>VERSION</tt> and <tt>TAG</tt>, <tt>TAGS</tt> as for restoring
+#### For cleanup:
 
-<tt>LEAVE</tt> — number of dumps to leave
+`LIKE`, `VER`, `VERSION` and `TAG`, `TAGS` as for restoring
 
-  rake dump:cleanup LEAVE=10
-  rake dump:cleanup LEAVE=none
+`LEAVE` — number of dumps to leave
 
-=== cap tasks
+    rake dump:cleanup LEAVE=10
+    rake dump:cleanup LEAVE=none
+
+### cap tasks
 
 For all cap commands environment variables are same as for rake tasks
 
-<tt>TRANSFER_VIA</tt> — transfer method (rsync, sftp or scp)
+`TRANSFER_VIA` — transfer method (rsync, sftp or scp)
 By default transferring task will try to transfer using rsync if it is present, else it will try to use sftp and scp
 
 force transfer using scp:
-  cap dump:remote:download TRANSFER_VIA=scp
-  cap dump:mirror:down TRANSFER_VIA=scp
 
-<tt>BACKUP</tt>, <tt>AUTOBACKUP</tt>, <tt>AUTO_BACKUP</tt> — no autobackup if you pass "0", "no" or "false"
+    cap dump:remote:download TRANSFER_VIA=scp
+    cap dump:mirror:down TRANSFER_VIA=scp
+
+`BACKUP`, `AUTOBACKUP`, `AUTO_BACKUP` — no autobackup if you pass "0", "no" or "false"
 by default backup is created before mirroring
 
 don't create backup:
-  cap dump:mirror:down BACKUP=0
-  cap dump:mirror:down AUTOBACKUP=no
-  cap dump:mirror:down AUTO_BACKUP=false
 
-==== Basic cap tasks are same as rake tasks
+    cap dump:mirror:down BACKUP=0
+    cap dump:mirror:down AUTOBACKUP=no
+    cap dump:mirror:down AUTO_BACKUP=false
 
-  cap dump:local
-  cap dump:local:create
-  cap dump:local:restore
-  cap dump:local:versions
-  cap dump:local:cleanup
+#### Basic cap tasks are same as rake tasks
 
-  cap dump:remote
-  cap dump:remote:create
-  cap dump:remote:restore
-  cap dump:remote:versions
-  cap dump:remote:cleanup
+    cap dump:local
+    cap dump:local:create
+    cap dump:local:restore
+    cap dump:local:versions
+    cap dump:local:cleanup
 
-==== Dump exchanging tasks
+    cap dump:remote
+    cap dump:remote:create
+    cap dump:remote:restore
+    cap dump:remote:versions
+    cap dump:remote:cleanup
+
+#### Dump exchanging tasks
 
 transfer selected dump to remote server:
-  cap dump:local:upload
+
+    cap dump:local:upload
 
 transfer selected dump to local:
-  cap dump:remote:download
 
-==== Mirroring tasks
+    cap dump:remote:download
+
+#### Mirroring tasks
 
 mirror local to remote (create local dump, upload it to remote and restore it there):
-  cap dump:mirror:up
+
+    cap dump:mirror:up
 
 mirror remote to local (create remote dump, download it from remote and restore on local):
-  cap dump:mirror:down
 
-==== Backuping tasks
+    cap dump:mirror:down
+
+#### Backuping tasks
 
 backup remote on local (create remote dump and download it):
-  cap dump:backup:create
+
+    cap dump:backup:create
 
 restore backup (upload dump and restore on remote):
-  cap dump:backup:restore
+
+    cap dump:backup:restore
