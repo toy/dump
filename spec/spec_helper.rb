@@ -1,8 +1,7 @@
 begin
   require File.dirname(__FILE__) + '/../../../../spec/spec_helper'
-rescue LoadError
-  puts "You need to install rspec in your base app"
-  exit
+rescue LoadError => e
+  abort e
 end
 
 Spec::Runner.configure do |config|
