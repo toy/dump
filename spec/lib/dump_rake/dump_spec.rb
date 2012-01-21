@@ -1,13 +1,12 @@
 require File.dirname(__FILE__) + '/../../spec_helper'
 
-Dump = DumpRake::Dump
-describe Dump do
+describe DumpRake::Dump do
   def dump_path(file_name)
     File.join(DumpRake::RailsRoot, 'dump', file_name)
   end
 
   def new_dump(file_name)
-    Dump.new(dump_path(file_name))
+    DumpRake::Dump.new(dump_path(file_name))
   end
 
   describe "lock" do
@@ -20,7 +19,7 @@ describe Dump do
 
       File.should_receive(:open).and_return(nil)
 
-      Dump.new('hello').lock do
+      DumpRake::Dump.new('hello').lock do
         @yield_receiver.fire
       end
     end
@@ -34,7 +33,7 @@ describe Dump do
       @file.should_receive(:close)
       File.should_receive(:open).and_return(@file)
 
-      Dump.new('hello').lock do
+      DumpRake::Dump.new('hello').lock do
         @yield_receiver.fire
       end
     end
@@ -48,7 +47,7 @@ describe Dump do
       @file.should_receive(:close)
       File.should_receive(:open).and_return(@file)
 
-      Dump.new('hello').lock do
+      DumpRake::Dump.new('hello').lock do
         @yield_receiver.fire
       end
     end
@@ -56,11 +55,11 @@ describe Dump do
 
   describe "new" do
     it "should init with path if String sent" do
-      Dump.new('hello').path.should == Pathname('hello')
+      DumpRake::Dump.new('hello').path.should == Pathname('hello')
     end
 
     it "should init with path if Pathname sent" do
-      Dump.new(Pathname('hello')).path.should == Pathname('hello')
+      DumpRake::Dump.new(Pathname('hello')).path.should == Pathname('hello')
     end
 
     describe "with options" do
@@ -72,23 +71,23 @@ describe Dump do
       end
 
       it "should generate path with no options" do
-        Dump.new.path.should == Pathname('19650414065945.tgz')
+        DumpRake::Dump.new.path.should == Pathname('19650414065945.tgz')
       end
 
       it "should generate with dir" do
-        Dump.new(:dir => 'dump_dir').path.should == Pathname('dump_dir/19650414065945.tgz')
+        DumpRake::Dump.new(:dir => 'dump_dir').path.should == Pathname('dump_dir/19650414065945.tgz')
       end
 
       it "should generate path with description" do
-        Dump.new(:dir => 'dump_dir', :desc => 'hello world').path.should == Pathname('dump_dir/19650414065945-hello world.tgz')
+        DumpRake::Dump.new(:dir => 'dump_dir', :desc => 'hello world').path.should == Pathname('dump_dir/19650414065945-hello world.tgz')
       end
 
       it "should generate path with tags" do
-        Dump.new(:dir => 'dump_dir', :tags => ' mirror, hello world ').path.should == Pathname('dump_dir/19650414065945@hello world,mirror.tgz')
+        DumpRake::Dump.new(:dir => 'dump_dir', :tags => ' mirror, hello world ').path.should == Pathname('dump_dir/19650414065945@hello world,mirror.tgz')
       end
 
       it "should generate path with description and tags" do
-        Dump.new(:dir => 'dump_dir', :desc => 'Anniversary backup', :tags => ' mirror, hello world ').path.should == Pathname('dump_dir/19650414065945-Anniversary backup@hello world,mirror.tgz')
+        DumpRake::Dump.new(:dir => 'dump_dir', :desc => 'Anniversary backup', :tags => ' mirror, hello world ').path.should == Pathname('dump_dir/19650414065945-Anniversary backup@hello world,mirror.tgz')
       end
     end
   end
@@ -106,17 +105,17 @@ describe Dump do
 
       it "should search for files in dump dir when asked for list" do
         Dir.should_receive(:[]).with(dump_path('*.tgz')).and_return([])
-        Dump.list
+        DumpRake::Dump.list
       end
 
       it "should return selves instances for each found file" do
         stub_glob
-        Dump.list.all?{ |dump| dump.should be_a(Dump) }
+        DumpRake::Dump.list.all?{ |dump| dump.should be_a(DumpRake::Dump) }
       end
 
       it "should return dumps with name containting :like" do
         stub_glob
-        Dump.list(:like => '3').should == Dump.list.values_at(0, 1)
+        DumpRake::Dump.list(:like => '3').should == DumpRake::Dump.list.values_at(0, 1)
       end
     end
 
@@ -133,7 +132,7 @@ describe Dump do
       end
 
       it "should return all dumps if no tags send" do
-        Dump.list(:tags => '').should == Dump.list
+        DumpRake::Dump.list(:tags => '').should == DumpRake::Dump.list
       end
 
       {
@@ -148,7 +147,7 @@ describe Dump do
         '+d,+a'          => [2, 3, 4, 5],
       }.each do |tags, ids|
         it "should return dumps filtered by #{tags}" do
-          Dump.list(:tags => tags).should == Dump.list.values_at(*ids)
+          DumpRake::Dump.list(:tags => tags).should == DumpRake::Dump.list.values_at(*ids)
         end
       end
     end
@@ -216,59 +215,59 @@ describe Dump do
 
   describe "clean_description" do
     it "should shorten string to 50 chars and replace special symblos with '-'" do
-      Dump.new('').send(:clean_description, 'Special  Dump #12837192837 (before fixind *&^*&^ photos)').should == 'Special Dump #12837192837 (before fixind _ photos)'
-      Dump.new('').send(:clean_description, "To#{'o' * 100} long description").should == "T#{'o' * 49}"
+      DumpRake::Dump.new('').send(:clean_description, 'Special  Dump #12837192837 (before fixind *&^*&^ photos)').should == 'Special Dump #12837192837 (before fixind _ photos)'
+      DumpRake::Dump.new('').send(:clean_description, "To#{'o' * 100} long description").should == "T#{'o' * 49}"
     end
 
     it "should accept non string" do
-      Dump.new('').send(:clean_description, nil).should == ''
+      DumpRake::Dump.new('').send(:clean_description, nil).should == ''
     end
   end
 
   describe "clean_tag" do
     it "should shorten string to 20 chars and replace special symblos with '-'" do
-      Dump.new('').send(:clean_tag, 'Very special  tag #12837192837 (fixind *&^*&^)').should == 'very special tag _12'
-      Dump.new('').send(:clean_tag, "To#{'o' * 100} long tag").should == "t#{'o' * 19}"
+      DumpRake::Dump.new('').send(:clean_tag, 'Very special  tag #12837192837 (fixind *&^*&^)').should == 'very special tag _12'
+      DumpRake::Dump.new('').send(:clean_tag, "To#{'o' * 100} long tag").should == "t#{'o' * 19}"
     end
 
     it "should not allow '-' or '+' to be first symbol" do
-      Dump.new('').send(:clean_tag, ' Very special tag').should == 'very special tag'
-      Dump.new('').send(:clean_tag, '-Very special tag').should == 'very special tag'
-      Dump.new('').send(:clean_tag, '-----------').should == ''
-      Dump.new('').send(:clean_tag, '+Very special tag').should == '_very special tag'
-      Dump.new('').send(:clean_tag, '+++++++++++').should == '_'
+      DumpRake::Dump.new('').send(:clean_tag, ' Very special tag').should == 'very special tag'
+      DumpRake::Dump.new('').send(:clean_tag, '-Very special tag').should == 'very special tag'
+      DumpRake::Dump.new('').send(:clean_tag, '-----------').should == ''
+      DumpRake::Dump.new('').send(:clean_tag, '+Very special tag').should == '_very special tag'
+      DumpRake::Dump.new('').send(:clean_tag, '+++++++++++').should == '_'
     end
 
     it "should accept non string" do
-      Dump.new('').send(:clean_tag, nil).should == ''
+      DumpRake::Dump.new('').send(:clean_tag, nil).should == ''
     end
   end
 
   describe "clean_tags" do
     it "should split string and return uniq non blank sorted tags" do
-      Dump.new('').send(:clean_tags, ' perfect  tag , hello,Hello,this  is (*^(*&').should == ['hello', 'perfect tag', 'this is _']
-      Dump.new('').send(:clean_tags, "l#{'o' * 100}ng tag").should == ["l#{'o' * 19}"]
+      DumpRake::Dump.new('').send(:clean_tags, ' perfect  tag , hello,Hello,this  is (*^(*&').should == ['hello', 'perfect tag', 'this is _']
+      DumpRake::Dump.new('').send(:clean_tags, "l#{'o' * 100}ng tag").should == ["l#{'o' * 19}"]
     end
 
     it "should accept non string" do
-      Dump.new('').send(:clean_tags, nil).should == []
+      DumpRake::Dump.new('').send(:clean_tags, nil).should == []
     end
   end
 
   describe "get_filter_tags" do
     it "should split string and return uniq non blank sorted tags" do
-      Dump.new('').send(:get_filter_tags, 'a,+b,+c,-d').should == {:simple => %w[a], :mandatory => %w[b c], :forbidden => %w[d]}
-      Dump.new('').send(:get_filter_tags, ' a , + b , + c , - d ').should == {:simple => %w[a], :mandatory => %w[b c], :forbidden => %w[d]}
-      Dump.new('').send(:get_filter_tags, ' a , + c , + b , - d ').should == {:simple => %w[a], :mandatory => %w[b c], :forbidden => %w[d]}
-      Dump.new('').send(:get_filter_tags, ' a , + b , + , - ').should == {:simple => %w[a], :mandatory => %w[b], :forbidden => []}
-      Dump.new('').send(:get_filter_tags, ' a , a , + b , + b , - d , - d ').should == {:simple => %w[a], :mandatory => %w[b], :forbidden => %w[d]}
-      proc{ Dump.new('').send(:get_filter_tags, 'a,+a') }.should_not raise_error
-      proc{ Dump.new('').send(:get_filter_tags, 'a,-a') }.should raise_error
-      proc{ Dump.new('').send(:get_filter_tags, '+a,-a') }.should raise_error
+      DumpRake::Dump.new('').send(:get_filter_tags, 'a,+b,+c,-d').should == {:simple => %w[a], :mandatory => %w[b c], :forbidden => %w[d]}
+      DumpRake::Dump.new('').send(:get_filter_tags, ' a , + b , + c , - d ').should == {:simple => %w[a], :mandatory => %w[b c], :forbidden => %w[d]}
+      DumpRake::Dump.new('').send(:get_filter_tags, ' a , + c , + b , - d ').should == {:simple => %w[a], :mandatory => %w[b c], :forbidden => %w[d]}
+      DumpRake::Dump.new('').send(:get_filter_tags, ' a , + b , + , - ').should == {:simple => %w[a], :mandatory => %w[b], :forbidden => []}
+      DumpRake::Dump.new('').send(:get_filter_tags, ' a , a , + b , + b , - d , - d ').should == {:simple => %w[a], :mandatory => %w[b], :forbidden => %w[d]}
+      proc{ DumpRake::Dump.new('').send(:get_filter_tags, 'a,+a') }.should_not raise_error
+      proc{ DumpRake::Dump.new('').send(:get_filter_tags, 'a,-a') }.should raise_error
+      proc{ DumpRake::Dump.new('').send(:get_filter_tags, '+a,-a') }.should raise_error
     end
 
     it "should accept non string" do
-      Dump.new('').send(:get_filter_tags, nil).should == {:simple => [], :mandatory => [], :forbidden => []}
+      DumpRake::Dump.new('').send(:get_filter_tags, nil).should == {:simple => [], :mandatory => [], :forbidden => []}
     end
   end
 
@@ -279,7 +278,7 @@ describe Dump do
       File.should_receive(:symlink).with(DumpRake::RailsRoot, 'assets')
       File.should_receive(:unlink).with('assets')
       proc{
-        Dump.new('').send(:assets_root_link) do |dir, prefix|
+        DumpRake::Dump.new('').send(:assets_root_link) do |dir, prefix|
           dir.should == '/tmp/abc'
           prefix.should == 'assets'
           @yielded = true

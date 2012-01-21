@@ -49,7 +49,7 @@ class DumpRake
 
     def write_tables
       verify_connection
-      tables_to_dump.each_with_progress('Tables') do |table|
+      tables_to_dump.with_progress('Tables') do |table|
         write_table(table)
       end
     end
@@ -83,12 +83,12 @@ class DumpRake
         config[:assets] = {}
         Dir.chdir(DumpRake::RailsRoot) do
           assets = Dir[*assets].uniq
-          assets.with_progress('Assets').each do |asset|
+          assets.with_progress('Assets') do |asset|
             paths = Dir[File.join(asset, '**/*')]
             files = paths.select{ |path| File.file?(path) }
             config[:assets][asset] = {:total => paths.length, :files => files.length}
             assets_root_link do |tmpdir, prefix|
-              paths.each_with_progress(asset) do |entry|
+              paths.with_progress(asset) do |entry|
                 begin
                   Archive::Tar::Minitar.pack_file(File.join(prefix, entry), stream)
                 rescue => e

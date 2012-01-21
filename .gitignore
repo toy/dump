@@ -1,4 +1,5 @@
 /pkg/
+/*.gem
 
 /doc/
 /rdoc/
@@ -10,5 +11,4 @@ Makefile
 *.bundle
 /tmp/
 
-/spec/debug.log
 /spec/db/database.yml

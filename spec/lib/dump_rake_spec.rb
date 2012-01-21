@@ -1,60 +1,6 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 
 describe DumpRake do
-  describe "require_gem_or_unpacked_gem" do
-    before do
-      def gem(*args)
-        @expectations.gem(*args)
-      end
-      def require(*args)
-        @expectations.require(*args)
-      end
-      @expectations = mock('expectations')
-    end
-
-    it "should not use unpacked, should not call gem and should call require when called without version" do
-      @expectations.should_not_receive(:gem)
-      @expectations.should_receive(:require).with('progress')
-      $:.should_not_receive(:<<)
-
-      require_gem_or_unpacked_gem('progress')
-    end
-
-    it "should not use unpacked, should call gem and should call require when called with version" do
-      @expectations.should_receive(:gem).with('progress', '1.2.3')
-      @expectations.should_receive(:require).with('progress')
-      $:.should_not_receive(:<<)
-
-      require_gem_or_unpacked_gem('progress', '1.2.3')
-    end
-
-    it "should use unpacked, should not call gem and should call require when called without version and require fails" do
-      @expectations.should_not_receive(:gem)
-      @expectations.should_receive(:require).with('progress').and_raise(MissingSourceFile.new('', ''))
-      $:.should_receive(:<<).with(instance_of(Pathname))
-      @expectations.should_receive(:require).with('progress')
-
-      require_gem_or_unpacked_gem('progress')
-    end
-
-    it "should use unpacked, should call gem and should not call require when called with version and gem fails" do
-      @expectations.should_receive(:gem).with('progress', '1.2.3').and_raise(Gem::LoadError)
-      $:.should_receive(:<<).with(instance_of(Pathname))
-      @expectations.should_receive(:require).with('progress')
-
-      require_gem_or_unpacked_gem('progress', '1.2.3')
-    end
-
-    it "should use unpacked, should call gem and should call require when called with version and require fails" do
-      @expectations.should_receive(:gem).with('progress', '1.2.3')
-      @expectations.should_receive(:require).with('progress').and_raise(MissingSourceFile.new('', ''))
-      $:.should_receive(:<<).with(instance_of(Pathname))
-      @expectations.should_receive(:require).with('progress')
-
-      require_gem_or_unpacked_gem('progress', '1.2.3')
-    end
-  end
-
   describe "versions" do
     it "should call Dump.list if called without version" do
       DumpRake::Dump.should_receive(:list).and_return([])

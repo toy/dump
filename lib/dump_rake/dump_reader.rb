@@ -131,7 +131,7 @@ class DumpRake
             migrate_down = (migrated - dump_migrations)
 
             unless migrate_down.empty?
-              migrate_down.with_progress('Migrating down').reverse.each do |version|
+              migrate_down.reverse.with_progress('Migrating down') do |version|
                 DumpRake::Env.with_env('VERSION' => version) do
                   Rake::Task['db:migrate:down'].tap do |task|
                     begin
@@ -170,7 +170,7 @@ class DumpRake
 
     def read_tables
       verify_connection
-      config[:tables].each_with_progress('Tables') do |table, rows|
+      config[:tables].with_progress('Tables') do |table, rows|
         if (restore_schema? && schema_tables.include?(table)) || DumpRake::Env.filter(:restore_tables).pass?(table)
           read_table(table, rows)
         end
