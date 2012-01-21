@@ -1,8 +1,8 @@
 # encoding: UTF-8
 
 $: << File.join(File.dirname(__FILE__), '../lib')
-require 'shell_escape'
 require 'fileutils'
+require 'shellwords'
 
 require 'dump_rake/continious_timeout'
 require 'dump_rake/env'
@@ -31,7 +31,7 @@ namespace :dump do
 
     cmd = %W[#{rake} -s dump:#{command}]
     cmd += env.sort.map{ |key, value| "#{key}=#{value}" }
-    ShellEscape.command(*cmd)
+    cmd.shelljoin
   end
 
   def fetch_rails_env
@@ -65,7 +65,7 @@ namespace :dump do
             else
               raise "Don't know how to transfer in direction #{direction}"
             end
-            ShellEscape.command(*cmd)
+            cmd.shelljoin
           end
           commands.each do |cmd|
             logger.info cmd if logger
