@@ -214,3 +214,7 @@ backup remote on local (create remote dump and download it):
 restore backup (upload dump and restore on remote):
 
     cap dump:backup:restore
+
+## Copyright
+
+Copyright (c) 2008-2012 Ivan Kuchin. See LICENSE.txt for details.
