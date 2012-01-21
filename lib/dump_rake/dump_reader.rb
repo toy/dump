@@ -170,7 +170,7 @@ class DumpRake
 
     def read_tables
       verify_connection
-      config[:tables].each_with_progress('Tables') do |table, rows|
+      config[:tables].with_progress('Tables') do |table, rows|
         if (restore_schema? && schema_tables.include?(table)) || DumpRake::Env.filter(:restore_tables).pass?(table)
           read_table(table, rows)
         end
