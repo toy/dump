@@ -4,7 +4,6 @@ require 'find'
 require 'fileutils'
 require 'zlib'
 require 'tempfile'
-require 'backported_tmpdir' unless Dir.respond_to?(:mktmpdir)
 
 require 'rake'
 require 'archive/tar/minitar'
