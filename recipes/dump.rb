@@ -2,9 +2,9 @@
 
 $: << File.join(File.dirname(__FILE__), '../lib')
 require 'shell_escape'
-require 'continious_timeout'
 require 'fileutils'
 
+require 'dump_rake/continious_timeout'
 require 'dump_rake/env'
 
 begin
