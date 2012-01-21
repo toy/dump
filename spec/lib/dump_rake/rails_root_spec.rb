@@ -1,14 +1,25 @@
 require File.dirname(__FILE__) + '/../../spec_helper'
 
+def temp_remove_const(where, which)
+  around do |example|
+    if where.const_defined?(which)
+      old = where.send(:const_get, which)
+      where.send(:remove_const, which)
+      example.run
+      where.const_set(which, old)
+    end
+  end
+end
+
 describe 'RailsRoot' do
   before do
     @root = mock('root')
     @root.should_receive(:to_s).and_return(@root)
-
-    Object.send(:remove_const, 'Rails') if defined?(Rails)
-    Object.send(:remove_const, 'RAILS_ROOT') if defined?(RAILS_ROOT)
-    DumpRake.send(:remove_const, 'RailsRoot') if defined?(DumpRake::RailsRoot)
   end
+
+  temp_remove_const Object, :Rails
+  temp_remove_const Object, :RAILS_ROOT
+  temp_remove_const DumpRake, :RailsRoot
 
   it "should use Rails if it is present" do
     Object.const_set('Rails', mock('rails'))

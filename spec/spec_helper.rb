@@ -1,18 +1,20 @@
 begin
-  require File.dirname(__FILE__) + '/../../../../spec/spec_helper'
-rescue LoadError
-  puts "You need to install rspec in your base app"
-  exit
+  require File.join(File.dirname(__FILE__), 'dummy-3.1.3/spec/spec_helper')
+rescue LoadError => e
+  abort e
 end
 
-Spec::Runner.configure do |config|
+$:.unshift '../lib/dump_rake'
+require 'dump_rake'
+
+RSpec.configure do |config|
   config.use_transactional_fixtures = false
   config.use_instantiated_fixtures  = false
   config.fixture_path = DumpRake::RailsRoot + '/spec/fixtures/'
 end
 
 PLUGIN_SPEC_DIR = File.expand_path(File.dirname(__FILE__)) unless defined? PLUGIN_SPEC_DIR
-ActiveRecord::Base.logger = Logger.new(File.join(DumpRake::RailsRoot, 'log/dump-plugin-debug.log'))
+ActiveRecord::Base.logger = Logger.new(File.join(DumpRake::RailsRoot, 'log/dump.log'))
 
 DUMMY_SCHEMA_PATH = File.join(PLUGIN_SPEC_DIR, "db", "schema.rb") unless defined? DUMMY_SCHEMA_PATH
 
