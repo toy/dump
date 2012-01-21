@@ -1,10 +1,13 @@
 begin
-  require File.dirname(__FILE__) + '/../../../../spec/spec_helper'
+  require File.join(File.dirname(__FILE__), 'dummy-3.1.3/spec/spec_helper')
 rescue LoadError => e
   abort e
 end
 
-Spec::Runner.configure do |config|
+$:.unshift '../lib/dump_rake'
+require 'dump_rake'
+
+RSpec.configure do |config|
   config.use_transactional_fixtures = false
   config.use_instantiated_fixtures  = false
   config.fixture_path = DumpRake::RailsRoot + '/spec/fixtures/'
