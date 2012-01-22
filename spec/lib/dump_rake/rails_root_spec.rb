@@ -6,7 +6,10 @@ def temp_remove_const(where, which)
       old = where.send(:const_get, which)
       where.send(:remove_const, which)
       example.run
+      where.send(:remove_const, which) if where.const_defined?(which)
       where.const_set(which, old)
+    else
+      example.run
     end
   end
 end
