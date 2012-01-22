@@ -1,6 +1,6 @@
 # DumpRake
 
-Tasks to create and restore dumps of database and assets.
+Rails app rake and capistrano tasks to create and restore dumps of database and assets.
 
 ## Install
 
