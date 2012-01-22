@@ -1,4 +1,5 @@
-# encoding: utf-8
+# encoding: UTF-8
+
 require 'dump_rake/env/filter'
 
 class DumpRake
