@@ -45,7 +45,7 @@ Also you can set custom remote rake binary in your deploy.rb like:
 
     rake dump DESC='uploaded photos'
 
-`TAG`, `TAGS` — comma separated list of tags
+`TAGS`, `TAG` — comma separated list of tags
 
     rake dump TAGS='photos,videos'
 
@@ -79,7 +79,7 @@ dump all tables except people and pages:
     rake dump:versions LIKE='2009'
     rake dump:restore LIKE='2009' # restores last dump matching 2009
 
-`TAG`, `TAGS` — comma separated list of tags
+`TAGS`, `TAG` — comma separated list of tags
 without '+' or '-' — dump should have any of such tags
 prefixed with '+' — dump should have every tag with prefix
 prefixed with '-' — dump should not have any of tags with prefix
