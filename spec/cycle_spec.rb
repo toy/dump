@@ -147,7 +147,7 @@ describe 'full cycle' do
             Chicken.all.should == []
 
             #restore dump and verify equality
-            call_rake_restore('chickens')
+            call_rake_restore(:version => 'chickens')
             Chicken.all.map(&:attributes).should == chicken_attributes
 
             # go throught create/restore cycle and verify equality
@@ -168,7 +168,7 @@ describe 'full cycle' do
             create_chickens!(:random => 100)
             call_rake_create(:description => 'chickens')
             load_schema
-            call_rake_restore('chickens')
+            call_rake_restore(:version => 'chickens')
             create_chickens!
           end
         end

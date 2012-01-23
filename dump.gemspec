@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = %w[lib]
 
-  s.add_dependency 'archive-tar-minitar', '~> 0.5.2'
+  s.add_dependency 'archive-tar-minitar', '= 0.5.2'
   s.add_dependency 'progress', '~> 2.4.0'
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'sqlite3'

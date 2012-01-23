@@ -8,6 +8,7 @@ require 'tempfile'
 
 require 'rake'
 require 'archive/tar/minitar'
+require 'dump_rake/archive_tar_minitar_fix'
 require 'progress'
 
 class DumpRake

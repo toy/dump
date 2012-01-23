@@ -2,6 +2,8 @@
 
 Rails app rake and capistrano tasks to create and restore dumps of database and assets.
 
+Requires at least ruby 1.8.7, tested with ruby 1.9
+
 ## Install
 
     script/plugin install git://github.com/toy/dump.git

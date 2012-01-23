@@ -395,6 +395,7 @@ describe DumpReader do
 
       it "should clear table and read table if entry found for table" do
         @entry = mock('entry', :to_str => Marshal.dump('data'), :eof? => true)
+        @dump.should_receive(:columns_insert_sql).with('data')
         @dump.should_receive(:find_entry).with('first.dump').and_yield(@entry)
         @dump.should_receive(:quote_table_name).with('first').and_return('`first`')
         @dump.should_receive(:clear_table).with('`first`')
@@ -403,6 +404,7 @@ describe DumpReader do
 
       it "should clear schema table before writing" do
         @entry = mock('entry', :to_str => Marshal.dump('data'), :eof? => true)
+        @dump.should_receive(:columns_insert_sql).with('data')
         @dump.should_receive(:find_entry).with('schema_migrations.dump').and_yield(@entry)
         @dump.should_receive(:quote_table_name).with('schema_migrations').and_return('`schema_migrations`')
         @dump.should_receive(:clear_table).with('`schema_migrations`')
