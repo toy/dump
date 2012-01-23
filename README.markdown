@@ -2,22 +2,50 @@
 
 Rails app rake and capistrano tasks to create and restore dumps of database and assets.
 
-Requires at least ruby 1.8.7, tested with ruby 1.9
+Works with rails 2 and rails 3.
+
+Requires at least ruby 1.8.7, tested with ruby 1.9.
 
 ## Install
 
+Put in Gemfile if you are using bundler:
+
+    gem 'dump'
+
+Install as plugin for rails 3 (not recommended):
+
+    rails plugin install git://github.com/toy/dump.git
+
+Install as plugin for rails 2:
+
     script/plugin install git://github.com/toy/dump.git
 
-Put paths of dirs you want to dump in file `config/assets`.
+### Capistrano integration
+
+To get capistrano tasks in rails 3, put in `config/deploy.rb`:
+
+    require 'dump/capistrano'
+
+### Assets config
+
+`config/assets` holds paths of dirs you want to dump in file:
 
     public/audios
     public/flash
     public/images/upload
     public/videos
 
-When using cap tasks — be sure to link dump folder to persistent place on deploy, or you will lose all dumps every deploy.
+Generate in rails 3:
+
+    rails generate assets_config
+
+Generate in rails 2:
+
+    script/generate assets_config
 
 ## Capistrano integration
+
+When using cap tasks, dump folder should be in persistent place and be linked to application folder, or you will lose all dumps every deploy. Default recipe creates link on after `deploy:update_code`.
 
 You can use cap dump:* tasks to control dumps on remote server. Don't forget to deploy application to remote server before using dump:remote tasks.
 Also you can set custom remote rake binary in your deploy.rb like:
