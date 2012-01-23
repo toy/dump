@@ -3,8 +3,17 @@ sqlite3:
   database: ':memory:'
 
 mysql:
-  adapter: mysql
+  adapter: mysql2
   encoding: utf8
-  database:
+  database: dump_test # WARNING: this db will be droped
+  username:
+  password:
+
+postgresql:
+  adapter: postgresql
+  host: localhost
+  encoding: unicode
+  min_messages: WARNING
+  database: dump_test # WARNING: this db will be droped
   username:
   password:

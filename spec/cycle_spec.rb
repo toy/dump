@@ -10,9 +10,35 @@ def adapters
   database_configs.keys
 end
 
-def use_adapter(adapter = nil)
-  ActiveRecord::Base.establish_connection(database_configs[adapter || "sqlite3"])
-  load_schema
+def use_adapter(adapter)
+  config = database_configs[adapter]
+  begin
+    case config['adapter']
+    when /^mysql/
+      ActiveRecord::Base.establish_connection(config.merge('database' => nil))
+      ActiveRecord::Base.connection.create_database(config['database'])
+      ActiveRecord::Base.establish_connection(config)
+    when /^postgresql/
+      ActiveRecord::Base.establish_connection(config.merge('database' => 'postgres', 'schema_search_path' => 'public'))
+      ActiveRecord::Base.connection.create_database(config['database'])
+      ActiveRecord::Base.establish_connection(config)
+    else
+      ActiveRecord::Base.establish_connection(config)
+    end
+    load_schema
+    yield
+  ensure
+    case config['adapter']
+    when /^mysql/
+      ActiveRecord::Base.establish_connection(config)
+      ActiveRecord::Base.connection.drop_database config['database']
+    when /^postgresql/
+      ActiveRecord::Base.establish_connection(config.merge('database' => 'postgres', 'schema_search_path' => 'public'))
+      ActiveRecord::Base.connection.drop_database config['database']
+    end
+  end
+ensure
+  ActiveRecord::Base.establish_connection(:adapter => 'sqlite3', :database => ':memory:')
 end
 
 def load_schema
@@ -45,7 +71,6 @@ def create_chickens!(options = {})
     :timestamp => [time, time - 5.years],
     :time => [time, time - 5.years],
     :date => [time, time - 5.years],
-    :binary => [(1..255).to_a.pack('c*')],
     :boolean => [true, false],
   }
   Chicken.create!
@@ -111,44 +136,44 @@ describe 'full cycle' do
     adapters.each do |adapter|
       it "should dump and restore using #{adapter}" do
         in_temp_rails_app do
-          use_adapter(adapter)
+          use_adapter(adapter) do
+            #add chickens store their attributes and create dump
+            create_chickens!(:random => 100)
+            chicken_attributes = Chicken.all.map(&:attributes)
+            call_rake_create(:description => 'chickens')
 
-          #add chickens store their attributes and create dump
-          create_chickens!(:random => 100)
-          chicken_attributes = Chicken.all.map(&:attributes)
-          call_rake_create(:description => 'chickens')
+            #clear database
+            load_schema
+            Chicken.all.should == []
 
-          #clear database
-          load_schema
-          Chicken.all.should == []
+            #restore dump and verify equality
+            call_rake_restore('chickens')
+            Chicken.all.map(&:attributes).should == chicken_attributes
 
-          #restore dump and verify equality
-          call_rake_restore('chickens')
-          Chicken.all.map(&:attributes).should == chicken_attributes
-
-          # go throught create/restore cycle and verify equality
-          call_rake_create
-          load_schema
-          Chicken.all.should be_empty
-          call_rake_restore
-          Chicken.all.map(&:attributes).should == chicken_attributes
+            # go throught create/restore cycle and verify equality
+            call_rake_create
+            load_schema
+            Chicken.all.should be_empty
+            call_rake_restore
+            Chicken.all.map(&:attributes).should == chicken_attributes
+          end
         end
       end
     end
 
-    adapters.each do |adapter_src|
-      adapters.each do |adapter_dst|
-        next if adapter_src == adapter_dst
-        it "should dump using #{adapter_src} and restore using #{adapter_dst}" do
-          in_temp_rails_app do
-            use_adapter(adapter_src)
+    adapters.combination(2) do |adapter_src, adapter_dst|
+      it "should dump using #{adapter_src} and restore using #{adapter_dst}" do
+        in_temp_rails_app do
+          chicken_attributes = nil
+          use_adapter(adapter_src) do
             Chicken.all.should be_empty
 
             create_chickens!(:random => 100)
             chicken_attributes = Chicken.all.map(&:attributes)
             call_rake_create
+          end
 
-            use_adapter(adapter_dst)
+          use_adapter(adapter_dst) do
             Chicken.all.should be_empty
 
             call_rake_restore
@@ -162,21 +187,20 @@ describe 'full cycle' do
       in_temp_rails_app do
         dumps = []
         adapters.each do |adapter|
-          use_adapter(adapter)
-          load_schema
+          use_adapter(adapter) do
+            dump_name = call_rake_create(:desc => adapter)[:stdout].strip
+            dump_path = File.join(DumpRake::RailsRoot, 'dump', dump_name)
 
-          dump_name = call_rake_create(:desc => adapter)[:stdout].strip
-          dump_path = File.join(DumpRake::RailsRoot, 'dump', dump_name)
-
-          data = []
-          Zlib::GzipReader.open(dump_path) do |gzip|
-            Archive::Tar::Minitar.open(gzip, 'r') do |stream|
-              stream.each do |entry|
-                data << [entry.full_name, entry.read]
+            data = []
+            Zlib::GzipReader.open(dump_path) do |gzip|
+              Archive::Tar::Minitar.open(gzip, 'r') do |stream|
+                stream.each do |entry|
+                  data << [entry.full_name, entry.read]
+                end
               end
             end
+            dumps << {:path => dump_path, :data => data.sort}
           end
-          dumps << {:path => dump_path, :data => data.sort}
         end
 
         dumps.combination(2) do |dump_a, dump_b|
@@ -187,6 +211,5 @@ describe 'full cycle' do
     end
   rescue Errno::ENOENT => e
     $stderr.puts e
-    it "create database.yml from example to run all tests"
   end
 end
