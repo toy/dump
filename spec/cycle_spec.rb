@@ -161,6 +161,20 @@ describe 'full cycle' do
       end
     end
 
+    adapters.each do |adapter|
+      it "should not break id incrementing using #{adapter}" do
+        in_temp_rails_app do
+          use_adapter(adapter) do
+            create_chickens!(:random => 100)
+            call_rake_create(:description => 'chickens')
+            load_schema
+            call_rake_restore('chickens')
+            create_chickens!
+          end
+        end
+      end
+    end
+
     adapters.combination(2) do |adapter_src, adapter_dst|
       it "should dump using #{adapter_src} and restore using #{adapter_dst}" do
         in_temp_rails_app do
