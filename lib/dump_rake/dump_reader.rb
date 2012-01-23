@@ -202,6 +202,7 @@ class DumpRake
             end
           end
         end
+        fix_sequence!(table)
       end
     end
 

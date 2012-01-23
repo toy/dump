@@ -33,6 +33,12 @@ class DumpRake
       ActiveRecord::Base.connection.insert("INSERT INTO #{table_sql} #{columns_sql} VALUES #{values_sql}", 'Loading dump')
     end
 
+    def fix_sequence!(table)
+      if ActiveRecord::Base.connection.respond_to?(:reset_pk_sequence!)
+        ActiveRecord::Base.connection.reset_pk_sequence!(table)
+      end
+    end
+
     def join_for_sql(quoted)
       "(#{quoted.join(',')})"
     end
