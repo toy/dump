@@ -122,7 +122,7 @@ class DumpRake
 
     def assets_root_link
       prefix = 'assets'
-      Dir.mktmpdir do |dir|
+      Dir.mktmpdir('assets', File.join(DumpRake::RailsRoot, 'tmp')) do |dir|
         Dir.chdir(dir) do
           File.symlink(DumpRake::RailsRoot, prefix)
           begin
