@@ -34,6 +34,17 @@ describe "cap dump" do
     end
   end
 
+  describe :dump_command do
+
+    it "should return escaped string" do
+      @cap.dump.dump_command(:hello, :rake => 'rake', 'x x' => 'a b').should == 'rake -s dump:hello x\\ x\\=a\\ b'
+    end
+
+    it "should return escaped string for complex rake invocation command" do
+      @cap.dump.dump_command(:hello, :rake => 'bundler exec rake', 'x x' => 'a b').should == 'bundler exec rake -s dump:hello x\\ x\\=a\\ b'
+    end
+  end
+
   describe "do_transfer" do
     before do
       @cap.dump.stub!(:do_transfer_via)

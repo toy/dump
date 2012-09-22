@@ -30,9 +30,9 @@ Capistrano::Configuration.instance(:i_need_this!).load do
 
       env.update(DumpRake::Env.for_command(command, true))
 
-      cmd = %W[#{rake} -s dump:#{command}]
+      cmd = %W[-s dump:#{command}]
       cmd += env.sort.map{ |key, value| "#{key}=#{value}" }
-      cmd.shelljoin
+      "#{rake} #{cmd.shelljoin}"
     end
 
     def fetch_rails_env
