@@ -1,7 +1,7 @@
 PATH
   remote: ../../..
   specs:
-    dump (1.0.0)
+    dump (1.0.2)
       archive-tar-minitar (= 0.5.2)
       progress (~> 2.4.0)
     progress (2.4.0)
