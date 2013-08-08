@@ -112,7 +112,7 @@ class DumpRake
         rows = select_all_by_sql(select_where_primary_key % '>= 0')
         until rows.blank?
           rows.each(&block)
-          break if rows.length < chunk_size
+          break if rows.count < chunk_size
           rows = select_all_by_sql(select_where_primary_key % "> #{rows.last[primary_key].to_i}")
         end
       else
