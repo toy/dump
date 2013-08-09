@@ -150,14 +150,14 @@ describe 'full cycle' do
 
             #restore dump and verify equality
             call_rake_restore(:version => 'chickens')
-            Chicken.all.map(&:attributes).should == chicken_attributes
+            Chicken.all.map(&:attributes).to_set.should == chicken_attributes.to_set
 
             # go throught create/restore cycle and verify equality
             call_rake_create
             load_schema
             Chicken.all.should be_empty
             call_rake_restore
-            Chicken.all.map(&:attributes).should == chicken_attributes
+            Chicken.all.map(&:attributes).to_set.should == chicken_attributes.to_set
           end
         end
       end
@@ -193,7 +193,7 @@ describe 'full cycle' do
             Chicken.all.should be_empty
 
             call_rake_restore
-            chicken_attributes.should == Chicken.all.map(&:attributes)
+            chicken_attributes.to_set.should == Chicken.all.map(&:attributes).to_set
           end
         end
       end
