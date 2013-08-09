@@ -1,8 +1,4 @@
-begin
-  require File.join(File.dirname(__FILE__), 'dummy-3.1.3/spec/spec_helper')
-rescue LoadError => e
-  abort e
-end
+require File.join(File.dirname(__FILE__), 'dummy-3.1.3/spec/spec_helper')
 
 $:.unshift '../lib/dump_rake'
 require 'dump_rake'
