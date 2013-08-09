@@ -16,10 +16,12 @@ def use_adapter(adapter)
     case config['adapter']
     when /^mysql/
       ActiveRecord::Base.establish_connection(config.merge('database' => nil))
+      ActiveRecord::Base.connection.drop_database config['database'] rescue nil
       ActiveRecord::Base.connection.create_database(config['database'])
       ActiveRecord::Base.establish_connection(config)
     when /^postgresql/
       ActiveRecord::Base.establish_connection(config.merge('database' => 'postgres', 'schema_search_path' => 'public'))
+      ActiveRecord::Base.connection.drop_database config['database'] rescue nil
       ActiveRecord::Base.connection.create_database(config['database'])
       ActiveRecord::Base.establish_connection(config)
     else
