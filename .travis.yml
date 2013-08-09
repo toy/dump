@@ -14,4 +14,3 @@ before_install:
   - mysql -e 'create database myapp_test;'
   - psql -c 'create database myapp_test;' -U postgres
   - cp .travis.database.yml spec/db/database.yml
-  - for i in spec/*/Gemfile; do bundle install --gemfile="$i"; done
