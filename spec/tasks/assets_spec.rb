@@ -26,7 +26,7 @@ describe "rake assets" do
       public/images/a
       public/images/b
     end_src
-    File.stub!(:readlines).and_return(StringIO.new(data).readlines)
+    File.stub(:readlines).and_return(StringIO.new(data).readlines)
     @rake["assets"].invoke
     ENV['ASSETS'].should == 'public/images/a:public/images/b'
   end
@@ -36,7 +36,7 @@ describe "rake assets" do
       public/images/a
       public/images/b
     end_src
-    File.stub!(:readlines).and_return(StringIO.new(data).readlines)
+    File.stub(:readlines).and_return(StringIO.new(data).readlines)
     DumpRake::Env.with_env :assets => 'public/images' do
       @rake["assets"].invoke
       ENV['ASSETS'].should == 'public/images'
@@ -45,7 +45,7 @@ describe "rake assets" do
 
   describe "delete" do
     before do
-      FileUtils.stub!(:remove_entry)
+      FileUtils.stub(:remove_entry)
     end
 
     it "should require assets task" do
@@ -54,7 +54,7 @@ describe "rake assets" do
 
     describe "deleting existing assets" do
       it "should go through each asset from config" do
-        ENV.stub!(:[]).with('ASSETS').and_return('images:videos')
+        ENV.stub(:[]).with('ASSETS').and_return('images:videos')
 
         File.should_receive(:expand_path).with('images', DumpRake::RailsRoot).and_return('')
         File.should_receive(:expand_path).with('videos', DumpRake::RailsRoot).and_return('')
@@ -64,7 +64,7 @@ describe "rake assets" do
 
       it "should glob all assets and delete content" do
         @assets = %w[images videos]
-        ENV.stub!(:[]).with('ASSETS').and_return(@assets.join(':'))
+        ENV.stub(:[]).with('ASSETS').and_return(@assets.join(':'))
         @assets.each do |asset|
           mask = File.join(DumpRake::RailsRoot, asset, '*')
           paths = %w[file1 file2 dir].map{ |file| File.join(DumpRake::RailsRoot, asset, file) }
@@ -79,7 +79,7 @@ describe "rake assets" do
 
       it "should not glob risky paths" do
         @assets = %w[images / /private ../ ../.. ./../ dir/.. dir/../..]
-        ENV.stub!(:[]).with('ASSETS').and_return(@assets.join(':'))
+        ENV.stub(:[]).with('ASSETS').and_return(@assets.join(':'))
 
         Dir.should_receive(:[]).with(File.join(DumpRake::RailsRoot, 'images/*')).and_return([])
         Dir.should_receive(:[]).with(File.join(DumpRake::RailsRoot, '*')).and_return([])

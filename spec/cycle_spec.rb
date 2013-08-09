@@ -52,7 +52,7 @@ def in_temp_rails_app
   DumpRake::RailsRoot.replace(File.join(PLUGIN_SPEC_DIR, 'temp_rails_app'))
   FileUtils.remove_entry(DumpRake::RailsRoot) if File.exist?(DumpRake::RailsRoot)
   FileUtils.mkpath(DumpRake::RailsRoot)
-  Progress.stub!(:io).and_return(StringIO.new)
+  Progress.stub(:io).and_return(StringIO.new)
   yield
 ensure
   FileUtils.remove_entry(DumpRake::RailsRoot) if File.exist?(DumpRake::RailsRoot)

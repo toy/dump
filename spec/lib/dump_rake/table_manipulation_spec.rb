@@ -143,9 +143,9 @@ describe TableManipulation do
   describe "table_chunk_size" do
     it "should return chunk_size based on estimated average for row size" do
       should_receive(:table_columns).with('first').and_return(
-        [mock(:column, :type => :integer, :limit => nil)] * 3 +
-        [mock(:column, :type => :string, :limit => nil)] * 3 +
-        [mock(:column, :type => :text, :limit => nil)]
+        [double(:column, :type => :integer, :limit => nil)] * 3 +
+        [double(:column, :type => :string, :limit => nil)] * 3 +
+        [double(:column, :type => :text, :limit => nil)]
       )
       table_chunk_size('first').should satisfy { |n|
         (TableManipulation::CHUNK_SIZE_MIN..TableManipulation::CHUNK_SIZE_MAX).include?(n)
@@ -154,14 +154,14 @@ describe TableManipulation do
 
     it "should not return value less than CHUNK_SIZE_MIN" do
       should_receive(:table_columns).with('first').and_return(
-        [mock(:column, :type => :text, :limit => nil)] * 100
+        [double(:column, :type => :text, :limit => nil)] * 100
       )
       table_chunk_size('first').should == TableManipulation::CHUNK_SIZE_MIN
     end
 
     it "should not return value more than CHUNK_SIZE_MAX" do
       should_receive(:table_columns).with('first').and_return(
-        [mock(:column, :type => :boolean, :limit => 1)] * 10
+        [double(:column, :type => :boolean, :limit => 1)] * 10
       )
       table_chunk_size('first').should == TableManipulation::CHUNK_SIZE_MAX
     end
@@ -169,7 +169,7 @@ describe TableManipulation do
 
   describe "table_columns" do
     it "should return table column definitions" do
-      columns = [mock(:column), mock(:column), mock(:column)]
+      columns = [double(:column), double(:column), double(:column)]
       ActiveRecord::Base.connection.should_receive(:columns).with('first').and_return(columns)
       table_columns('first').should == columns
     end
@@ -179,13 +179,13 @@ describe TableManipulation do
     it "should return true only if table has column with name id and type :integer" do
       should_receive(:table_primary_key).at_least(3).times.and_return('id')
 
-      should_receive(:table_columns).with('first').and_return([mock(:column, :name => 'id', :type => :integer), mock(:column, :name => 'title', :type => :integer)])
+      should_receive(:table_columns).with('first').and_return([double(:column, :name => 'id', :type => :integer), double(:column, :name => 'title', :type => :integer)])
       table_has_primary_column?('first').should be_true
 
-      should_receive(:table_columns).with('second').and_return([mock(:column, :name => 'id', :type => :string), mock(:column, :name => 'title', :type => :integer)])
+      should_receive(:table_columns).with('second').and_return([double(:column, :name => 'id', :type => :string), double(:column, :name => 'title', :type => :integer)])
       table_has_primary_column?('second').should be_false
 
-      should_receive(:table_columns).with('third').and_return([mock(:column, :name => 'name', :type => :integer), mock(:column, :name => 'title', :type => :integer)])
+      should_receive(:table_columns).with('third').and_return([double(:column, :name => 'name', :type => :integer), double(:column, :name => 'title', :type => :integer)])
       table_has_primary_column?('third').should be_false
     end
   end
@@ -248,7 +248,7 @@ describe TableManipulation do
 
   describe "select_all_by_sql" do
     it "should return all rows returned by database" do
-      rows = [mock(:row), mock(:row), mock(:row)]
+      rows = [double(:row), double(:row), double(:row)]
       ActiveRecord::Base.connection.should_receive(:select_all).with("SELECT * FROM abc WHERE x = y").and_return(rows)
       select_all_by_sql("SELECT * FROM abc WHERE x = y").should == rows
     end

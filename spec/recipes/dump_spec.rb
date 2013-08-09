@@ -47,7 +47,7 @@ describe "cap dump" do
 
   describe "do_transfer" do
     before do
-      @cap.dump.stub!(:do_transfer_via)
+      @cap.dump.stub(:do_transfer_via)
     end
 
     [:up, :down].each do |direction|
@@ -61,13 +61,13 @@ describe "cap dump" do
 
           describe "if got_rsync?" do
             it "should use rsync" do
-              @cap.dump.stub!(:got_rsync?).and_return(true)
+              @cap.dump.stub(:got_rsync?).and_return(true)
               @cap.dump.should_receive(:do_transfer_via).with(:rsync, direction, 'a.tgz', 'b.tgz')
               grab_output{ @cap.dump.do_transfer(direction, 'a.tgz', 'b.tgz') }
             end
 
             it "should raise if rsync fails" do
-              @cap.dump.stub!(:got_rsync?).and_return(true)
+              @cap.dump.stub(:got_rsync?).and_return(true)
               @cap.dump.should_receive(:do_transfer_via).with(:rsync, direction, 'a.tgz', 'b.tgz').and_raise('problem using rsync')
               proc{
                 grab_output{ @cap.dump.do_transfer(direction, 'a.tgz', 'b.tgz') }
@@ -77,20 +77,20 @@ describe "cap dump" do
 
           describe "unless got_rsync?" do
             it "should try sftp" do
-              @cap.dump.stub!(:got_rsync?).and_return(false)
+              @cap.dump.stub(:got_rsync?).and_return(false)
               @cap.dump.should_receive(:do_transfer_via).with(:sftp, direction, 'a.tgz', 'b.tgz')
               grab_output{ @cap.dump.do_transfer(direction, 'a.tgz', 'b.tgz') }
             end
 
             it "should try scp after sftp" do
-              @cap.dump.stub!(:got_rsync?).and_return(false)
+              @cap.dump.stub(:got_rsync?).and_return(false)
               @cap.dump.should_receive(:do_transfer_via).with(:sftp, direction, 'a.tgz', 'b.tgz').and_raise('problem using sftp')
               @cap.dump.should_receive(:do_transfer_via).with(:scp, direction, 'a.tgz', 'b.tgz')
               grab_output{ @cap.dump.do_transfer(direction, 'a.tgz', 'b.tgz') }
             end
 
             it "should not rescue if scp also fails" do
-              @cap.dump.stub!(:got_rsync?).and_return(false)
+              @cap.dump.stub(:got_rsync?).and_return(false)
               @cap.dump.should_receive(:do_transfer_via).with(:sftp, direction, 'a.tgz', 'b.tgz').and_raise('problem using sftp')
               @cap.dump.should_receive(:do_transfer_via).with(:scp, direction, 'a.tgz', 'b.tgz').and_raise('problem using scp')
               proc{
@@ -117,7 +117,7 @@ describe "cap dump" do
       })
 
       it "should print result of rake task" do
-        @cap.dump.stub!(:run_local).and_return(" 123M\t123123.tgz\n")
+        @cap.dump.stub(:run_local).and_return(" 123M\t123123.tgz\n")
         grab_output{
           @cap.find_and_execute_task("dump:local:versions")
         }[:stdout].should == " 123M\t123123.tgz\n"
@@ -137,7 +137,7 @@ describe "cap dump" do
       })
 
       it "should print result of rake task" do
-        @cap.dump.stub!(:run_local).and_return("123123.tgz\n")
+        @cap.dump.stub(:run_local).and_return("123123.tgz\n")
         grab_output{
           @cap.find_and_execute_task("dump:local:cleanup")
         }[:stdout].should == "123123.tgz\n"
@@ -176,14 +176,14 @@ describe "cap dump" do
       }, :return_value => '123.tgz')
 
       it "should print result of rake task" do
-        @cap.dump.stub!(:run_local).and_return("123123.tgz\n")
+        @cap.dump.stub(:run_local).and_return("123123.tgz\n")
         grab_output{
           @cap.find_and_execute_task("dump:local:create")
         }[:stdout].should == "123123.tgz\n"
       end
 
       it "should return stripped result of rake task" do
-        @cap.dump.stub!(:run_local).and_return("123123.tgz\n")
+        @cap.dump.stub(:run_local).and_return("123123.tgz\n")
         grab_output{
           @cap.find_and_execute_task("dump:local:create").should == "123123.tgz"
         }
@@ -220,19 +220,19 @@ describe "cap dump" do
       }, :cap_task => 'dump:local:upload')
 
       it "should not upload anything if there are no versions avaliable" do
-        @cap.dump.stub!(:run_local).and_return('')
+        @cap.dump.stub(:run_local).and_return('')
         @cap.dump.should_not_receive(:do_transfer)
         @cap.find_and_execute_task("dump:local:upload")
       end
 
       it "should transfer latest version dump" do
-        @cap.dump.stub!(:run_local).and_return("100.tgz\n200.tgz\n300.tgz\n")
+        @cap.dump.stub(:run_local).and_return("100.tgz\n200.tgz\n300.tgz\n")
         @cap.dump.should_receive(:do_transfer).with(:up, "dump/300.tgz", "#{@remote_path}/dump/300.tgz")
         @cap.find_and_execute_task("dump:local:upload")
       end
 
       it "should handle extra spaces around file names" do
-        @cap.dump.stub!(:run_local).and_return("\r\n\r\n\r  100.tgz   \r\n\r\n\r  200.tgz   \r\n\r\n\r  300.tgz   \r\n\r\n\r  ")
+        @cap.dump.stub(:run_local).and_return("\r\n\r\n\r  100.tgz   \r\n\r\n\r  200.tgz   \r\n\r\n\r  300.tgz   \r\n\r\n\r  ")
         @cap.dump.should_receive(:do_transfer).with(:up, "dump/300.tgz", "#{@remote_path}/dump/300.tgz")
         @cap.find_and_execute_task("dump:local:upload")
       end
@@ -253,7 +253,7 @@ describe "cap dump" do
       })
 
       it "should print result of rake task" do
-        @cap.dump.stub!(:run_remote).and_return(" 123M\t123123.tgz\n")
+        @cap.dump.stub(:run_remote).and_return(" 123M\t123123.tgz\n")
         grab_output{
           @cap.find_and_execute_task("dump:remote:versions")
         }[:stdout].should == " 123M\t123123.tgz\n"
@@ -279,7 +279,7 @@ describe "cap dump" do
       })
 
       it "should print result of rake task" do
-        @cap.dump.stub!(:run_remote).and_return("123123.tgz\n")
+        @cap.dump.stub(:run_remote).and_return("123123.tgz\n")
         grab_output{
           @cap.find_and_execute_task("dump:remote:cleanup")
         }[:stdout].should == "123123.tgz\n"
@@ -332,14 +332,14 @@ describe "cap dump" do
       }, :return_value => '123.tgz')
 
       it "should print result of rake task" do
-        @cap.dump.stub!(:run_remote).and_return("123123.tgz\n")
+        @cap.dump.stub(:run_remote).and_return("123123.tgz\n")
         grab_output{
           @cap.find_and_execute_task("dump:remote:create")
         }[:stdout].should == "123123.tgz\n"
       end
 
       it "should return stripped result of rake task" do
-        @cap.dump.stub!(:run_remote).and_return("123123.tgz\n")
+        @cap.dump.stub(:run_remote).and_return("123123.tgz\n")
         grab_output{
           @cap.find_and_execute_task("dump:remote:create").should == "123123.tgz"
         }
@@ -405,28 +405,28 @@ describe "cap dump" do
       }, :cap_task => "dump:remote:download")
 
       it "should not download anything if there are no versions avaliable" do
-        @cap.dump.stub!(:run_remote).and_return('')
+        @cap.dump.stub(:run_remote).and_return('')
         @cap.dump.should_not_receive(:do_transfer)
         @cap.find_and_execute_task("dump:remote:download")
       end
 
       it "should transfer latest version dump" do
-        @cap.dump.stub!(:run_remote).and_return("100.tgz\n200.tgz\n300.tgz\n")
+        @cap.dump.stub(:run_remote).and_return("100.tgz\n200.tgz\n300.tgz\n")
         @cap.dump.should_receive(:do_transfer).with(:down, "#{@remote_path}/dump/300.tgz", "dump/300.tgz")
-        FileUtils.stub!(:mkpath)
+        FileUtils.stub(:mkpath)
         @cap.find_and_execute_task("dump:remote:download")
       end
 
       it "should handle extra spaces around file names" do
-        @cap.dump.stub!(:run_remote).and_return("\r\n\r\n\r  100.tgz   \r\n\r\n\r  200.tgz   \r\n\r\n\r  300.tgz   \r\n\r\n\r  ")
+        @cap.dump.stub(:run_remote).and_return("\r\n\r\n\r  100.tgz   \r\n\r\n\r  200.tgz   \r\n\r\n\r  300.tgz   \r\n\r\n\r  ")
         @cap.dump.should_receive(:do_transfer).with(:down, "#{@remote_path}/dump/300.tgz", "dump/300.tgz")
-        FileUtils.stub!(:mkpath)
+        FileUtils.stub(:mkpath)
         @cap.find_and_execute_task("dump:remote:download")
       end
 
       it "should create local dump dir" do
-        @cap.dump.stub!(:run_remote).and_return("100.tgz\n200.tgz\n300.tgz\n")
-        @cap.dump.stub!(:do_transfer)
+        @cap.dump.stub(:run_remote).and_return("100.tgz\n200.tgz\n300.tgz\n")
+        @cap.dump.stub(:do_transfer)
         FileUtils.should_receive(:mkpath).with('dump')
         @cap.find_and_execute_task("dump:remote:download")
       end
@@ -457,19 +457,19 @@ describe "cap dump" do
         end
 
         it "should not call local:create if auto-backup fails" do
-          @cap.dump.namespaces[dst].stub!(:create).and_return('')
+          @cap.dump.namespaces[dst].stub(:create).and_return('')
           @cap.dump.namespaces[src].should_not_receive(:create)
           @cap.find_and_execute_task("dump:mirror:#{dir}")
         end
 
         it "should call local:create if auto-backup succeedes with tags mirror and mirror-#{dir}" do
-          @cap.dump.namespaces[dst].stub!(:create).and_return('123.tgz')
+          @cap.dump.namespaces[dst].stub(:create).and_return('123.tgz')
           @cap.dump.namespaces[src].should_receive(:create){ DumpRake::Env[:tags].should == "mirror"; '' }
           @cap.find_and_execute_task("dump:mirror:#{dir}")
         end
 
         it "should call local:create if auto-backup succeedes with additional tags mirror and mirror-#{dir}" do
-          @cap.dump.namespaces[dst].stub!(:create).and_return('123.tgz')
+          @cap.dump.namespaces[dst].stub(:create).and_return('123.tgz')
           @cap.dump.namespaces[src].should_receive(:create){ DumpRake::Env[:tags].should == "mirror,photos"; '' }
           DumpRake::Env.with_env :tags => 'photos' do
             @cap.find_and_execute_task("dump:mirror:#{dir}")
@@ -477,16 +477,16 @@ describe "cap dump" do
         end
 
         it "should not call local:upload or remote:restore if local:create fails" do
-          @cap.dump.namespaces[dst].stub!(:create).and_return('123.tgz')
-          @cap.dump.namespaces[src].stub!(:create).and_return('')
+          @cap.dump.namespaces[dst].stub(:create).and_return('123.tgz')
+          @cap.dump.namespaces[src].stub(:create).and_return('')
           @cap.dump.namespaces[src].should_not_receive(:upload)
           @cap.dump.namespaces[dst].should_not_receive(:restore)
           @cap.find_and_execute_task("dump:mirror:#{dir}")
         end
 
         it "should call local:upload and remote:restore with only varibale ver set to file name if local:create returns file name" do
-          @cap.dump.namespaces[dst].stub!(:create).and_return('123.tgz')
-          @cap.dump.namespaces[src].stub!(:create).and_return('123.tgz')
+          @cap.dump.namespaces[dst].stub(:create).and_return('123.tgz')
+          @cap.dump.namespaces[src].stub(:create).and_return('123.tgz')
           test_env = proc{
             DumpRake::Env[:like].should == '123.tgz'
             DumpRake::Env[:tags].should == nil
@@ -509,13 +509,13 @@ describe "cap dump" do
     end
 
     it "should not call remote:download if remote:create returns blank" do
-      @cap.dump.remote.stub!(:create).and_return('')
+      @cap.dump.remote.stub(:create).and_return('')
       @cap.dump.remote.should_not_receive(:download)
       @cap.find_and_execute_task("dump:backup")
     end
 
     it "should call remote:download if remote:create returns file name" do
-      @cap.dump.remote.stub!(:create).and_return('123.tgz')
+      @cap.dump.remote.stub(:create).and_return('123.tgz')
       @cap.dump.remote.should_receive(:download).ordered
       @cap.find_and_execute_task("dump:backup")
     end
@@ -549,7 +549,7 @@ describe "cap dump" do
     end
 
     it "should send only ver variable" do
-      @cap.dump.remote.stub!(:create).and_return('123.tgz')
+      @cap.dump.remote.stub(:create).and_return('123.tgz')
       def (@cap.dump.remote).download
         DumpRake::Env[:like].should == '123.tgz'
         DumpRake::Env[:tags].should == nil

@@ -11,7 +11,7 @@ describe DumpRake::Dump do
 
   describe "lock" do
     before do
-      @yield_receiver = mock('yield_receiver')
+      @yield_receiver = double('yield_receiver')
     end
 
     it "should not yield if file does not exist" do
@@ -27,7 +27,7 @@ describe DumpRake::Dump do
     it "should not yield if file can not be locked" do
       @yield_receiver.should_not_receive(:fire)
 
-      @file = mock('file')
+      @file = double('file')
       @file.should_receive(:flock).with(File::LOCK_EX | File::LOCK_NB).and_return(nil)
       @file.should_receive(:flock).with(File::LOCK_UN)
       @file.should_receive(:close)
@@ -41,7 +41,7 @@ describe DumpRake::Dump do
     it "should yield if file can not be locked" do
       @yield_receiver.should_receive(:fire)
 
-      @file = mock('file')
+      @file = double('file')
       @file.should_receive(:flock).with(File::LOCK_EX | File::LOCK_NB).and_return(true)
       @file.should_receive(:flock).with(File::LOCK_UN)
       @file.should_receive(:close)
@@ -64,10 +64,10 @@ describe DumpRake::Dump do
 
     describe "with options" do
       before do
-        @time = mock('time')
-        @time.stub!(:utc).and_return(@time)
-        @time.stub!(:strftime).and_return('19650414065945')
-        Time.stub!(:now).and_return(@time)
+        @time = double('time')
+        @time.stub(:utc).and_return(@time)
+        @time.stub(:strftime).and_return('19650414065945')
+        Time.stub(:now).and_return(@time)
       end
 
       it "should generate path with no options" do
@@ -100,7 +100,7 @@ describe DumpRake::Dump do
           File.should_receive(:file?).with(path).at_least(1).and_return(true)
           path
         end
-        Dir.stub!(:[]).and_return(paths)
+        Dir.stub(:[]).and_return(paths)
       end
 
       it "should search for files in dump dir when asked for list" do
@@ -128,7 +128,7 @@ describe DumpRake::Dump do
           File.should_receive(:file?).with(path).at_least(1).and_return(true)
           path
         end
-        Dir.stub!(:[]).and_return(paths)
+        Dir.stub(:[]).and_return(paths)
       end
 
       it "should return all dumps if no tags send" do

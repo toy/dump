@@ -16,7 +16,7 @@ end
 
 describe 'RailsRoot' do
   before do
-    @root = mock('root')
+    @root = double('root')
     @root.should_receive(:to_s).and_return(@root)
   end
 
@@ -25,7 +25,7 @@ describe 'RailsRoot' do
   temp_remove_const DumpRake, :RailsRoot
 
   it "should use Rails if it is present" do
-    Object.const_set('Rails', mock('rails'))
+    Object.const_set('Rails', double('rails'))
     Rails.should_receive(:root).and_return(@root)
     load 'dump_rake/rails_root.rb'
     DumpRake::RailsRoot.should === @root
