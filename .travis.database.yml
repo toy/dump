@@ -1,0 +1,14 @@
+sqlite3:
+  adapter: sqlite3
+  database: ':memory:'
+
+mysql:
+  adapter: mysql2
+  database: myapp_test
+  username: travis
+  encoding: utf8
+
+postgresql:
+  adapter: postgresql
+  database: myapp_test
+  username: postgres
