@@ -14,3 +14,7 @@ before_install:
   - mysql -e 'create database myapp_test;'
   - psql -c 'create database myapp_test;' -U postgres
   - cp .travis.database.yml spec/db/database.yml
+matrix:
+  allow_failures:
+    - rvm: rbx-18mode
+    - rvm: rbx-19mode
