@@ -93,7 +93,7 @@ def create_chickens!(options = {})
 end
 
 def chicken_data
-  Chicken.all.map(&:attributes).to_set
+  Chicken.all.map(&:attributes).sort_by{ |attributes| attributes['id'] }
 end
 
 def reset_rake!
