@@ -76,10 +76,10 @@ def create_chickens!(options = {})
     :boolean => [true, false],
   }
   Chicken.create!
-  data.each do |type, values|
-    values.each do |value|
-      Chicken.create!("#{type}_col" => value)
-    end
+  data.values.map(&:length).max.times do |i|
+    attributes = {}
+    data.each{ |type, values| attributes["#{type}_col"] = values[i] }
+    Chicken.create!(attributes)
   end
   if options[:random]
     options[:random].to_i.times do
