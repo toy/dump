@@ -92,6 +92,10 @@ def create_chickens!(options = {})
   end
 end
 
+def chicken_data
+  Chicken.all.map(&:attributes).to_set
+end
+
 def reset_rake!
   @rake = Rake::Application.new
   Rake.application = @rake
@@ -141,7 +145,7 @@ describe 'full cycle' do
           use_adapter(adapter) do
             #add chickens store their attributes and create dump
             create_chickens!(:random => 100)
-            chicken_attributes = Chicken.all.map(&:attributes)
+            saved_chicken_data = chicken_data
             call_rake_create(:description => 'chickens')
 
             #clear database
@@ -150,14 +154,14 @@ describe 'full cycle' do
 
             #restore dump and verify equality
             call_rake_restore(:version => 'chickens')
-            Chicken.all.map(&:attributes).to_set.should == chicken_attributes.to_set
+            chicken_data.should == saved_chicken_data
 
             # go throught create/restore cycle and verify equality
             call_rake_create
             load_schema
             Chicken.all.should be_empty
             call_rake_restore
-            Chicken.all.map(&:attributes).to_set.should == chicken_attributes.to_set
+            chicken_data.should == saved_chicken_data
           end
         end
       end
@@ -180,12 +184,12 @@ describe 'full cycle' do
     adapters.combination(2) do |adapter_src, adapter_dst|
       it "should dump using #{adapter_src} and restore using #{adapter_dst}" do
         in_temp_rails_app do
-          chicken_attributes = nil
+          saved_chicken_data = nil
           use_adapter(adapter_src) do
             Chicken.all.should be_empty
 
             create_chickens!(:random => 100)
-            chicken_attributes = Chicken.all.map(&:attributes)
+            saved_chicken_data = chicken_data
             call_rake_create
           end
 
@@ -193,7 +197,7 @@ describe 'full cycle' do
             Chicken.all.should be_empty
 
             call_rake_restore
-            chicken_attributes.to_set.should == Chicken.all.map(&:attributes).to_set
+            chicken_data.should == saved_chicken_data
           end
         end
       end
