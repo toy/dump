@@ -1,5 +1,26 @@
 ENV['RAILS_ENV'] ||= 'test'
-require File.expand_path('../dummy-3.1.3/config/environment', __FILE__)
+
+require 'rails/version'
+
+rails_version = Rails::VERSION::STRING.split('.')
+
+environment_paths = (1..rails_version.length).map do |count|
+  version_part = rails_version[0, count].join('.')
+  File.expand_path("../dummy-#{version_part}/config/environment", __FILE__)
+end.reverse
+
+environment_paths.any? do |environment_path|
+  if File.exist?("#{environment_path}.rb")
+    require environment_path
+    true
+  end
+end || begin
+  abort [
+    "No dummy app for rails version #{rails_version.join('.')}",
+    "Create using `bundle exec rails new spec/dummy-#{rails_version[0, 2].join('.')} -TSJG --skip-bundle`",
+    'Tried:', *environment_paths,
+  ].join("\n")
+end
 
 $:.unshift '../lib/dump_rake'
 require 'dump_rake'
