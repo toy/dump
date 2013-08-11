@@ -22,7 +22,7 @@ matrix:
     - rvm: jruby-19mode
     - rvm: rbx-19mode
   exclude:
-    - rvm: 1.8.7
+    - rvm: 1.8.7 # not supported by rails 4
       env: RAILS_VERSION='~> 4.0.0'
-    - rvm: ree
+    - rvm: ree # not supported by rails 4
       env: RAILS_VERSION='~> 4.0.0'
