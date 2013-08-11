@@ -31,6 +31,7 @@ describe DumpReader do
     it "should call dump subroutines" do
       @dump = double('dump')
       @dump.stub(:open).and_yield(@dump)
+      @dump.stub(:silence).and_yield
       DumpReader.stub(:new).and_return(@dump)
 
       @dump.should_receive(:read_config).ordered

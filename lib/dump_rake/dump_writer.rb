@@ -4,7 +4,7 @@ class DumpRake
 
     def self.create(path)
       new(path).open do |dump|
-        ActiveRecord::Base.logger.silence do
+        dump.silence do
           dump.write_schema
 
           dump.write_tables
