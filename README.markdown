@@ -249,4 +249,4 @@ restore backup (upload dump and restore on remote):
 
 ## Copyright
 
-Copyright (c) 2008-2012 Ivan Kuchin. See LICENSE.txt for details.
+Copyright (c) 2008-2013 Ivan Kuchin. See LICENSE.txt for details.
