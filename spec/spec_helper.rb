@@ -24,7 +24,7 @@ end || begin
   abort [
     "No dummy app for rails version #{rails_version.join('.')}",
     "Create using `#{command}`",
-    'Tried:', *environment_paths,
+    'Tried:', *environment_paths
   ].join("\n")
 end
 
