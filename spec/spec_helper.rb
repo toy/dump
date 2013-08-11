@@ -4,6 +4,13 @@ require 'rails/version'
 
 rails_version = Rails::VERSION::STRING.split('.')
 
+if rails_version[0].to_i < 3 && !Gem.respond_to?(:source_index)
+  module Gem
+    def self.source_index; sources; end
+    SourceIndex = Specification
+  end
+end
+
 environment_paths = (1..rails_version.length).map do |count|
   version_part = rails_version[0, count].join('.')
   File.expand_path("../dummy-#{version_part}/config/environment", __FILE__)
