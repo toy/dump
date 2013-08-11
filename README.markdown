@@ -2,9 +2,9 @@
 
 Rails app rake and capistrano tasks to create and restore dumps of database and assets.
 
-Works with rails 2 and rails 3.
+Tested against rails 2.3, 3.0, 3.1, 3.2 and 4.0 (rails 2.3 has problems on ruby 2.0).
 
-Requires at least ruby 1.8.7, tested with ruby 1.9.
+Works with ruby 1.8.7, ree, 1.9, 2.0 (rails 4.0 requires at least ruby 1.9).
 
 ## Install
 
