@@ -8,7 +8,7 @@ rvm:
   - ree
 env:
   - RAILS_VERSION='~> 2.3.0'
-  - RAILS_VERSION='~> 3.0.0'
+  # - RAILS_VERSION='~> 3.0.0' # conflicting adapters for postgresql and mysql2
   - RAILS_VERSION='~> 3.1.0'
   - RAILS_VERSION='~> 3.2.0'
   - RAILS_VERSION='~> 4.0.0'
