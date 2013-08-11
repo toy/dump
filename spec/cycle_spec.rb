@@ -77,17 +77,19 @@ def create_chickens!(options = {})
   }
   Chicken.create!
   data.values.map(&:length).max.times do |i|
-    attributes = {}
-    data.each{ |type, values| attributes["#{type}_col"] = values[i] }
-    Chicken.create!(attributes)
+    Chicken.create! do |chicken|
+      data.each do |type, values|
+        chicken["#{type}_col"] = values[i]
+      end
+    end
   end
   if options[:random]
     options[:random].to_i.times do
-      attributes = {}
-      data.each do |type, values|
-        attributes["#{type}_col"] = values[rand(values.length)] if rand > 0.5
+      Chicken.create! do |chicken|
+        data.each do |type, values|
+          chicken["#{type}_col"] = values[rand(values.length)] if rand > 0.5
+        end
       end
-      Chicken.create!(attributes)
     end
   end
 end

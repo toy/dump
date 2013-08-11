@@ -1,11 +1,20 @@
 source 'http://rubygems.org'
 
-gem 'rails', '3.1.3'
+rails_version = ENV['RAILS_VERSION'] || '~> 4.0'
+gem 'rails', rails_version
 
-gem 'sqlite3'
-gem 'mysql2'
-gem 'pg'
-
+if defined?(JRUBY_VERSION)
+  gem 'activerecord-jdbcsqlite3-adapter'
+  gem 'activerecord-jdbcmysql-adapter'
+  gem 'activerecord-jdbcpostgresql-adapter'
+else
+  gem 'sqlite3'
+  gem 'mysql2'
+  gem 'pg'
+  if rails_version =~ /(^|[^.\d])(2|3\.0)\.\d+/
+    gem 'activerecord-mysql2-adapter'
+  end
+end
 
 gem 'capistrano'
 gemspec

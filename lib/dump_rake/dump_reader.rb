@@ -4,7 +4,7 @@ class DumpRake
 
     def self.restore(path)
       new(path).open do |dump|
-        ActiveRecord::Base.logger.silence do
+        dump.silence do
           dump.read_config
           dump.migrate_down
           dump.read_schema

@@ -118,6 +118,10 @@ class DumpRake
       end
     end
 
+    def silence(&block)
+      Rails.logger.silence(&block)
+    end
+
   protected
 
     def assets_root_link

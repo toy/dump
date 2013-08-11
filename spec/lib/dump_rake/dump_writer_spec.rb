@@ -15,6 +15,7 @@ describe DumpWriter do
     it "should call dump subroutines" do
       @dump = double('dump')
       @dump.stub(:open).and_yield(@dump)
+      @dump.stub(:silence).and_yield
       DumpWriter.stub(:new).and_return(@dump)
 
       @dump.should_receive(:write_schema).ordered
