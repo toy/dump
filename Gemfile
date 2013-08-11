@@ -13,7 +13,6 @@ else
   gem 'pg'
   if rails_version =~ /(^|[^.\d])(2|3\.0)\.\d+/
     gem 'activerecord-mysql2-adapter'
-    gem 'activerecord-postgresql-adapter'
   end
 end
 
