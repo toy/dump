@@ -15,9 +15,15 @@ environment_paths.any? do |environment_path|
     true
   end
 end || begin
+  command = "RAILS_VERSION=#{rails_version.join('.')} bundle exec rails " + if rails_version[0].to_i < 3
+    "spec/dummy-#{rails_version[0, 2].join('.')}"
+  else
+    "new spec/dummy-#{rails_version[0, 2].join('.')} -TSJ --skip-bundle"
+  end
+
   abort [
     "No dummy app for rails version #{rails_version.join('.')}",
-    "Create using `bundle exec rails new spec/dummy-#{rails_version[0, 2].join('.')} -TSJG --skip-bundle`",
+    "Create using `#{command}`",
     'Tried:', *environment_paths,
   ].join("\n")
 end
