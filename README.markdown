@@ -28,6 +28,8 @@ To get capistrano tasks in rails 3, put in `config/deploy.rb`:
 
     require 'dump/capistrano'
 
+    role :dump, 'example.com' # server with assets and db access to manage dumps
+
 ### Assets config
 
 `config/assets` holds paths of dirs you want to dump in file:
