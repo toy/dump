@@ -247,6 +247,14 @@ restore backup (upload dump and restore on remote):
 
     cap dump:backup:restore
 
+#### If you have separate db server
+
+by default, dump's capistrano tasks using remote server with role :db, :primary => true. If you have separate db server, and want to use dump with assets, you should run cap tasks as following:
+
+    cap dump:mirror:down HOSTS=myappserver.com
+
+where myappserver.com is application server carrying assets with database access.
+
 ## Copyright
 
 Copyright (c) 2008-2013 Ivan Kuchin. See LICENSE.txt for details.
