@@ -385,6 +385,28 @@ describe DumpReader do
 
         @dump.read_tables
       end
+
+      describe "with empty restore_tables config option" do
+        it "should not verfiy connection" do
+          @dump.stub(:config).and_return({:tables => {'first' => 1, 'second' => 3}})
+          @dump.should_not_receive(:verify_connection)
+
+          DumpRake::Env.with_env(:restore_tables => '') do
+            @dump.read_tables
+          end
+        end
+
+        it "should not call read_table" do
+          @dump.stub(:verify_connection)
+          @dump.stub(:config).and_return({:tables => {'first' => 1, 'second' => 3}})
+
+          @dump.should_not_receive(:read_table)
+
+          DumpRake::Env.with_env(:restore_tables => '') do
+            @dump.read_tables
+          end
+        end
+      end
     end
 
     describe "read_table" do
