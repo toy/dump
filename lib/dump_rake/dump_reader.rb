@@ -169,6 +169,7 @@ class DumpRake
     end
 
     def read_tables
+      return if DumpRake::Env[:restore_tables] && DumpRake::Env[:restore_tables].empty?
       verify_connection
       config[:tables].with_progress('Tables') do |table, rows|
         if (restore_schema? && schema_tables.include?(table)) || DumpRake::Env.filter(:restore_tables).pass?(table)
