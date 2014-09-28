@@ -562,6 +562,25 @@ describe DumpReader do
               @dump.read_assets
             end
           end
+
+          it "should not delete any files and dirs for empty list" do
+            @assets = %w[images videos]
+            @dump.stub(:config).and_return({:assets => @assets})
+
+            DumpRake::Assets.should_not_receive('glob_asset_children')
+            DumpRake::Assets.should_not_receive('glob_asset_children')
+
+            @dump.should_not_receive('read_asset?')
+
+            File.should_not_receive('file?')
+            File.should_not_receive('unlink')
+            File.should_not_receive('file?')
+            File.should_not_receive('directory?')
+
+            DumpRake::Env.with_env(:restore_assets => '') do
+              @dump.read_assets
+            end
+          end
         end
       end
 

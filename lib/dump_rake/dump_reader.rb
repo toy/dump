@@ -208,6 +208,7 @@ class DumpRake
     end
 
     def read_assets
+      return if DumpRake::Env[:restore_assets] && DumpRake::Env[:restore_assets].empty?
       unless config[:assets].blank?
         assets = config[:assets]
         if Hash === assets
