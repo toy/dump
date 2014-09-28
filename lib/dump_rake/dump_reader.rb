@@ -219,17 +219,19 @@ class DumpRake
         end
 
         if DumpRake::Env[:restore_assets]
-          assets_paths.each do |asset|
-            DumpRake::Assets.glob_asset_children(asset, '**/*').reverse.each do |child|
-              if read_asset?(child, DumpRake::RailsRoot)
-                case
-                when File.file?(child)
-                  File.unlink(child)
-                when File.directory?(child)
-                  begin
-                    Dir.unlink(child)
-                  rescue Errno::ENOTEMPTY
-                    nil
+          unless DumpRake::Env[:restore_assets].empty?
+            assets_paths.each do |asset|
+              DumpRake::Assets.glob_asset_children(asset, '**/*').reverse.each do |child|
+                if read_asset?(child, DumpRake::RailsRoot)
+                  case
+                  when File.file?(child)
+                    File.unlink(child)
+                  when File.directory?(child)
+                    begin
+                      Dir.unlink(child)
+                    rescue Errno::ENOTEMPTY
+                      nil
+                    end
                   end
                 end
               end
@@ -241,9 +243,11 @@ class DumpRake
           end
         end
 
-        read_assets_entries(assets_paths, assets_count) do |stream, root, entry, prefix|
-          if !DumpRake::Env[:restore_assets] || read_asset?(entry.full_name, prefix)
-            stream.extract_entry(root, entry)
+        if !DumpRake::Env[:restore_assets] || !DumpRake::Env[:restore_assets].empty?
+          read_assets_entries(assets_paths, assets_count) do |stream, root, entry, prefix|
+            if !DumpRake::Env[:restore_assets] || read_asset?(entry.full_name, prefix)
+              stream.extract_entry(root, entry)
+            end
           end
         end
       end
