@@ -193,20 +193,22 @@ module Dump
 
         columns = Marshal.load(entry)
         columns_sql = columns_insert_sql(columns)
-        Progress.start(table, rows_count) do
-          until entry.eof?
-            rows_sql = []
-            1000.times do
-              rows_sql << values_insert_sql(Marshal.load(entry)) unless entry.eof?
-            end
+        with_disabled_indexes table do
+          Progress.start(table, rows_count) do
+            until entry.eof?
+              rows_sql = []
+              1000.times do
+                rows_sql << values_insert_sql(Marshal.load(entry)) unless entry.eof?
+              end
 
-            begin
-              insert_into_table(table_sql, columns_sql, rows_sql)
-              Progress.step(rows_sql.length)
-            rescue
-              rows_sql.each do |row_sql|
-                insert_into_table(table_sql, columns_sql, row_sql)
-                Progress.step
+              begin
+                insert_into_table(table_sql, columns_sql, rows_sql)
+                Progress.step(rows_sql.length)
+              rescue
+                rows_sql.each do |row_sql|
+                  insert_into_table(table_sql, columns_sql, row_sql)
+                  Progress.step
+                end
               end
             end
           end
