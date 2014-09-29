@@ -28,6 +28,36 @@ class DumpRake
       ActiveRecord::Base.connection.delete("DELETE FROM #{table_sql}", 'Clearing table')
     end
 
+    def with_disabled_indexes(table, &block)
+      all_indexes = ActiveRecord::Base.connection.indexes(table)
+      table_indexes = all_indexes.keep_if {|index| index.table == table}
+
+      remove_indexes(table_indexes)
+      block.call
+      add_indexes(table_indexes)
+    end
+
+    def remove_indexes(indexes)
+      indexes.each do |index|
+        ActiveRecord::Base.connection.remove_index index.table, :name => index.name
+      end
+    end
+
+    def add_indexes(indexes)
+      indexes.each do |index|
+        options = {
+          :name => index.name,
+          :unique => index.unique,
+          :length => index.lengths,
+          :order => index.orders,
+          :where => index.where,
+          :type => index.type,
+          :using => index.using
+        }
+        ActiveRecord::Base.connection.add_index index.table, index.columns, options
+      end
+    end
+
     def insert_into_table(table_sql, columns_sql, values_sql)
       values_sql = values_sql.join(',') if values_sql.is_a?(Array)
       ActiveRecord::Base.connection.insert("INSERT INTO #{table_sql} #{columns_sql} VALUES #{values_sql}", 'Loading dump')
