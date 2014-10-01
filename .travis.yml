@@ -24,7 +24,13 @@ matrix:
   exclude:
     - rvm: 1.8.7 # not supported by rails 4
       env: RAILS_VERSION='~> 4.0.0'
+    - rvm: 1.8.7 # not supported by rails 4
+      env: RAILS_VERSION='~> 4.1.0'
     - rvm: ree # not supported by rails 4
       env: RAILS_VERSION='~> 4.0.0'
+    - rvm: ree # not supported by rails 4
+      env: RAILS_VERSION='~> 4.1.0'
     - rvm: 2.0.0 # problems with iconv
+      env: RAILS_VERSION='~> 2.3.0'
+    - rvm: 2.1.0
       env: RAILS_VERSION='~> 2.3.0'
