@@ -17,5 +17,5 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'archive-tar-minitar', '= 0.5.2'
   s.add_dependency 'progress', '~> 2.4.0'
-  s.add_development_dependency 'rspec'
+  s.add_development_dependency 'rspec', '~> 2.99'
 end
