@@ -16,5 +16,6 @@ else
   end
 end
 
-gem 'capistrano'
+gem 'capistrano', '~> 2.0'
+
 gemspec
