@@ -521,16 +521,16 @@ describe "cap dump" do
     end
 
     it "should call remote:create with tag backup" do
-      def (@cap.dump.remote).create
-        DumpRake::Env[:tags].should == 'backup'
+      expect(@cap.dump.remote).to receive(:create) do
+        expect(DumpRake::Env[:tags]).to eq('backup')
         ''
       end
       @cap.find_and_execute_task("dump:backup")
     end
 
     it "should call remote:create with additional tag backup" do
-      def (@cap.dump.remote).create
-        DumpRake::Env[:tags].should == 'backup,photos'
+      expect(@cap.dump.remote).to receive(:create) do
+        expect(DumpRake::Env[:tags]).to eq('backup,photos')
         ''
       end
       DumpRake::Env.with_env :tags => 'photos' do
@@ -539,8 +539,8 @@ describe "cap dump" do
     end
 
     it "should pass description if it is set" do
-      def (@cap.dump.remote).create
-        DumpRake::Env[:desc].should == 'remote dump'
+      expect(@cap.dump.remote).to receive(:create) do
+        expect(DumpRake::Env[:desc]).to eq('remote dump')
         ''
       end
       DumpRake::Env.with_env :desc => 'remote dump' do
@@ -550,10 +550,10 @@ describe "cap dump" do
 
     it "should send only ver variable" do
       allow(@cap.dump.remote).to receive(:create).and_return('123.tgz')
-      def (@cap.dump.remote).download
-        DumpRake::Env[:like].should == '123.tgz'
-        DumpRake::Env[:tags].should == nil
-        DumpRake::Env[:desc].should == nil
+      expect(@cap.dump.remote).to receive(:download) do
+        expect(DumpRake::Env[:like]).to eq('123.tgz')
+        expect(DumpRake::Env[:tags]).to eq(nil)
+        expect(DumpRake::Env[:desc]).to eq(nil)
         ''
       end
       DumpRake::Env.with_env all_dictionary_variables do

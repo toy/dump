@@ -508,8 +508,8 @@ describe DumpReader do
           allow(@dump).to receive(:config).and_return({:assets => @assets})
           allow(@dump).to receive(:find_entry)
 
-          def @task.invoke
-            DumpRake::Env[:assets].should == 'images:videos'
+          expect(@task).to receive(:invoke) do
+            expect(DumpRake::Env[:assets]).to eq('images:videos')
           end
 
           @dump.read_assets
