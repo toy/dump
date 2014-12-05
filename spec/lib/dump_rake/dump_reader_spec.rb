@@ -304,13 +304,13 @@ describe DumpReader do
 
             @versions = []
             @migrate_down_task = double('migrate_down_task')
-            expect(@migrate_down_task).to receive('invoke').exactly(2).times.with {
+            expect(@migrate_down_task).to receive('invoke').exactly(3).times do
               version = DumpRake::Env['VERSION']
               @versions << version
               if version == '6'
                 raise ActiveRecord::IrreversibleMigration
               end
-            }
+            end
             expect(@migrate_down_task).to receive('reenable').exactly(3).times
 
             expect($stderr).to receive('puts').with("Irreversible migration: 6")
