@@ -17,7 +17,7 @@ end
 describe 'RailsRoot' do
   before do
     @root = double('root')
-    @root.should_receive(:to_s).and_return(@root)
+    expect(@root).to receive(:to_s).and_return(@root)
   end
 
   temp_remove_const Object, :Rails
@@ -26,20 +26,20 @@ describe 'RailsRoot' do
 
   it "should use Rails if it is present" do
     Object.const_set('Rails', double('rails'))
-    Rails.should_receive(:root).and_return(@root)
+    expect(Rails).to receive(:root).and_return(@root)
     load 'dump_rake/rails_root.rb'
-    DumpRake::RailsRoot.should === @root
+    expect(DumpRake::RailsRoot).to be === @root
   end
 
   it "should use RAILS_ROOT if it is present" do
     Object.const_set('RAILS_ROOT', @root)
     load 'dump_rake/rails_root.rb'
-    DumpRake::RailsRoot.should === @root
+    expect(DumpRake::RailsRoot).to be === @root
   end
 
   it "should use Dir.pwd else" do
-    Dir.should_receive(:pwd).and_return(@root)
+    expect(Dir).to receive(:pwd).and_return(@root)
     load 'dump_rake/rails_root.rb'
-    DumpRake::RailsRoot.should === @root
+    expect(DumpRake::RailsRoot).to be === @root
   end
 end
