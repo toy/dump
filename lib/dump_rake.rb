@@ -47,7 +47,7 @@ class DumpRake
       if dump
         DumpReader.restore(dump.path)
       else
-        $stderr.puts "Avaliable versions:"
+        $stderr.puts 'Avaliable versions:'
         $stderr.puts Dump.list
       end
     end

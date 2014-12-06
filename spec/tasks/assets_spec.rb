@@ -1,7 +1,7 @@
 require File.dirname(__FILE__) + '/../spec_helper'
-require "rake"
+require 'rake'
 
-describe "rake assets" do
+describe 'rake assets' do
   before do
     @rake = Rake::Application.new
     Rake.application = @rake
@@ -15,11 +15,11 @@ describe "rake assets" do
       public/images/b
     end_src
     expect(File).to receive(:readlines).with(File.join(DumpRake::RailsRoot, 'config/assets')).and_return(StringIO.new(data).readlines)
-    @rake["assets"].invoke
+    @rake['assets'].invoke
     expect(ENV['ASSETS']).to eq('public/images/a:public/images/b')
   end
 
-  it "should ignore comments in config/assets" do
+  it 'should ignore comments in config/assets' do
     data = <<-end_src
       #comment
       #comment
@@ -27,7 +27,7 @@ describe "rake assets" do
       public/images/b
     end_src
     allow(File).to receive(:readlines).and_return(StringIO.new(data).readlines)
-    @rake["assets"].invoke
+    @rake['assets'].invoke
     expect(ENV['ASSETS']).to eq('public/images/a:public/images/b')
   end
 
@@ -38,31 +38,31 @@ describe "rake assets" do
     end_src
     allow(File).to receive(:readlines).and_return(StringIO.new(data).readlines)
     DumpRake::Env.with_env :assets => 'public/images' do
-      @rake["assets"].invoke
+      @rake['assets'].invoke
       expect(ENV['ASSETS']).to eq('public/images')
     end
   end
 
-  describe "delete" do
+  describe 'delete' do
     before do
       allow(FileUtils).to receive(:remove_entry)
     end
 
-    it "should require assets task" do
-      expect(@rake["assets:delete"].prerequisites).to include("assets")
+    it 'should require assets task' do
+      expect(@rake['assets:delete'].prerequisites).to include('assets')
     end
 
-    describe "deleting existing assets" do
-      it "should go through each asset from config" do
+    describe 'deleting existing assets' do
+      it 'should go through each asset from config' do
         allow(ENV).to receive(:[]).with('ASSETS').and_return('images:videos')
 
         expect(File).to receive(:expand_path).with('images', DumpRake::RailsRoot).and_return('')
         expect(File).to receive(:expand_path).with('videos', DumpRake::RailsRoot).and_return('')
 
-        @rake["assets:delete"].invoke
+        @rake['assets:delete'].invoke
       end
 
-      it "should glob all assets and delete content" do
+      it 'should glob all assets and delete content' do
         @assets = %w[images videos]
         allow(ENV).to receive(:[]).with('ASSETS').and_return(@assets.join(':'))
         @assets.each do |asset|
@@ -74,10 +74,10 @@ describe "rake assets" do
           end
         end
 
-        @rake["assets:delete"].invoke
+        @rake['assets:delete'].invoke
       end
 
-      it "should not glob risky paths" do
+      it 'should not glob risky paths' do
         @assets = %w[images / /private ../ ../.. ./../ dir/.. dir/../..]
         allow(ENV).to receive(:[]).with('ASSETS').and_return(@assets.join(':'))
 
@@ -85,7 +85,7 @@ describe "rake assets" do
         expect(Dir).to receive(:[]).with(File.join(DumpRake::RailsRoot, '*')).and_return([])
         expect(FileUtils).not_to receive(:remove_entry)
 
-        @rake["assets:delete"].invoke
+        @rake['assets:delete'].invoke
       end
     end
   end

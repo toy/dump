@@ -1,7 +1,7 @@
 require File.dirname(__FILE__) + '/../spec_helper'
-require "rake"
+require 'rake'
 
-describe "rake dump" do
+describe 'rake dump' do
   before do
     @rake = Rake::Application.new
     Rake.application = @rake
@@ -11,18 +11,18 @@ describe "rake dump" do
 
   %w[versions create restore cleanup].each do |task|
     describe task do
-      it "should require environment task" do
-        expect(@rake["dump:#{task}"].prerequisites).to include("environment")
+      it 'should require environment task' do
+        expect(@rake["dump:#{task}"].prerequisites).to include('environment')
       end
     end
   end
 
-  describe "versions" do
+  describe 'versions' do
     before do
-      @task = @rake["dump:versions"]
+      @task = @rake['dump:versions']
     end
 
-    it "should call DumpRake.versions" do
+    it 'should call DumpRake.versions' do
       expect(DumpRake).to receive(:versions)
       @task.invoke
     end
@@ -39,12 +39,12 @@ describe "rake dump" do
     end
   end
 
-  describe "create" do
+  describe 'create' do
     before do
-      @task = @rake["dump:create"]
+      @task = @rake['dump:create']
     end
 
-    it "should call DumpRake.create" do
+    it 'should call DumpRake.create' do
       expect(DumpRake).to receive(:create)
       @task.invoke
     end
@@ -61,12 +61,12 @@ describe "rake dump" do
     end
   end
 
-  describe "restore" do
+  describe 'restore' do
     before do
-      @task = @rake["dump:restore"]
+      @task = @rake['dump:restore']
     end
 
-    it "should call DumpRake.restore" do
+    it 'should call DumpRake.restore' do
       expect(DumpRake).to receive(:restore)
       @task.invoke
     end
@@ -83,12 +83,12 @@ describe "rake dump" do
     end
   end
 
-  describe "cleanup" do
+  describe 'cleanup' do
     before do
-      @task = @rake["dump:cleanup"]
+      @task = @rake['dump:cleanup']
     end
 
-    it "should call DumpRake.cleanup" do
+    it 'should call DumpRake.cleanup' do
       expect(DumpRake).to receive(:cleanup)
       @task.invoke
     end

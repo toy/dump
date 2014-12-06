@@ -19,7 +19,7 @@ class DumpRake
       if path_or_options.is_a?(Hash)
         options = path_or_options
 
-        name = Time.now.utc.strftime("%Y%m%d%H%M%S")
+        name = Time.now.utc.strftime('%Y%m%d%H%M%S')
 
         description = clean_description(options[:desc])
         name += "-#{description}" unless description.blank?
@@ -102,7 +102,7 @@ class DumpRake
     end
 
     def inspect
-      "#<%s:0x%x %s>" % [self.class, object_id, path.to_s.sub(/^.+(?=..\/[^\/]*$)/, '…')]
+      '#<%s:0x%x %s>' % [self.class, object_id, path.to_s.sub(/^.+(?=..\/[^\/]*$)/, '…')]
     end
 
     def lock

@@ -121,7 +121,7 @@ class DumpRake
         Rake::Task['db:create'].invoke
       when !DumpRake::Env.no?(:migrate_down)
         if avaliable_tables.include?('schema_migrations')
-          find_entry("schema_migrations.dump") do |entry|
+          find_entry('schema_migrations.dump') do |entry|
             migrated = table_rows('schema_migrations').map{ |row| row['version'] }
 
             dump_migrations = []

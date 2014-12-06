@@ -28,7 +28,7 @@ module ContiniousTimeout
             retry
           end
         end
-        x.raise TimeoutException, "execution expired" if x.alive?
+        x.raise TimeoutException, 'execution expired' if x.alive?
       end
       yield Deferer.new(y)
     ensure

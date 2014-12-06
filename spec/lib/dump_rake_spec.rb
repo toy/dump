@@ -1,25 +1,25 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 
 describe DumpRake do
-  describe "versions" do
-    it "should call Dump.list if called without version" do
+  describe 'versions' do
+    it 'should call Dump.list if called without version' do
       expect(DumpRake::Dump).to receive(:list).and_return([])
       DumpRake.versions
     end
 
-    it "should call Dump.list with options if called with version" do
+    it 'should call Dump.list with options if called with version' do
       expect(DumpRake::Dump).to receive(:list).with(:like => '123').and_return([])
       DumpRake.versions(:like => '123')
     end
 
-    it "should print versions" do
+    it 'should print versions' do
       expect(DumpRake::Dump).to receive(:list).and_return(%w[123.tgz 456.tgz])
       expect(grab_output{
         DumpRake.versions
       }[:stdout]).to eq("123.tgz\n456.tgz\n")
     end
 
-    it "should not show summary if not asked for" do
+    it 'should not show summary if not asked for' do
       dumps = %w[123.tgz 456.tgz].map do |s|
         dump = double("dump_#{s}", :path => double("dump_#{s}_path"))
         expect(DumpRake::DumpReader).not_to receive(:summary)
@@ -33,7 +33,7 @@ describe DumpRake do
       }
     end
 
-    it "should show summary if asked for" do
+    it 'should show summary if asked for' do
       dumps = %w[123.tgz 456.tgz].map do |s|
         dump = double("dump_#{s}", :path => double("dump_#{s}_path"))
         expect(DumpRake::DumpReader).to receive(:summary).with(dump.path)
@@ -47,7 +47,7 @@ describe DumpRake do
       }
     end
 
-    it "should show summary with scmema if asked for" do
+    it 'should show summary with scmema if asked for' do
       dumps = %w[123.tgz 456.tgz].map do |s|
         dump = double("dump_#{s}", :path => double("dump_#{s}_path"))
         expect(DumpRake::DumpReader).to receive(:summary).with(dump.path, :schema => true)
@@ -61,7 +61,7 @@ describe DumpRake do
       }
     end
 
-    it "should show output to stderr if summary raises error" do
+    it 'should show output to stderr if summary raises error' do
       allow(DumpRake::DumpReader).to receive(:summary)
       dumps = %w[123.tgz 456.tgz].map do |s|
         double("dump_#{s}", :path => double("dump_#{s}_path"))
@@ -79,8 +79,8 @@ describe DumpRake do
     end
   end
 
-  describe "create" do
-    describe "naming" do
+  describe 'create' do
+    describe 'naming' do
       it "should create file in 'rails app root'/dump" do
         allow(File).to receive(:rename)
         expect(DumpRake::DumpWriter).to receive(:create) do |path|
@@ -121,7 +121,7 @@ describe DumpRake do
         }
       end
 
-      it "should rename file after creating" do
+      it 'should rename file after creating' do
         expect(File).to receive(:rename) do |tmp_path, tgz_path|
           expect(File.basename(tmp_path)).to match(/^\d{14}-Some text and _\.tmp$/)
           expect(File.basename(tgz_path)).to match(/^\d{14}-Some text and _\.tgz$/)
@@ -132,7 +132,7 @@ describe DumpRake do
         }
       end
 
-      it "should output file name" do
+      it 'should output file name' do
         allow(File).to receive(:rename)
         allow(DumpRake::DumpWriter).to receive(:create)
         expect(grab_output{
@@ -141,8 +141,8 @@ describe DumpRake do
       end
     end
 
-    describe "writing" do
-      it "should dump schema, tables, assets" do
+    describe 'writing' do
+      it 'should dump schema, tables, assets' do
         allow(File).to receive(:rename)
         @dump = double('dump')
         expect(DumpRake::DumpWriter).to receive(:create)
@@ -154,9 +154,9 @@ describe DumpRake do
     end
   end
 
-  describe "restore" do
-    describe "without version" do
-      it "should call Dump.list" do
+  describe 'restore' do
+    describe 'without version' do
+      it 'should call Dump.list' do
         allow(DumpRake::Dump).to receive(:list)
         expect(DumpRake::Dump).to receive(:list).and_return([])
         grab_output{
@@ -164,7 +164,7 @@ describe DumpRake do
         }
       end
 
-      it "should not call DumpReader.restore and should call Dump.list and output it to $stderr if there are no versions at all" do
+      it 'should not call DumpReader.restore and should call Dump.list and output it to $stderr if there are no versions at all' do
         allow(DumpRake::Dump).to receive(:list).and_return([])
         expect(DumpRake::DumpReader).not_to receive(:restore)
         all_dumps = double('all_dumps')
@@ -176,7 +176,7 @@ describe DumpRake do
         }
       end
 
-      it "should not call DumpReader.restore and should call Dump.list and output it to $stderr if there are no versions at all" do
+      it 'should not call DumpReader.restore and should call Dump.list and output it to $stderr if there are no versions at all' do
         allow(DumpRake::Dump).to receive(:list).and_return([])
         expect(DumpRake::DumpReader).not_to receive(:restore)
         all_dumps = double('all_dumps')
@@ -188,7 +188,7 @@ describe DumpRake do
         }
       end
 
-      it "should call DumpReader.restore if there are versions" do
+      it 'should call DumpReader.restore if there are versions' do
         @dump = double('dump', :path => 'dump/213.tgz')
         expect(DumpRake::Dump).to receive(:list).once.and_return([@dump])
         expect(DumpRake::DumpReader).to receive(:restore).with('dump/213.tgz')
@@ -199,8 +199,8 @@ describe DumpRake do
       end
     end
 
-    describe "with version" do
-      it "should call Dump.list with options" do
+    describe 'with version' do
+      it 'should call Dump.list with options' do
         allow(DumpRake::Dump).to receive(:list)
         expect(DumpRake::Dump).to receive(:list).with(:like => '213').and_return([])
         grab_output{
@@ -208,7 +208,7 @@ describe DumpRake do
         }
       end
 
-      it "should not call DumpReader.restore and should call versions if desired version not found" do
+      it 'should not call DumpReader.restore and should call versions if desired version not found' do
         allow(DumpRake::Dump).to receive(:list).and_return([])
         expect(DumpRake::DumpReader).not_to receive(:restore)
         all_dumps = double('all_dumps')
@@ -220,7 +220,7 @@ describe DumpRake do
         }
       end
 
-      it "should call DumpReader.restore if there is desired version" do
+      it 'should call DumpReader.restore if there is desired version' do
         @dump = double('dump', :path => 'dump/213.tgz')
         expect(DumpRake::Dump).to receive(:list).once.and_return([@dump])
         expect(DumpRake::DumpReader).to receive(:restore).with('dump/213.tgz')
@@ -231,7 +231,7 @@ describe DumpRake do
         }
       end
 
-      it "should call DumpReader.restore on last version if found multiple matching versions" do
+      it 'should call DumpReader.restore on last version if found multiple matching versions' do
         @dump_a = double('dump_a', :path => 'dump/213-a.tgz')
         @dump_b = double('dump_b', :path => 'dump/213-b.tgz')
         expect(DumpRake::Dump).to receive(:list).once.and_return([@dump_a, @dump_b])
@@ -244,14 +244,14 @@ describe DumpRake do
     end
   end
 
-  describe "cleanup" do
-    it "should call ask for all files in dump dir and for dumps" do
+  describe 'cleanup' do
+    it 'should call ask for all files in dump dir and for dumps' do
       expect(DumpRake::Dump).to receive(:list).with(:all => true).and_return([])
       expect(DumpRake::Dump).to receive(:list).with({}).and_return([])
       DumpRake.cleanup
     end
 
-    it "should call Dump.list with options if called with version and tags" do
+    it 'should call Dump.list with options if called with version and tags' do
       expect(DumpRake::Dump).to receive(:list).with(:like => '123', :tags => 'a,b,c', :all => true).and_return([])
       expect(DumpRake::Dump).to receive(:list).with(:like => '123', :tags => 'a,b,c').and_return([])
       DumpRake.cleanup(:like => '123', :tags => 'a,b,c')
@@ -296,7 +296,7 @@ describe DumpRake do
       end
     end
 
-    it "should print to stderr if can not delete dump" do
+    it 'should print to stderr if can not delete dump' do
       dumps = %w[a b c d e f g h i j].map do |s|
         dump = double("dump_#{s}", :ext => 'tgz', :path => double("dump_#{s}_path"))
         allow(dump).to receive(:lock).and_yield

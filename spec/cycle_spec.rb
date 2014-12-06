@@ -5,7 +5,7 @@ require File.dirname(__FILE__) + '/../lib/dump_rake'
 require 'tmpdir'
 
 def database_configs
-  YAML::load(IO.read(PLUGIN_SPEC_DIR + "/db/database.yml"))
+  YAML::load(IO.read(PLUGIN_SPEC_DIR + '/db/database.yml'))
 end
 
 def adapters
@@ -63,7 +63,7 @@ ensure
 end
 
 def create_chickens!(options = {})
-  time = Time.local(2000,"jan",1,20,15,1)
+  time = Time.local(2000,'jan',1,20,15,1)
   data = {
     :string => ['', 'lala'],
     :text => ['', 'lala', 'lala' * 100],
@@ -206,7 +206,7 @@ describe 'full cycle' do
       end
     end
 
-    it "should create same dump for all adapters" do
+    it 'should create same dump for all adapters' do
       in_temp_rails_app do
         dumps = []
         adapters.each do |adapter|
