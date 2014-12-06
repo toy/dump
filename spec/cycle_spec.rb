@@ -218,7 +218,12 @@ describe 'full cycle' do
             Zlib::GzipReader.open(dump_path) do |gzip|
               Archive::Tar::Minitar.open(gzip, 'r') do |stream|
                 stream.each do |entry|
-                  data << [entry.full_name, entry.read]
+                  entry_data = if entry.full_name == 'schema.rb'
+                    entry.read
+                  else
+                    Marshal.load(entry.read)
+                  end
+                  data << [entry.full_name, entry_data]
                 end
               end
             end
