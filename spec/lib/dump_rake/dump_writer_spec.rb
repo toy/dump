@@ -153,11 +153,11 @@ describe DumpWriter do
         allow(@dump).to receive(:create_file).and_yield(@file)
 
         column_names = @column_definitions.map(&:name).sort
-        expect(@file).to receive(:write).with(Marshal.dump(column_names)).ordered
+        expect(Marshal).to receive(:dump).with(column_names, @file).ordered
         each_tabler_row_yielder = expect(@dump).to receive(:each_table_row)
         @rows.each do |row|
           each_tabler_row_yielder.and_yield(row)
-          expect(@file).to receive(:write).with(Marshal.dump(row.values_at(*column_names))).ordered
+          expect(Marshal).to receive(:dump).with(row.values_at(*column_names), @file).ordered
           @column_definitions.each do |column_definition|
             expect(column_definition).to receive(:type_cast).with(row[column_definition.name]).and_return(row[column_definition.name])
           end
@@ -287,7 +287,7 @@ describe DumpWriter do
         allow(@dump).to receive(:create_file).and_yield(@file)
         @config.replace({:tables => {'first' => 1, 'second' => 2}, :assets => %w[images videos]})
 
-        expect(@file).to receive(:write).with(Marshal.dump(@config))
+        expect(Marshal).to receive(:dump).with(@config, @file)
         @dump.write_config
       end
     end
