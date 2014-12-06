@@ -54,7 +54,7 @@ def in_temp_rails_app
   DumpRake::RailsRoot.replace(File.join(PLUGIN_SPEC_DIR, 'temp_rails_app'))
   FileUtils.remove_entry(DumpRake::RailsRoot) if File.exist?(DumpRake::RailsRoot)
   FileUtils.mkpath(DumpRake::RailsRoot)
-  Progress.stub(:io).and_return(StringIO.new)
+  allow(Progress).to receive(:io).and_return(StringIO.new)
   yield
 ensure
   FileUtils.remove_entry(DumpRake::RailsRoot) if File.exist?(DumpRake::RailsRoot)
@@ -152,18 +152,18 @@ describe 'full cycle' do
 
             #clear database
             load_schema
-            Chicken.all.should == []
+            expect(Chicken.all).to eq([])
 
             #restore dump and verify equality
             call_rake_restore(:version => 'chickens')
-            chicken_data.should == saved_chicken_data
+            expect(chicken_data).to eq(saved_chicken_data)
 
             # go throught create/restore cycle and verify equality
             call_rake_create
             load_schema
-            Chicken.all.should be_empty
+            expect(Chicken.all).to be_empty
             call_rake_restore
-            chicken_data.should == saved_chicken_data
+            expect(chicken_data).to eq(saved_chicken_data)
           end
         end
       end
@@ -188,7 +188,7 @@ describe 'full cycle' do
         in_temp_rails_app do
           saved_chicken_data = nil
           use_adapter(adapter_src) do
-            Chicken.all.should be_empty
+            expect(Chicken.all).to be_empty
 
             create_chickens!(:random => 100)
             saved_chicken_data = chicken_data
@@ -196,10 +196,10 @@ describe 'full cycle' do
           end
 
           use_adapter(adapter_dst) do
-            Chicken.all.should be_empty
+            expect(Chicken.all).to be_empty
 
             call_rake_restore
-            chicken_data.should == saved_chicken_data
+            expect(chicken_data).to eq(saved_chicken_data)
           end
         end
       end
@@ -226,8 +226,8 @@ describe 'full cycle' do
         end
 
         dumps.combination(2) do |dump_a, dump_b|
-          dump_a[:path].should_not == dump_b[:path]
-          dump_a[:data].should == dump_b[:data]
+          expect(dump_a[:path]).not_to eq(dump_b[:path])
+          expect(dump_a[:data]).to eq(dump_b[:data])
         end
       end
     end
