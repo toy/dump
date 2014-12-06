@@ -46,9 +46,9 @@ ensure
 end
 
 def load_schema
-  grab_output{
+  grab_output do
     load(DUMMY_SCHEMA_PATH)
-  }
+  end
 end
 
 def in_temp_rails_app
@@ -121,21 +121,21 @@ end
 
 def call_rake
   reset_rake!
-  grab_output{
+  grab_output do
     yield
-  }
+  end
 end
 
 def call_rake_create(*args)
-  call_rake{
+  call_rake do
     DumpRake.create(*args)
-  }
+  end
 end
 
 def call_rake_restore(*args)
-  call_rake{
+  call_rake do
     DumpRake.restore(*args)
-  }
+  end
 end
 
 describe 'full cycle' do

@@ -277,14 +277,14 @@ describe DumpRake::Dump do
       expect(Dir).to receive(:chdir).with('/tmp/abc').and_yield
       expect(File).to receive(:symlink).with(DumpRake::RailsRoot, 'assets')
       expect(File).to receive(:unlink).with('assets')
-      expect{
+      expect do
         DumpRake::Dump.new('').send(:assets_root_link) do |dir, prefix|
           expect(dir).to eq('/tmp/abc')
           expect(prefix).to eq('assets')
           @yielded = true
           raise 'just test'
         end
-      }.to raise_error('just test')
+      end.to raise_error('just test')
       expect(@yielded).to eq(true)
     end
   end

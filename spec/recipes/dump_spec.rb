@@ -69,9 +69,9 @@ describe 'cap dump' do
             it 'should raise if rsync fails' do
               allow(@cap.dump).to receive(:got_rsync?).and_return(true)
               expect(@cap.dump).to receive(:do_transfer_via).with(:rsync, direction, 'a.tgz', 'b.tgz').and_raise('problem using rsync')
-              expect{
+              expect do
                 grab_output{ @cap.dump.do_transfer(direction, 'a.tgz', 'b.tgz') }
-              }.to raise_error('problem using rsync')
+              end.to raise_error('problem using rsync')
             end
           end
 
@@ -93,9 +93,9 @@ describe 'cap dump' do
               allow(@cap.dump).to receive(:got_rsync?).and_return(false)
               expect(@cap.dump).to receive(:do_transfer_via).with(:sftp, direction, 'a.tgz', 'b.tgz').and_raise('problem using sftp')
               expect(@cap.dump).to receive(:do_transfer_via).with(:scp, direction, 'a.tgz', 'b.tgz').and_raise('problem using scp')
-              expect{
+              expect do
                 grab_output{ @cap.dump.do_transfer(direction, 'a.tgz', 'b.tgz') }
-              }.to raise_error('problem using scp')
+              end.to raise_error('problem using scp')
             end
           end
         end
@@ -118,9 +118,9 @@ describe 'cap dump' do
 
       it 'should print result of rake task' do
         allow(@cap.dump).to receive(:run_local).and_return(" 123M\t123123.tgz\n")
-        expect(grab_output{
+        expect(grab_output do
           @cap.find_and_execute_task('dump:local:versions')
-        }[:stdout]).to eq(" 123M\t123123.tgz\n")
+        end[:stdout]).to eq(" 123M\t123123.tgz\n")
       end
     end
 
@@ -138,34 +138,34 @@ describe 'cap dump' do
 
       it 'should print result of rake task' do
         allow(@cap.dump).to receive(:run_local).and_return("123123.tgz\n")
-        expect(grab_output{
+        expect(grab_output do
           @cap.find_and_execute_task('dump:local:cleanup')
-        }[:stdout]).to eq("123123.tgz\n")
+        end[:stdout]).to eq("123123.tgz\n")
       end
     end
 
     describe 'create' do
       it 'should raise if dump creation fails' do
         expect(@cap.dump).to receive(:run_local).with('rake -s dump:create TAGS\\=local').and_return('')
-        expect{
+        expect do
           @cap.find_and_execute_task('dump:local:create')
-        }.to raise_error('Failed creating dump')
+        end.to raise_error('Failed creating dump')
       end
 
       it 'should call local rake task with tag local' do
         expect(@cap.dump).to receive(:run_local).with('rake -s dump:create TAGS\\=local').and_return('123.tgz')
-        grab_output{
+        grab_output do
           @cap.find_and_execute_task('dump:local:create')
-        }
+        end
       end
 
       it 'should call local rake task with additional tag local' do
         expect(@cap.dump).to receive(:run_local).with('rake -s dump:create TAGS\\=local,photos').and_return('123.tgz')
-        grab_output{
+        grab_output do
           DumpRake::Env.with_env :tags => 'photos' do
             @cap.find_and_execute_task('dump:local:create')
           end
-        }
+        end
       end
 
       test_passing_environment_variables(:local, :create, {
@@ -177,16 +177,16 @@ describe 'cap dump' do
 
       it 'should print result of rake task' do
         allow(@cap.dump).to receive(:run_local).and_return("123123.tgz\n")
-        expect(grab_output{
+        expect(grab_output do
           @cap.find_and_execute_task('dump:local:create')
-        }[:stdout]).to eq("123123.tgz\n")
+        end[:stdout]).to eq("123123.tgz\n")
       end
 
       it 'should return stripped result of rake task' do
         allow(@cap.dump).to receive(:run_local).and_return("123123.tgz\n")
-        grab_output{
+        grab_output do
           expect(@cap.find_and_execute_task('dump:local:create')).to eq('123123.tgz')
-        }
+        end
       end
     end
 
@@ -254,9 +254,9 @@ describe 'cap dump' do
 
       it 'should print result of rake task' do
         allow(@cap.dump).to receive(:run_remote).and_return(" 123M\t123123.tgz\n")
-        expect(grab_output{
+        expect(grab_output do
           @cap.find_and_execute_task('dump:remote:versions')
-        }[:stdout]).to eq(" 123M\t123123.tgz\n")
+        end[:stdout]).to eq(" 123M\t123123.tgz\n")
       end
 
       it 'should use custom rake binary' do
@@ -280,9 +280,9 @@ describe 'cap dump' do
 
       it 'should print result of rake task' do
         allow(@cap.dump).to receive(:run_remote).and_return("123123.tgz\n")
-        expect(grab_output{
+        expect(grab_output do
           @cap.find_and_execute_task('dump:remote:cleanup')
-        }[:stdout]).to eq("123123.tgz\n")
+        end[:stdout]).to eq("123123.tgz\n")
       end
 
       it 'should use custom rake binary' do
@@ -295,33 +295,33 @@ describe 'cap dump' do
     describe 'create' do
       it 'should raise if dump creation fails' do
         expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; rake -s dump:create PROGRESS_TTY\\=\\+ RAILS_ENV\\=production TAGS\\=remote").and_return('')
-        expect{
+        expect do
           @cap.find_and_execute_task('dump:remote:create')
-        }.to raise_error('Failed creating dump')
+        end.to raise_error('Failed creating dump')
       end
 
       it 'should call remote rake task with default rails_env and tag remote' do
         expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; rake -s dump:create PROGRESS_TTY\\=\\+ RAILS_ENV\\=production TAGS\\=remote").and_return('123.tgz')
-        grab_output{
+        grab_output do
           @cap.find_and_execute_task('dump:remote:create')
-        }
+        end
       end
 
       it 'should call remote rake task with default rails_env and additional tag remote' do
         expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; rake -s dump:create PROGRESS_TTY\\=\\+ RAILS_ENV\\=production TAGS\\=remote,photos").and_return('123.tgz')
-        grab_output{
+        grab_output do
           DumpRake::Env.with_env :tags => 'photos' do
             @cap.find_and_execute_task('dump:remote:create')
           end
-        }
+        end
       end
 
       it 'should call remote rake task with fetched rails_env and default DESC remote' do
         expect(@cap.dump).to receive(:fetch_rails_env).and_return('dev')
         expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; rake -s dump:create PROGRESS_TTY\\=\\+ RAILS_ENV\\=dev TAGS\\=remote").and_return('123.tgz')
-        grab_output{
+        grab_output do
           @cap.find_and_execute_task('dump:remote:create')
-        }
+        end
       end
 
       test_passing_environment_variables(:remote, :create, {
@@ -333,24 +333,24 @@ describe 'cap dump' do
 
       it 'should print result of rake task' do
         allow(@cap.dump).to receive(:run_remote).and_return("123123.tgz\n")
-        expect(grab_output{
+        expect(grab_output do
           @cap.find_and_execute_task('dump:remote:create')
-        }[:stdout]).to eq("123123.tgz\n")
+        end[:stdout]).to eq("123123.tgz\n")
       end
 
       it 'should return stripped result of rake task' do
         allow(@cap.dump).to receive(:run_remote).and_return("123123.tgz\n")
-        grab_output{
+        grab_output do
           expect(@cap.find_and_execute_task('dump:remote:create')).to eq('123123.tgz')
-        }
+        end
       end
 
       it 'should use custom rake binary' do
         expect(@cap.dump).to receive(:fetch_rake).and_return('/custom/rake')
         expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; /custom/rake -s dump:create PROGRESS_TTY\\=\\+ RAILS_ENV\\=production TAGS\\=remote").and_return('123.tgz')
-        grab_output{
+        grab_output do
           @cap.find_and_execute_task('dump:remote:create')
-        }
+        end
       end
     end
 
@@ -487,11 +487,11 @@ describe 'cap dump' do
         it 'should call local:upload and remote:restore with only varibale ver set to file name if local:create returns file name' do
           allow(@cap.dump.namespaces[dst]).to receive(:create).and_return('123.tgz')
           allow(@cap.dump.namespaces[src]).to receive(:create).and_return('123.tgz')
-          test_env = proc{
+          test_env = proc do
             expect(DumpRake::Env[:like]).to eq('123.tgz')
             expect(DumpRake::Env[:tags]).to eq(nil)
             expect(DumpRake::Env[:desc]).to eq(nil)
-          }
+          end
           expect(@cap.dump.namespaces[src]).to receive(:"#{dir}load").ordered(&test_env)
           expect(@cap.dump.namespaces[dst]).to receive(:restore).ordered(&test_env)
           DumpRake::Env.with_env all_dictionary_variables do

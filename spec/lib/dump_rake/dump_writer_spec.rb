@@ -269,9 +269,9 @@ describe DumpWriter do
         expect(Archive::Tar::Minitar).to receive(:pack_file).with('assets/a.mov', @stream).and_raise('file not found')
         expect(Archive::Tar::Minitar).to receive(:pack_file).with('assets/b.mov', @stream)
 
-        grab_output{
+        grab_output do
           @dump.write_assets
-        }
+        end
       end
 
     end

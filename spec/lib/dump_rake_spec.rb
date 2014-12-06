@@ -14,9 +14,9 @@ describe DumpRake do
 
     it 'should print versions' do
       expect(DumpRake::Dump).to receive(:list).and_return(%w[123.tgz 456.tgz])
-      expect(grab_output{
+      expect(grab_output do
         DumpRake.versions
-      }[:stdout]).to eq("123.tgz\n456.tgz\n")
+      end[:stdout]).to eq("123.tgz\n456.tgz\n")
     end
 
     it 'should not show summary if not asked for' do
@@ -27,10 +27,10 @@ describe DumpRake do
       end
 
       expect(DumpRake::Dump).to receive(:list).and_return(dumps)
-      grab_output{
+      grab_output do
         expect($stderr).not_to receive(:puts)
         DumpRake.versions
-      }
+      end
     end
 
     it 'should show summary if asked for' do
@@ -41,10 +41,10 @@ describe DumpRake do
       end
 
       expect(DumpRake::Dump).to receive(:list).and_return(dumps)
-      grab_output{
+      grab_output do
         expect($stderr).not_to receive(:puts)
         DumpRake.versions(:summary => '1')
-      }
+      end
     end
 
     it 'should show summary with scmema if asked for' do
@@ -55,10 +55,10 @@ describe DumpRake do
       end
 
       expect(DumpRake::Dump).to receive(:list).and_return(dumps)
-      grab_output{
+      grab_output do
         expect($stderr).not_to receive(:puts)
         DumpRake.versions(:summary => '2')
-      }
+      end
     end
 
     it 'should show output to stderr if summary raises error' do
@@ -69,13 +69,13 @@ describe DumpRake do
       expect(DumpRake::DumpReader).to receive(:summary).with(dumps[1].path).and_raise('terrible error')
 
       expect(DumpRake::Dump).to receive(:list).and_return(dumps)
-      grab_output{
+      grab_output do
         allow($stderr).to receive(:puts)
         expect($stderr).to receive(:puts) do |s|
           expect(s['terrible error']).not_to be_nil
         end
         DumpRake.versions(:summary => 'true')
-      }
+      end
     end
   end
 
@@ -86,9 +86,9 @@ describe DumpRake do
         expect(DumpRake::DumpWriter).to receive(:create) do |path|
           expect(File.dirname(path)).to eq(File.join(DumpRake::RailsRoot, 'dump'))
         end
-        grab_output{
+        grab_output do
           DumpRake.create
-        }
+        end
       end
 
       it "should create file with name like 'yyyymmddhhmmss.tmp' when called without description" do
@@ -96,9 +96,9 @@ describe DumpRake do
         expect(DumpRake::DumpWriter).to receive(:create) do |path|
           expect(File.basename(path)).to match(/^\d{14}\.tmp$/)
         end
-        grab_output{
+        grab_output do
           DumpRake.create
-        }
+        end
       end
 
       it "should create file with name like 'yyyymmddhhmmss-Some text and _.tmp' when called with description 'Some text and !@'" do
@@ -106,9 +106,9 @@ describe DumpRake do
         expect(DumpRake::DumpWriter).to receive(:create) do |path|
           expect(File.basename(path)).to match(/^\d{14}-Some text and _\.tmp$/)
         end
-        grab_output{
+        grab_output do
           DumpRake.create(:desc => 'Some text and !@')
-        }
+        end
       end
 
       it "should create file with name like 'yyyymmddhhmmss@super tag,second.tmp' when called with description 'Some text and !@'" do
@@ -116,9 +116,9 @@ describe DumpRake do
         expect(DumpRake::DumpWriter).to receive(:create) do |path|
           expect(File.basename(path)).to match(/^\d{14}-Some text and _\.tmp$/)
         end
-        grab_output{
+        grab_output do
           DumpRake.create(:desc => 'Some text and !@')
-        }
+        end
       end
 
       it 'should rename file after creating' do
@@ -127,17 +127,17 @@ describe DumpRake do
           expect(File.basename(tgz_path)).to match(/^\d{14}-Some text and _\.tgz$/)
         end
         allow(DumpRake::DumpWriter).to receive(:create)
-        grab_output{
+        grab_output do
           DumpRake.create(:desc => 'Some text and !@')
-        }
+        end
       end
 
       it 'should output file name' do
         allow(File).to receive(:rename)
         allow(DumpRake::DumpWriter).to receive(:create)
-        expect(grab_output{
+        expect(grab_output do
           DumpRake.create(:desc => 'Some text and !@')
-        }[:stdout]).to match(/^\d{14}-Some text and _\.tgz$/)
+        end[:stdout]).to match(/^\d{14}-Some text and _\.tgz$/)
       end
     end
 
@@ -147,9 +147,9 @@ describe DumpRake do
         @dump = double('dump')
         expect(DumpRake::DumpWriter).to receive(:create)
 
-        grab_output{
+        grab_output do
           DumpRake.create
-        }
+        end
       end
     end
   end
@@ -159,9 +159,9 @@ describe DumpRake do
       it 'should call Dump.list' do
         allow(DumpRake::Dump).to receive(:list)
         expect(DumpRake::Dump).to receive(:list).and_return([])
-        grab_output{
+        grab_output do
           DumpRake.restore
-        }
+        end
       end
 
       it 'should not call DumpReader.restore and should call Dump.list and output it to $stderr if there are no versions at all' do
@@ -169,11 +169,11 @@ describe DumpRake do
         expect(DumpRake::DumpReader).not_to receive(:restore)
         all_dumps = double('all_dumps')
         expect(DumpRake::Dump).to receive(:list).with(no_args).and_return(all_dumps)
-        grab_output{
+        grab_output do
           expect($stderr).to receive(:puts).with(kind_of(String))
           expect($stderr).to receive(:puts).with(all_dumps)
           DumpRake.restore
-        }
+        end
       end
 
       it 'should not call DumpReader.restore and should call Dump.list and output it to $stderr if there are no versions at all' do
@@ -181,21 +181,21 @@ describe DumpRake do
         expect(DumpRake::DumpReader).not_to receive(:restore)
         all_dumps = double('all_dumps')
         expect(DumpRake::Dump).to receive(:list).with(no_args).and_return(all_dumps)
-        grab_output{
+        grab_output do
           expect($stderr).to receive(:puts).with(kind_of(String))
           expect($stderr).to receive(:puts).with(all_dumps)
           DumpRake.restore('213')
-        }
+        end
       end
 
       it 'should call DumpReader.restore if there are versions' do
         @dump = double('dump', :path => 'dump/213.tgz')
         expect(DumpRake::Dump).to receive(:list).once.and_return([@dump])
         expect(DumpRake::DumpReader).to receive(:restore).with('dump/213.tgz')
-        grab_output{
+        grab_output do
           expect($stderr).not_to receive(:puts)
           DumpRake.restore
-        }
+        end
       end
     end
 
@@ -203,9 +203,9 @@ describe DumpRake do
       it 'should call Dump.list with options' do
         allow(DumpRake::Dump).to receive(:list)
         expect(DumpRake::Dump).to receive(:list).with(:like => '213').and_return([])
-        grab_output{
+        grab_output do
           DumpRake.restore(:like => '213')
-        }
+        end
       end
 
       it 'should not call DumpReader.restore and should call versions if desired version not found' do
@@ -213,11 +213,11 @@ describe DumpRake do
         expect(DumpRake::DumpReader).not_to receive(:restore)
         all_dumps = double('all_dumps')
         expect(DumpRake::Dump).to receive(:list).with(no_args).and_return(all_dumps)
-        grab_output{
+        grab_output do
           expect($stderr).to receive(:puts).with(kind_of(String))
           expect($stderr).to receive(:puts).with(all_dumps)
           DumpRake.restore('213')
-        }
+        end
       end
 
       it 'should call DumpReader.restore if there is desired version' do
@@ -225,10 +225,10 @@ describe DumpRake do
         expect(DumpRake::Dump).to receive(:list).once.and_return([@dump])
         expect(DumpRake::DumpReader).to receive(:restore).with('dump/213.tgz')
         expect(DumpRake).not_to receive(:versions)
-        grab_output{
+        grab_output do
           expect($stderr).not_to receive(:puts)
           DumpRake.restore(:like => '213')
-        }
+        end
       end
 
       it 'should call DumpReader.restore on last version if found multiple matching versions' do
@@ -236,10 +236,10 @@ describe DumpRake do
         @dump_b = double('dump_b', :path => 'dump/213-b.tgz')
         expect(DumpRake::Dump).to receive(:list).once.and_return([@dump_a, @dump_b])
         expect(DumpRake::DumpReader).to receive(:restore).with('dump/213-b.tgz')
-        grab_output{
+        grab_output do
           expect($stderr).not_to receive(:puts)
           DumpRake.restore(:like => '213')
-        }
+        end
       end
     end
   end
@@ -290,9 +290,9 @@ describe DumpRake do
 
         expect(DumpRake::Dump).to receive(:list).with(hash_including(:all => true)).and_return(all_dumps)
         expect(DumpRake::Dump).to receive(:list).with(hash_not_including(:all => true)).and_return(dumps)
-        grab_output{
+        grab_output do
           DumpRake.cleanup({:like => '123', :tags => 'a,b,c'}.merge(options))
-        }
+        end
       end
     end
 
@@ -307,20 +307,20 @@ describe DumpRake do
       expect(dumps[3].path).to receive(:unlink).and_raise('Horrible error')
 
       allow(DumpRake::Dump).to receive(:list).and_return(dumps)
-      grab_output{
+      grab_output do
         allow($stderr).to receive(:puts)
         expect($stderr).to receive(:puts) do |s|
           expect(s[dumps[3].path.to_s]).not_to be_nil
           expect(s['Horrible error']).not_to be_nil
         end
         DumpRake.cleanup
-      }
+      end
     end
 
     it "should raise if called with :leave which is not a number or 'none'" do
-      expect{
+      expect do
         DumpRake.cleanup(:leave => 'nothing')
-      }.to raise_error
+      end.to raise_error
     end
   end
 end
