@@ -104,6 +104,11 @@ describe 'cap dump' do
   end
 
   describe 'local' do
+    it 'should call local:create' do
+      expect(@cap.dump.local).to receive(:create).and_return('')
+      @cap.find_and_execute_task('dump:local')
+    end
+
     describe 'versions' do
       it 'should call local rake task' do
         expect(@cap.dump).to receive(:run_local).with('rake -s dump:versions SHOW_SIZE\\=true').and_return('')
@@ -240,6 +245,11 @@ describe 'cap dump' do
   end
 
   describe 'remote' do
+    it 'should call remote:create' do
+      expect(@cap.dump.remote).to receive(:create).and_return('')
+      @cap.find_and_execute_task('dump:remote')
+    end
+
     describe 'versions' do
       it 'should call remote rake task' do
         expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions PROGRESS_TTY\\=\\+ RAILS_ENV\\=production SHOW_SIZE\\=true").and_return('')
@@ -436,6 +446,20 @@ describe 'cap dump' do
         expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; /custom/rake -s dump:versions PROGRESS_TTY\\=\\+ RAILS_ENV\\=production").and_return('')
         @cap.find_and_execute_task('dump:remote:download')
       end
+    end
+  end
+
+  describe 'upload' do
+    it 'should call local:upload' do
+      expect(@cap.dump.local).to receive(:upload).and_return('')
+      @cap.find_and_execute_task('dump:upload')
+    end
+  end
+
+  describe 'download' do
+    it 'should call remote:download' do
+      expect(@cap.dump.remote).to receive(:download).and_return('')
+      @cap.find_and_execute_task('dump:download')
     end
   end
 
