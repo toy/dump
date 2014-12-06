@@ -258,7 +258,7 @@ Capistrano::Configuration.instance(:i_need_this!).load do
 
     desc 'Shorthand for dump:remote:download' << DumpRake::Env.explain_variables_for_command(:transfer)
     task :download, :roles => :db, :only => {:primary => true} do
-      remote:download
+      remote.download
     end
 
     namespace :mirror do
