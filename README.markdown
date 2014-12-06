@@ -1,4 +1,6 @@
+[![Gem Version](https://img.shields.io/gem/v/dump.svg?style=flat)](https://rubygems.org/gems/dump)
 [![Build Status](https://img.shields.io/travis/toy/dump/master.svg?style=flat)](https://travis-ci.org/toy/dump)
+[![Code Climate](https://img.shields.io/codeclimate/github/toy/dump.svg?style=flat)](https://codeclimate.com/github/toy/dump)
 
 # DumpRake
 
