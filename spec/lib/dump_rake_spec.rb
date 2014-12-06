@@ -168,7 +168,7 @@ describe DumpRake do
         allow(DumpRake::Dump).to receive(:list).and_return([])
         expect(DumpRake::DumpReader).not_to receive(:restore)
         all_dumps = double('all_dumps')
-        expect(DumpRake::Dump).to receive(:list).with().and_return(all_dumps)
+        expect(DumpRake::Dump).to receive(:list).with(no_args).and_return(all_dumps)
         grab_output{
           expect($stderr).to receive(:puts).with(kind_of(String))
           expect($stderr).to receive(:puts).with(all_dumps)
@@ -180,7 +180,7 @@ describe DumpRake do
         allow(DumpRake::Dump).to receive(:list).and_return([])
         expect(DumpRake::DumpReader).not_to receive(:restore)
         all_dumps = double('all_dumps')
-        expect(DumpRake::Dump).to receive(:list).with().and_return(all_dumps)
+        expect(DumpRake::Dump).to receive(:list).with(no_args).and_return(all_dumps)
         grab_output{
           expect($stderr).to receive(:puts).with(kind_of(String))
           expect($stderr).to receive(:puts).with(all_dumps)
@@ -212,7 +212,7 @@ describe DumpRake do
         allow(DumpRake::Dump).to receive(:list).and_return([])
         expect(DumpRake::DumpReader).not_to receive(:restore)
         all_dumps = double('all_dumps')
-        expect(DumpRake::Dump).to receive(:list).with().and_return(all_dumps)
+        expect(DumpRake::Dump).to receive(:list).with(no_args).and_return(all_dumps)
         grab_output{
           expect($stderr).to receive(:puts).with(kind_of(String))
           expect($stderr).to receive(:puts).with(all_dumps)
