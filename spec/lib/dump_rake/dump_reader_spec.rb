@@ -386,7 +386,19 @@ describe DumpReader do
         @dump.read_tables
       end
 
-      describe "with empty restore_tables config option" do
+      describe "when called with restore_tables" do
+        it "should verify connection and call read_table for each table in restore_tables" do
+          allow(@dump).to receive(:config).and_return({:tables => {'first' => 1, 'second' => 3}})
+
+          expect(@dump).to receive(:verify_connection)
+          expect(@dump).to receive(:read_table).with('first', 1)
+          expect(@dump).not_to receive(:read_table).with('second', 3)
+
+          DumpRake::Env.with_env(:restore_tables => 'first') do
+            @dump.read_tables
+          end
+        end
+
         it "should not verfiy connection" do
           allow(@dump).to receive(:config).and_return({:tables => {'first' => 1, 'second' => 3}})
           expect(@dump).not_to receive(:verify_connection)
