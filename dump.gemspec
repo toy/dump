@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name        = 'dump'
-  s.version     = '1.0.3'
+  s.version     = '1.0.4'
   s.summary     = %q{Rails app rake and capistrano tasks to create and restore dumps of database and assets}
   s.homepage    = "http://github.com/toy/#{s.name}"
   s.authors     = ['Ivan Kuchin']
