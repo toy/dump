@@ -169,6 +169,7 @@ class DumpRake
     end
 
     def read_tables
+      return if DumpRake::Env[:restore_tables] && DumpRake::Env[:restore_tables].empty?
       verify_connection
       config[:tables].with_progress('Tables') do |table, rows|
         if (restore_schema? && schema_tables.include?(table)) || DumpRake::Env.filter(:restore_tables).pass?(table)
@@ -207,6 +208,7 @@ class DumpRake
     end
 
     def read_assets
+      return if DumpRake::Env[:restore_assets] && DumpRake::Env[:restore_assets].empty?
       unless config[:assets].blank?
         assets = config[:assets]
         if Hash === assets

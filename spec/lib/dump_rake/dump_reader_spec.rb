@@ -385,6 +385,31 @@ describe DumpReader do
 
         @dump.read_tables
       end
+
+      describe "when called with restore_tables" do
+        it "should verify connection and call read_table for each table in restore_tables" do
+          allow(@dump).to receive(:config).and_return({:tables => {'first' => 1, 'second' => 3}})
+
+          expect(@dump).to receive(:verify_connection)
+          expect(@dump).to receive(:read_table).with('first', 1)
+          expect(@dump).not_to receive(:read_table).with('second', 3)
+
+          DumpRake::Env.with_env(:restore_tables => 'first') do
+            @dump.read_tables
+          end
+        end
+
+        it "should not verfiy connection or call read_table for empty restore_tables" do
+          allow(@dump).to receive(:config).and_return({:tables => {'first' => 1, 'second' => 3}})
+
+          expect(@dump).not_to receive(:verify_connection)
+          expect(@dump).not_to receive(:read_table)
+
+          DumpRake::Env.with_env(:restore_tables => '') do
+            @dump.read_tables
+          end
+        end
+      end
     end
 
     describe "read_table" do
@@ -537,6 +562,23 @@ describe DumpReader do
             expect(Dir).to receive('unlink').with('images').and_raise(Errno::ENOTEMPTY)
 
             DumpRake::Env.with_env(:restore_assets => 'images/a.*:stylesheets') do
+              @dump.read_assets
+            end
+          end
+
+          it "should not delete any files and dirs for empty list" do
+            @assets = %w[images videos]
+            allow(@dump).to receive(:config).and_return({:assets => @assets})
+
+            expect(DumpRake::Assets).not_to receive('glob_asset_children')
+
+            expect(@dump).not_to receive('read_asset?')
+
+            expect(File).not_to receive('directory?')
+            expect(File).not_to receive('file?')
+            expect(File).not_to receive('unlink')
+
+            DumpRake::Env.with_env(:restore_assets => '') do
               @dump.read_assets
             end
           end
