@@ -68,8 +68,8 @@ describe TableManipulation do
 
   describe "columns_insert_sql" do
     it "should return columns sql part for insert" do
-      should_receive(:quote_column_name).with('a').and_return('`a`')
-      should_receive(:quote_column_name).with('b').and_return('`b`')
+      expect(self).to receive(:quote_column_name).with('a').and_return('`a`')
+      expect(self).to receive(:quote_column_name).with('b').and_return('`b`')
 
       expect(columns_insert_sql(%w[a b])).to eq('(`a`,`b`)')
     end
@@ -77,8 +77,8 @@ describe TableManipulation do
 
   describe "values_insert_sql" do
     it "should return values sql part for insert" do
-      should_receive(:quote_value).with('a').and_return('`a`')
-      should_receive(:quote_value).with('b').and_return('`b`')
+      expect(self).to receive(:quote_value).with('a').and_return('`a`')
+      expect(self).to receive(:quote_value).with('b').and_return('`b`')
 
       expect(values_insert_sql(%w[a b])).to eq('(`a`,`b`)')
     end
@@ -142,7 +142,7 @@ describe TableManipulation do
 
   describe "table_chunk_size" do
     it "should return chunk_size based on estimated average for row size" do
-      should_receive(:table_columns).with('first').and_return(
+      expect(self).to receive(:table_columns).with('first').and_return(
         [double(:column, :type => :integer, :limit => nil)] * 3 +
         [double(:column, :type => :string, :limit => nil)] * 3 +
         [double(:column, :type => :text, :limit => nil)]
@@ -153,14 +153,14 @@ describe TableManipulation do
     end
 
     it "should not return value less than CHUNK_SIZE_MIN" do
-      should_receive(:table_columns).with('first').and_return(
+      expect(self).to receive(:table_columns).with('first').and_return(
         [double(:column, :type => :text, :limit => nil)] * 100
       )
       expect(table_chunk_size('first')).to eq(TableManipulation::CHUNK_SIZE_MIN)
     end
 
     it "should not return value more than CHUNK_SIZE_MAX" do
-      should_receive(:table_columns).with('first').and_return(
+      expect(self).to receive(:table_columns).with('first').and_return(
         [double(:column, :type => :boolean, :limit => 1)] * 10
       )
       expect(table_chunk_size('first')).to eq(TableManipulation::CHUNK_SIZE_MAX)
@@ -177,15 +177,15 @@ describe TableManipulation do
 
   describe "table_has_primary_column?" do
     it "should return true only if table has column with name id and type :integer" do
-      should_receive(:table_primary_key).at_least(3).times.and_return('id')
+      expect(self).to receive(:table_primary_key).at_least(3).times.and_return('id')
 
-      should_receive(:table_columns).with('first').and_return([double(:column, :name => 'id', :type => :integer), double(:column, :name => 'title', :type => :integer)])
+      expect(self).to receive(:table_columns).with('first').and_return([double(:column, :name => 'id', :type => :integer), double(:column, :name => 'title', :type => :integer)])
       expect(table_has_primary_column?('first')).to be_truthy
 
-      should_receive(:table_columns).with('second').and_return([double(:column, :name => 'id', :type => :string), double(:column, :name => 'title', :type => :integer)])
+      expect(self).to receive(:table_columns).with('second').and_return([double(:column, :name => 'id', :type => :string), double(:column, :name => 'title', :type => :integer)])
       expect(table_has_primary_column?('second')).to be_falsey
 
-      should_receive(:table_columns).with('third').and_return([double(:column, :name => 'name', :type => :integer), double(:column, :name => 'title', :type => :integer)])
+      expect(self).to receive(:table_columns).with('third').and_return([double(:column, :name => 'name', :type => :integer), double(:column, :name => 'title', :type => :integer)])
       expect(table_has_primary_column?('third')).to be_falsey
     end
   end
@@ -213,35 +213,35 @@ describe TableManipulation do
     end
 
     it "should get rows in chunks if table has primary column and chunk size is less than row count" do
-      should_receive(:table_has_primary_column?).with('first').and_return(true)
-      should_receive(:table_chunk_size).with('first').and_return(100)
+      expect(self).to receive(:table_has_primary_column?).with('first').and_return(true)
+      expect(self).to receive(:table_chunk_size).with('first').and_return(100)
       quoted_table_name = quote_table_name('first')
       quoted_primary_key = "#{quoted_table_name}.#{quote_column_name(table_primary_key('first'))}"
       sql = "SELECT * FROM #{quoted_table_name} WHERE #{quoted_primary_key} %s ORDER BY #{quoted_primary_key} ASC LIMIT 100"
 
-      should_receive(:select_all_by_sql).with(sql % '>= 0').and_return(@rows[0, 100])
+      expect(self).to receive(:select_all_by_sql).with(sql % '>= 0').and_return(@rows[0, 100])
       5.times do |i|
         last_primary_key = 100 + i * 100
-        should_receive(:select_all_by_sql).with(sql % "> #{last_primary_key}").and_return(@rows[last_primary_key, 100])
+        expect(self).to receive(:select_all_by_sql).with(sql % "> #{last_primary_key}").and_return(@rows[last_primary_key, 100])
       end
 
       verify_getting_rows
     end
 
     def verify_getting_rows_in_one_pass
-      should_receive(:select_all_by_sql).with("SELECT * FROM #{quote_table_name('first')}").and_return(@rows)
+      expect(self).to receive(:select_all_by_sql).with("SELECT * FROM #{quote_table_name('first')}").and_return(@rows)
       verify_getting_rows
     end
 
     it "should get rows in one pass if table has primary column but chunk size is not less than row count" do
-      should_receive(:table_has_primary_column?).with('first').and_return(true)
-      should_receive(:table_chunk_size).with('first').and_return(3_000)
+      expect(self).to receive(:table_has_primary_column?).with('first').and_return(true)
+      expect(self).to receive(:table_chunk_size).with('first').and_return(3_000)
       verify_getting_rows_in_one_pass
     end
 
     it "should get rows in one pass if table has no primary column" do
-      should_receive(:table_has_primary_column?).with('first').and_return(false)
-      should_not_receive(:table_chunk_size)
+      expect(self).to receive(:table_has_primary_column?).with('first').and_return(false)
+      expect(self).to_not receive(:table_chunk_size)
       verify_getting_rows_in_one_pass
     end
   end
