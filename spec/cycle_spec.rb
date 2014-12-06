@@ -2,6 +2,8 @@ require File.dirname(__FILE__) + '/spec_helper'
 
 require File.dirname(__FILE__) + '/../lib/dump_rake'
 
+require 'tmpdir'
+
 def database_configs
   YAML::load(IO.read(PLUGIN_SPEC_DIR + "/db/database.yml"))
 end
@@ -51,13 +53,12 @@ end
 
 def in_temp_rails_app
   old_rails_root = DumpRake::RailsRoot.dup
-  DumpRake::RailsRoot.replace(File.join(PLUGIN_SPEC_DIR, 'temp_rails_app'))
-  FileUtils.remove_entry(DumpRake::RailsRoot) if File.exist?(DumpRake::RailsRoot)
-  FileUtils.mkpath(DumpRake::RailsRoot)
-  allow(Progress).to receive(:io).and_return(StringIO.new)
-  yield
+  Dir.mktmpdir do |dir|
+    DumpRake::RailsRoot.replace(dir)
+    allow(Progress).to receive(:io).and_return(StringIO.new)
+    yield
+  end
 ensure
-  FileUtils.remove_entry(DumpRake::RailsRoot) if File.exist?(DumpRake::RailsRoot)
   DumpRake::RailsRoot.replace(old_rails_root)
 end
 
