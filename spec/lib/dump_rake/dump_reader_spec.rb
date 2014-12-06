@@ -399,19 +399,10 @@ describe DumpReader do
           end
         end
 
-        it "should not verfiy connection" do
+        it "should not verfiy connection or call read_table for empty restore_tables" do
           allow(@dump).to receive(:config).and_return({:tables => {'first' => 1, 'second' => 3}})
+
           expect(@dump).not_to receive(:verify_connection)
-
-          DumpRake::Env.with_env(:restore_tables => '') do
-            @dump.read_tables
-          end
-        end
-
-        it "should not call read_table" do
-          allow(@dump).to receive(:verify_connection)
-          allow(@dump).to receive(:config).and_return({:tables => {'first' => 1, 'second' => 3}})
-
           expect(@dump).not_to receive(:read_table)
 
           DumpRake::Env.with_env(:restore_tables => '') do
@@ -580,14 +571,12 @@ describe DumpReader do
             allow(@dump).to receive(:config).and_return({:assets => @assets})
 
             expect(DumpRake::Assets).not_to receive('glob_asset_children')
-            expect(DumpRake::Assets).not_to receive('glob_asset_children')
 
             expect(@dump).not_to receive('read_asset?')
 
+            expect(File).not_to receive('directory?')
             expect(File).not_to receive('file?')
             expect(File).not_to receive('unlink')
-            expect(File).not_to receive('file?')
-            expect(File).not_to receive('directory?')
 
             DumpRake::Env.with_env(:restore_assets => '') do
               @dump.read_assets
