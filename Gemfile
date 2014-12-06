@@ -14,6 +14,9 @@ else
   if rails_version =~ /(^|[^.\d])(2|3\.0)\.\d+/
     gem 'activerecord-mysql2-adapter'
   end
+  if rails_version =~ /(^|[^.\d])2\.\d+/ && RUBY_VERSION >= '2.0'
+    gem 'iconv', '~> 1.0.4'
+  end
 end
 
 gem 'capistrano', '~> 2.0'
