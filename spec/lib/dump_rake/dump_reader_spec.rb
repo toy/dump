@@ -388,8 +388,8 @@ describe DumpReader do
 
       describe "with empty restore_tables config option" do
         it "should not verfiy connection" do
-          @dump.stub(:config).and_return({:tables => {'first' => 1, 'second' => 3}})
-          @dump.should_not_receive(:verify_connection)
+          allow(@dump).to receive(:config).and_return({:tables => {'first' => 1, 'second' => 3}})
+          expect(@dump).not_to receive(:verify_connection)
 
           DumpRake::Env.with_env(:restore_tables => '') do
             @dump.read_tables
@@ -397,10 +397,10 @@ describe DumpReader do
         end
 
         it "should not call read_table" do
-          @dump.stub(:verify_connection)
-          @dump.stub(:config).and_return({:tables => {'first' => 1, 'second' => 3}})
+          allow(@dump).to receive(:verify_connection)
+          allow(@dump).to receive(:config).and_return({:tables => {'first' => 1, 'second' => 3}})
 
-          @dump.should_not_receive(:read_table)
+          expect(@dump).not_to receive(:read_table)
 
           DumpRake::Env.with_env(:restore_tables => '') do
             @dump.read_tables
@@ -565,17 +565,17 @@ describe DumpReader do
 
           it "should not delete any files and dirs for empty list" do
             @assets = %w[images videos]
-            @dump.stub(:config).and_return({:assets => @assets})
+            allow(@dump).to receive(:config).and_return({:assets => @assets})
 
-            DumpRake::Assets.should_not_receive('glob_asset_children')
-            DumpRake::Assets.should_not_receive('glob_asset_children')
+            expect(DumpRake::Assets).not_to receive('glob_asset_children')
+            expect(DumpRake::Assets).not_to receive('glob_asset_children')
 
-            @dump.should_not_receive('read_asset?')
+            expect(@dump).not_to receive('read_asset?')
 
-            File.should_not_receive('file?')
-            File.should_not_receive('unlink')
-            File.should_not_receive('file?')
-            File.should_not_receive('directory?')
+            expect(File).not_to receive('file?')
+            expect(File).not_to receive('unlink')
+            expect(File).not_to receive('file?')
+            expect(File).not_to receive('directory?')
 
             DumpRake::Env.with_env(:restore_assets => '') do
               @dump.read_assets
