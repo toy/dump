@@ -17,8 +17,6 @@ describe DumpRake::Dump do
     it 'should not yield if file does not exist' do
       expect(@yield_receiver).not_to receive(:fire)
 
-      expect(File).to receive(:open).and_return(nil)
-
       DumpRake::Dump.new('hello').lock do
         @yield_receiver.fire
       end

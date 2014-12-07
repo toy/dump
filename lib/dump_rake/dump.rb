@@ -115,6 +115,8 @@ class DumpRake
         lock.flock(File::LOCK_UN)
         lock.close
       end
+    rescue Errno::ENOENT
+      nil
     end
 
     def silence(&block)
