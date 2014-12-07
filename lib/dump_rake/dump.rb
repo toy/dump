@@ -163,12 +163,10 @@ class DumpRake
       def get_filter_tags(tags)
         groups = Hash.new{ |hash, key| hash[key] = SortedSet.new }
         tags.to_s.split(',').each do |tag|
-          if (m = tag.strip.match(/^(\-|\+)?(.*)$/))
-            type = {'+' => :mandatory, '-' => :forbidden}[m[1]] || :simple
-            unless (cleaned_tag = clean_tag(m[2])).blank?
-              groups[type] << cleaned_tag
-            end
-          end
+          next unless (m = tag.strip.match(/^(\-|\+)?(.*)$/))
+          type = {'+' => :mandatory, '-' => :forbidden}[m[1]] || :simple
+          next unless (cleaned_tag = clean_tag(m[2])).present?
+          groups[type] << cleaned_tag
         end
         [:simple, :mandatory].each do |type|
           if (clashing = (groups[type] & groups[:forbidden])).present?

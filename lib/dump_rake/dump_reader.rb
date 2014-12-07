@@ -220,16 +220,15 @@ class DumpRake
       if DumpRake::Env[:restore_assets]
         assets_paths.each do |asset|
           DumpRake::Assets.glob_asset_children(asset, '**/*').reverse.each do |child|
-            if read_asset?(child, DumpRake::RailsRoot)
-              case
-              when File.file?(child)
-                File.unlink(child)
-              when File.directory?(child)
-                begin
-                  Dir.unlink(child)
-                rescue Errno::ENOTEMPTY
-                  nil
-                end
+            next unless read_asset?(child, DumpRake::RailsRoot)
+            case
+            when File.file?(child)
+              File.unlink(child)
+            when File.directory?(child)
+              begin
+                Dir.unlink(child)
+              rescue Errno::ENOTEMPTY
+                nil
               end
             end
           end
