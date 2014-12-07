@@ -2,20 +2,6 @@ require 'spec_helper'
 require 'dump_rake'
 require 'active_record/migration'
 
-def object_of_length(required_length)
-  LengthConstraint.new(required_length)
-end
-
-class LengthConstraint
-  def initialize(required_length)
-    @required_length = required_length
-  end
-
-  def ==(other)
-    @required_length == other.length
-  end
-end
-
 DumpReader = DumpRake::DumpReader
 describe DumpReader do
   describe 'restore' do
@@ -457,6 +443,10 @@ describe DumpReader do
           allow(@dump).to receive(:insert_into_table)
           @dump.read_table('first', 2500)
           expect(@entry.eof?).to be_truthy
+        end
+
+        define :object_of_length do |n|
+          match{ |actual| actual.length == n }
         end
 
         it 'should try to insert rows in slices of 1000 rows' do
