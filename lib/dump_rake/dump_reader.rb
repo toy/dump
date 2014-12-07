@@ -120,27 +120,26 @@ class DumpRake
         Rake::Task['db:drop'].invoke
         Rake::Task['db:create'].invoke
       when !DumpRake::Env.no?(:migrate_down)
-        if avaliable_tables.include?('schema_migrations')
-          find_entry('schema_migrations.dump') do |entry|
-            migrated = table_rows('schema_migrations').map{ |row| row['version'] }
+        return unless avaliable_tables.include?('schema_migrations')
+        find_entry('schema_migrations.dump') do |entry|
+          migrated = table_rows('schema_migrations').map{ |row| row['version'] }
 
-            dump_migrations = []
-            Marshal.load(entry) # skip header
-            dump_migrations << Marshal.load(entry).first until entry.eof?
+          dump_migrations = []
+          Marshal.load(entry) # skip header
+          dump_migrations << Marshal.load(entry).first until entry.eof?
 
-            migrate_down = (migrated - dump_migrations)
+          migrate_down = (migrated - dump_migrations)
 
-            unless migrate_down.empty?
-              migrate_down.reverse.with_progress('Migrating down') do |version|
-                DumpRake::Env.with_env('VERSION' => version) do
-                  Rake::Task['db:migrate:down'].tap do |task|
-                    begin
-                      task.invoke
-                    rescue ActiveRecord::IrreversibleMigration
-                      $stderr.puts "Irreversible migration: #{version}"
-                    end
-                    task.reenable
+          unless migrate_down.empty?
+            migrate_down.reverse.with_progress('Migrating down') do |version|
+              DumpRake::Env.with_env('VERSION' => version) do
+                Rake::Task['db:migrate:down'].tap do |task|
+                  begin
+                    task.invoke
+                  rescue ActiveRecord::IrreversibleMigration
+                    $stderr.puts "Irreversible migration: #{version}"
                   end
+                  task.reenable
                 end
               end
             end
@@ -154,13 +153,12 @@ class DumpRake
     end
 
     def read_schema
-      if restore_schema?
-        read_entry_to_file('schema.rb') do |f|
-          DumpRake::Env.with_env('SCHEMA' => f.path) do
-            Rake::Task['db:schema:load'].invoke
-          end
-          Rake::Task['db:schema:dump'].invoke
+      return unless restore_schema?
+      read_entry_to_file('schema.rb') do |f|
+        DumpRake::Env.with_env('SCHEMA' => f.path) do
+          Rake::Task['db:schema:load'].invoke
         end
+        Rake::Task['db:schema:dump'].invoke
       end
     end
 
@@ -209,42 +207,42 @@ class DumpRake
 
     def read_assets
       return if DumpRake::Env[:restore_assets] && DumpRake::Env[:restore_assets].empty?
-      unless config[:assets].blank?
-        assets = config[:assets]
-        if Hash === assets
-          assets_count = assets.values.sum{ |value| Hash === value ? value[:total] : value }
-          assets_paths = assets.keys
-        else
-          assets_count, assets_paths = nil, assets
-        end
+      return if config[:assets].blank?
 
-        if DumpRake::Env[:restore_assets]
-          assets_paths.each do |asset|
-            DumpRake::Assets.glob_asset_children(asset, '**/*').reverse.each do |child|
-              if read_asset?(child, DumpRake::RailsRoot)
-                case
-                when File.file?(child)
-                  File.unlink(child)
-                when File.directory?(child)
-                  begin
-                    Dir.unlink(child)
-                  rescue Errno::ENOTEMPTY
-                    nil
-                  end
+      assets = config[:assets]
+      if Hash === assets
+        assets_count = assets.values.sum{ |value| Hash === value ? value[:total] : value }
+        assets_paths = assets.keys
+      else
+        assets_count, assets_paths = nil, assets
+      end
+
+      if DumpRake::Env[:restore_assets]
+        assets_paths.each do |asset|
+          DumpRake::Assets.glob_asset_children(asset, '**/*').reverse.each do |child|
+            if read_asset?(child, DumpRake::RailsRoot)
+              case
+              when File.file?(child)
+                File.unlink(child)
+              when File.directory?(child)
+                begin
+                  Dir.unlink(child)
+                rescue Errno::ENOTEMPTY
+                  nil
                 end
               end
             end
           end
-        else
-          DumpRake::Env.with_env(:assets => assets_paths.join(':')) do
-            Rake::Task['assets:delete'].invoke
-          end
         end
+      else
+        DumpRake::Env.with_env(:assets => assets_paths.join(':')) do
+          Rake::Task['assets:delete'].invoke
+        end
+      end
 
-        read_assets_entries(assets_paths, assets_count) do |stream, root, entry, prefix|
-          if !DumpRake::Env[:restore_assets] || read_asset?(entry.full_name, prefix)
-            stream.extract_entry(root, entry)
-          end
+      read_assets_entries(assets_paths, assets_count) do |stream, root, entry, prefix|
+        if !DumpRake::Env[:restore_assets] || read_asset?(entry.full_name, prefix)
+          stream.extract_entry(root, entry)
         end
       end
     end

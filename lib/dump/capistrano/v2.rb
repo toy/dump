@@ -145,9 +145,8 @@ Capistrano::Configuration.instance(:i_need_this!).load do
     end
 
     def last_part_of_last_line(out)
-      if line = out.strip.split(/\s*[\n\r]\s*/).last
-        line.split("\t").last
-      end
+      line = out.strip.split(/\s*[\n\r]\s*/).last
+      line.split("\t").last if line
     end
 
     def fetch_rake

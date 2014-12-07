@@ -32,9 +32,8 @@ class DumpRake
     end
 
     def fix_sequence!(table)
-      if connection.respond_to?(:reset_pk_sequence!)
-        connection.reset_pk_sequence!(table)
-      end
+      return unless connection.respond_to?(:reset_pk_sequence!)
+      connection.reset_pk_sequence!(table)
     end
 
     def join_for_sql(quoted)

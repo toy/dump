@@ -79,21 +79,21 @@ class DumpRake
 
     def write_assets
       assets = assets_to_dump
-      if assets.present?
-        config[:assets] = {}
-        Dir.chdir(DumpRake::RailsRoot) do
-          assets = Dir[*assets].uniq
-          assets.with_progress('Assets') do |asset|
-            paths = Dir[File.join(asset, '**/*')]
-            files = paths.select{ |path| File.file?(path) }
-            config[:assets][asset] = {:total => paths.length, :files => files.length}
-            assets_root_link do |_tmpdir, prefix|
-              paths.with_progress(asset) do |entry|
-                begin
-                  Archive::Tar::Minitar.pack_file(File.join(prefix, entry), stream)
-                rescue => e
-                  $stderr.puts "Skipped asset due to error #{e}"
-                end
+      return if assets.blank?
+
+      config[:assets] = {}
+      Dir.chdir(DumpRake::RailsRoot) do
+        assets = Dir[*assets].uniq
+        assets.with_progress('Assets') do |asset|
+          paths = Dir[File.join(asset, '**/*')]
+          files = paths.select{ |path| File.file?(path) }
+          config[:assets][asset] = {:total => paths.length, :files => files.length}
+          assets_root_link do |_tmpdir, prefix|
+            paths.with_progress(asset) do |entry|
+              begin
+                Archive::Tar::Minitar.pack_file(File.join(prefix, entry), stream)
+              rescue => e
+                $stderr.puts "Skipped asset due to error #{e}"
               end
             end
           end

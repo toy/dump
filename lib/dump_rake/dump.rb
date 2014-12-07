@@ -106,15 +106,14 @@ class DumpRake
     end
 
     def lock
-      if lock = File.open(path, 'r')
-        begin
-          if lock.flock(File::LOCK_EX | File::LOCK_NB)
-            yield
-          end
-        ensure
-          lock.flock(File::LOCK_UN)
-          lock.close
+      lock = File.open(path, 'r')
+      begin
+        if lock.flock(File::LOCK_EX | File::LOCK_NB)
+          yield
         end
+      ensure
+        lock.flock(File::LOCK_UN)
+        lock.close
       end
     end
 

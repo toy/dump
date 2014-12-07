@@ -89,12 +89,10 @@ def create_chickens!(options = {})
       end
     end
   end
-  if options[:random]
-    options[:random].to_i.times do
-      Chicken.create! do |chicken|
-        data.each do |type, values|
-          chicken["#{type}_col"] = values[rand(values.length)] if rand > 0.5
-        end
+  options[:random].to_i.times do
+    Chicken.create! do |chicken|
+      data.each do |type, values|
+        chicken["#{type}_col"] = values[rand(values.length)] if rand > 0.5
       end
     end
   end
