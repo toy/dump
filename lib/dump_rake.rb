@@ -11,6 +11,14 @@ require 'archive/tar/minitar'
 require 'dump_rake/archive_tar_minitar_fix'
 require 'progress'
 
+require 'dump_rake/rails_root'
+require 'dump_rake/assets'
+require 'dump_rake/table_manipulation'
+require 'dump_rake/dump'
+require 'dump_rake/dump_reader'
+require 'dump_rake/dump_writer'
+require 'dump_rake/env'
+
 class DumpRake
   class << self
     def versions(options = {})
@@ -82,8 +90,4 @@ class DumpRake
       end
     end
   end
-end
-
-%w[rails_root assets table_manipulation dump dump_reader dump_writer env].each do |file|
-  require "dump_rake/#{file}"
 end
