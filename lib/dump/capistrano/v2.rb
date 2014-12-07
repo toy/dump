@@ -68,7 +68,7 @@ Capistrano::Configuration.instance(:i_need_this!).load do
           end
         end
       when :sftp, :scp
-        ContiniousTimeout.timeout 15 do |thread|
+        DumpRake::ContiniousTimeout.timeout 15 do |thread|
           transfer(direction, from, to, :via => via) do |channel, path, transfered, total|
             thread.defer
             progress = if transfered < total
