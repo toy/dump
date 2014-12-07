@@ -87,18 +87,9 @@ Capistrano::Configuration.instance(:i_need_this!).load do
     end
 
     def do_transfer(direction, from, to)
-      if via = DumpRake::Env[:transfer_via]
-        case via.downcase
-        when 'rsync'
-          do_transfer_via(:rsync, direction, from, to)
-        when 'sftp'
-          do_transfer_via(:sftp, direction, from, to)
-        when 'scp'
-          do_transfer_via(:scp, direction, from, to)
-        else
-          fail "Unknown transfer method #{via}"
-        end
-      else
+      via = DumpRake::Env[:transfer_via]
+      case via && via.downcase
+      when nil
         if got_rsync?
           do_transfer_via(:rsync, direction, from, to)
         else
@@ -110,6 +101,14 @@ Capistrano::Configuration.instance(:i_need_this!).load do
             do_transfer_via(:scp, direction, from, to)
           end
         end
+      when 'rsync'
+        do_transfer_via(:rsync, direction, from, to)
+      when 'sftp'
+        do_transfer_via(:sftp, direction, from, to)
+      when 'scp'
+        do_transfer_via(:scp, direction, from, to)
+      else
+        fail "Unknown transfer method #{via}"
       end
     end
 
