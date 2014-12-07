@@ -15,7 +15,11 @@ class DumpRake
   class << self
     def versions(options = {})
       Dump.list(options).each do |dump|
-        puts DumpRake::Env[:show_size] || $stdout.tty? ? "#{dump.human_size.to_s.rjust(7)}\t#{dump}" : dump
+        if DumpRake::Env[:show_size] || $stdout.tty?
+          puts "#{dump.human_size.to_s.rjust(7)}\t#{dump}"
+        else
+          puts dump
+        end
         begin
           case options[:summary].to_s.downcase[0, 1]
           when *%w[1 t y]
