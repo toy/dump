@@ -98,11 +98,11 @@ class DumpRake
         degree += 1
         number /= 1024.0
       end
-      "#{'%.2f' % number}#{symbols[degree]}"
+      format('%.2f%s', number, symbols[degree])
     end
 
     def inspect
-      '#<%s:0x%x %s>' % [self.class, object_id, path.to_s.sub(/^.+(?=..\/[^\/]*$)/, '…')]
+      "#<#{self.class}:0x#{object_id} #{path}>"
     end
 
     def lock

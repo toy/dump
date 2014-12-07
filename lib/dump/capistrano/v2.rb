@@ -74,7 +74,7 @@ Capistrano::Configuration.instance(:i_need_this!).load do
           transfer(direction, from, to, :via => via) do |_channel, _path, transfered, total|
             thread.defer
             progress = if transfered < total
-              "\e[1m%5.1f%%\e[0m" % (transfered * 100.0 / total)
+              format("\e[1m%5.1f%%\e[0m", transfered * 100.0 / total)
             else
               '100%'
             end
