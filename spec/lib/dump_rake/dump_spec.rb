@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/../../spec_helper'
+require 'spec_helper'
 
 describe DumpRake::Dump do
   def dump_path(file_name)

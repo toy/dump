@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/../../spec_helper'
+require 'spec_helper'
 
 def temp_remove_const(where, which)
   around do |example|
