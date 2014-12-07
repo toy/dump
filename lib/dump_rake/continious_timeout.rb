@@ -22,7 +22,7 @@ class DumpRake
         1.times do
           begin
             sleep sec
-          rescue RestartException => e
+          rescue RestartException
             retry
           end
         end
