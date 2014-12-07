@@ -44,18 +44,15 @@ module Dump
       end
     end
 
+    INDEX_FIELDS = [:name, :unique, :length, :order, :where, :type, :using].freeze
+
+    def index_options(index)
+      Hash[*INDEX_FIELDS.map{|field| [field, index.members.include?(field) ? index.send(field) : nil]}.flatten]
+    end
+
     def add_indexes(indexes)
       indexes.each do |index|
-        options = {
-          :name => index.name,
-          :unique => index.unique,
-          :length => index.lengths,
-          :order => index.orders,
-          :where => index.where,
-          :type => index.type,
-          :using => index.using
-        }
-        ActiveRecord::Base.connection.add_index index.table, index.columns, options
+        ActiveRecord::Base.connection.add_index index.table, index.columns, index_options(index)
       end
     end
 
