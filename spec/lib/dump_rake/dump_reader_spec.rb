@@ -11,8 +11,8 @@ class LengthConstraint
     @required_length = required_length
   end
 
-  def ==(value)
-    @required_length == value.length
+  def ==(other)
+    @required_length == other.length
   end
 end
 
