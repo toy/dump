@@ -39,7 +39,6 @@ describe TableManipulation do
     end
   end
 
-
   describe 'clear_table' do
     it 'should call ActiveRecord::Base.connection.delete with sql for deleting everything from table' do
       expect(ActiveRecord::Base.connection).to receive(:delete).with('DELETE FROM `first`', anything)
@@ -82,7 +81,6 @@ describe TableManipulation do
       expect(values_insert_sql(%w[a b])).to eq('(`a`,`b`)')
     end
   end
-
 
   describe 'tables_to_dump' do
     it 'should call ActiveRecord::Base.connection.tables' do
@@ -144,7 +142,7 @@ describe TableManipulation do
       expect(self).to receive(:table_columns).with('first').and_return(
         [double(:column, :type => :integer, :limit => nil)] * 3 +
         [double(:column, :type => :string, :limit => nil)] * 3 +
-        [double(:column, :type => :text, :limit => nil)]
+        [double(:column, :type => :text, :limit => nil)],
       )
       expect(table_chunk_size('first')).to satisfy{ |n|
         (TableManipulation::CHUNK_SIZE_MIN..TableManipulation::CHUNK_SIZE_MAX).include?(n)
@@ -153,14 +151,14 @@ describe TableManipulation do
 
     it 'should not return value less than CHUNK_SIZE_MIN' do
       expect(self).to receive(:table_columns).with('first').and_return(
-        [double(:column, :type => :text, :limit => nil)] * 100
+        [double(:column, :type => :text, :limit => nil)] * 100,
       )
       expect(table_chunk_size('first')).to eq(TableManipulation::CHUNK_SIZE_MIN)
     end
 
     it 'should not return value more than CHUNK_SIZE_MAX' do
       expect(self).to receive(:table_columns).with('first').and_return(
-        [double(:column, :type => :boolean, :limit => 1)] * 10
+        [double(:column, :type => :boolean, :limit => 1)] * 10,
       )
       expect(table_chunk_size('first')).to eq(TableManipulation::CHUNK_SIZE_MAX)
     end

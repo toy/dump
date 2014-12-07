@@ -10,7 +10,6 @@ class DumpRake
       ActiveRecord::Base.connection.verify!(0)
     end
 
-
     def quote_table_name(table)
       ActiveRecord::Base.connection.quote_table_name(table)
     end
@@ -22,7 +21,6 @@ class DumpRake
     def quote_value(value)
       ActiveRecord::Base.connection.quote(value)
     end
-
 
     def clear_table(table_sql)
       ActiveRecord::Base.connection.delete("DELETE FROM #{table_sql}", 'Clearing table')
@@ -50,7 +48,6 @@ class DumpRake
     def values_insert_sql(values)
       join_for_sql(values.map{ |value| quote_value(value) })
     end
-
 
     def avaliable_tables
       ActiveRecord::Base.connection.tables
@@ -95,7 +92,7 @@ class DumpRake
       table_columns(table).any?{ |column| column.name == table_primary_key(table) && column.type == :integer }
     end
 
-    def table_primary_key(table)
+    def table_primary_key(_table)
       'id'
     end
 
@@ -105,9 +102,9 @@ class DumpRake
         primary_key = table_primary_key(table)
         quoted_primary_key = "#{quote_table_name(table)}.#{quote_column_name(primary_key)}"
         select_where_primary_key =
-          "SELECT * FROM #{quote_table_name(table)}" +
-            " WHERE #{quoted_primary_key} %s" +
-            " ORDER BY #{quoted_primary_key} ASC" +
+          "SELECT * FROM #{quote_table_name(table)}" \
+            " WHERE #{quoted_primary_key} %s" \
+            " ORDER BY #{quoted_primary_key} ASC" \
             " LIMIT #{chunk_size}"
         rows = select_all_by_sql(select_where_primary_key % '>= 0')
         until rows.blank?

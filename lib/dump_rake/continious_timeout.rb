@@ -17,22 +17,20 @@ class DumpRake
     end
 
     def self.timeout(sec)
-      begin
-        x = Thread.current
-        y = Thread.start do
-          1.times do
-            begin
-              sleep sec
-            rescue RestartException => e
-              retry
-            end
+      x = Thread.current
+      y = Thread.start do
+        1.times do
+          begin
+            sleep sec
+          rescue RestartException => e
+            retry
           end
-          x.raise TimeoutException, 'execution expired' if x.alive?
         end
-        yield Deferer.new(y)
-      ensure
-        y.kill if y and y.alive?
+        x.raise TimeoutException, 'execution expired' if x.alive?
       end
+      yield Deferer.new(y)
+    ensure
+      y.kill if y && y.alive?
     end
   end
 end

@@ -6,7 +6,7 @@ class Chicken < ActiveRecord::Base
 end
 
 def database_configs
-  YAML::load(IO.read(File.expand_path('../db/database.yml', __FILE__)))
+  YAML.load(IO.read(File.expand_path('../db/database.yml', __FILE__)))
 end
 
 def adapters
@@ -68,7 +68,7 @@ ensure
 end
 
 def create_chickens!(options = {})
-  time = Time.local(2000,'jan',1,20,15,1)
+  time = Time.local(2000, 'jan', 1, 20, 15, 1)
   data = {
     :string => ['', 'lala'],
     :text => ['', 'lala', 'lala' * 100],
@@ -151,16 +151,16 @@ describe 'full cycle' do
       it "should dump and restore using #{adapter}" do
         in_temp_rails_app do
           use_adapter(adapter) do
-            #add chickens store their attributes and create dump
+            # add chickens store their attributes and create dump
             create_chickens!(:random => 100)
             saved_chicken_data = chicken_data
             call_rake_create(:description => 'chickens')
 
-            #clear database
+            # clear database
             load_schema
             expect(Chicken.all).to eq([])
 
-            #restore dump and verify equality
+            # restore dump and verify equality
             call_rake_restore(:version => 'chickens')
             expect(chicken_data).to eq(saved_chicken_data)
 

@@ -252,11 +252,11 @@ class DumpRake
     def read_asset?(path, prefix)
       DumpRake::Env.filter(:restore_assets, DumpRake::Assets::SPLITTER).custom_pass? do |value|
         File.fnmatch(File.join(prefix, value), path) ||
-        File.fnmatch(File.join(prefix, value, '**'), path)
+          File.fnmatch(File.join(prefix, value, '**'), path)
       end
     end
 
-    def read_assets_entries(assets_paths, assets_count)
+    def read_assets_entries(_assets_paths, assets_count)
       Progress.start('Assets', assets_count || 1) do
         found_assets = false
         # old style — in separate tar

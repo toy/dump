@@ -139,7 +139,7 @@ describe DumpWriter do
         @column_definitions = [
           double('column', :name => 'id'),
           double('column', :name => 'name'),
-          double('column', :name => 'associated_id')
+          double('column', :name => 'associated_id'),
         ]
         allow(ActiveRecord::Base.connection).to receive(:columns).and_return(@column_definitions)
         @rows = [

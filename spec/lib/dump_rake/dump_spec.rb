@@ -282,7 +282,7 @@ describe DumpRake::Dump do
           expect(dir).to eq('/tmp/abc')
           expect(prefix).to eq('assets')
           @yielded = true
-          raise 'just test'
+          fail 'just test'
         end
       end.to raise_error('just test')
       expect(@yielded).to eq(true)

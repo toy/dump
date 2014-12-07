@@ -54,7 +54,7 @@ Capistrano::Configuration.instance(:i_need_this!).load do
               when :down
                 cmd << "#{full_host}:#{from}" << to
               else
-                raise "Don't know how to transfer in direction #{direction}"
+                fail "Don't know how to transfer in direction #{direction}"
               end
               cmd.shelljoin
             end
@@ -65,13 +65,13 @@ Capistrano::Configuration.instance(:i_need_this!).load do
                 break if system(cmd)
                 break unless [10, 11, 12, 23, 30, 35].include?($CHILD_STATUS.exitstatus)
               end
-              raise "rsync returned #{$CHILD_STATUS.exitstatus}" unless $CHILD_STATUS.success?
+              fail "rsync returned #{$CHILD_STATUS.exitstatus}" unless $CHILD_STATUS.success?
             end
           end
         end
       when :sftp, :scp
         DumpRake::ContiniousTimeout.timeout 15 do |thread|
-          transfer(direction, from, to, :via => via) do |channel, path, transfered, total|
+          transfer(direction, from, to, :via => via) do |_channel, _path, transfered, total|
             thread.defer
             progress = if transfered < total
               "\e[1m%5.1f%%\e[0m" % (transfered * 100.0 / total)
@@ -82,7 +82,7 @@ Capistrano::Configuration.instance(:i_need_this!).load do
           end
         end
       else
-        raise "Unknown transfer method #{via}"
+        fail "Unknown transfer method #{via}"
       end
     end
 
@@ -96,7 +96,7 @@ Capistrano::Configuration.instance(:i_need_this!).load do
         when 'scp'
           do_transfer_via(:scp, direction, from, to)
         else
-          raise "Unknown transfer method #{via}"
+          fail "Unknown transfer method #{via}"
         end
       else
         if got_rsync?
@@ -122,7 +122,7 @@ Capistrano::Configuration.instance(:i_need_this!).load do
 
     def print_and_return_or_fail
       out = yield
-      raise 'Failed creating dump' if out.blank?
+      fail 'Failed creating dump' if out.blank?
       print out
       out.strip
     end
@@ -133,7 +133,7 @@ Capistrano::Configuration.instance(:i_need_this!).load do
 
     def run_remote(cmd)
       output = ''
-      run(cmd) do |channel, io, data|
+      run(cmd) do |_channel, io, data|
         case io
         when :out
           output << data

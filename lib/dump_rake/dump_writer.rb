@@ -87,7 +87,7 @@ class DumpRake
             paths = Dir[File.join(asset, '**/*')]
             files = paths.select{ |path| File.file?(path) }
             config[:assets][asset] = {:total => paths.length, :files => files.length}
-            assets_root_link do |tmpdir, prefix|
+            assets_root_link do |_tmpdir, prefix|
               paths.with_progress(asset) do |entry|
                 begin
                   Archive::Tar::Minitar.pack_file(File.join(prefix, entry), stream)
@@ -108,12 +108,10 @@ class DumpRake
     end
 
     def assets_to_dump
-      begin
-        Rake::Task['assets'].invoke
-        DumpRake::Env[:assets].split(DumpRake::Assets::SPLITTER)
-      rescue
-        []
-      end
+      Rake::Task['assets'].invoke
+      DumpRake::Env[:assets].split(DumpRake::Assets::SPLITTER)
+    rescue
+      []
     end
   end
 end

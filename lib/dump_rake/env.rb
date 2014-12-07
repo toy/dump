@@ -90,7 +90,7 @@ class DumpRake
           :select => [:like, :tags],
           :assets => [:assets],
           :restore_options => [:migrate_down, :restore_schema, :restore_tables, :restore_assets],
-          :transfer_options => [:transfer_via]
+          :transfer_options => [:transfer_via],
         }
 
         m[:versions] = m[:select] | [:summary]
@@ -124,9 +124,9 @@ class DumpRake
 
       def explain_variables_for_command(command)
         ".\n" <<
-        variable_names_for_command(command).map do |variable_name|
-          "  #{DICTIONARY[variable_name].join(', ')} — #{EXPLANATIONS[variable_name]}\n"
-        end.join('')
+          variable_names_for_command(command).map do |variable_name|
+            "  #{DICTIONARY[variable_name].join(', ')} — #{EXPLANATIONS[variable_name]}\n"
+          end.join('')
       end
 
     private

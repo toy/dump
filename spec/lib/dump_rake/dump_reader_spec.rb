@@ -179,7 +179,7 @@ describe DumpReader do
       end
 
       it 'should return result of block' do
-        expect(@dump.find_entry(/\.dump$/) do |entry|
+        expect(@dump.find_entry(/\.dump$/) do |_entry|
           'hello'
         end).to eq('hello')
       end
@@ -306,7 +306,7 @@ describe DumpReader do
               version = DumpRake::Env['VERSION']
               @versions << version
               if version == '6'
-                raise ActiveRecord::IrreversibleMigration
+                fail ActiveRecord::IrreversibleMigration
               end
             end
             expect(@migrate_down_task).to receive('reenable').exactly(3).times
@@ -361,7 +361,7 @@ describe DumpReader do
 
     describe 'schema' do
       it 'should read schema' do
-        @data = %q{create table, rows, etc...}
+        @data = 'create table, rows, etc...'
         expect(@dump).to receive(:read_entry).with('schema.rb').and_return(@data)
         expect(@dump.schema).to eq(@data)
       end
