@@ -5,9 +5,6 @@ require 'dump_rake'
 
 ActiveRecord::Base.logger = Logger.new(File.join(DumpRake::RailsRoot, 'log/dump.log'))
 
-class Chicken < ActiveRecord::Base
-end
-
 def grab_output
   real_stdout, $stdout = $stdout, StringIO.new
   real_stderr, $stderr = $stderr, StringIO.new

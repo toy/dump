@@ -4,6 +4,9 @@ require File.dirname(__FILE__) + '/../lib/dump_rake'
 
 require 'tmpdir'
 
+class Chicken < ActiveRecord::Base
+end
+
 def database_configs
   YAML::load(IO.read(File.expand_path('../db/database.yml', __FILE__)))
 end
