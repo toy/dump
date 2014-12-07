@@ -7,18 +7,7 @@ Capistrano::Configuration.instance(:i_need_this!).load do
   require 'dump_rake/continious_timeout'
   require 'dump_rake/env'
 
-  begin
-    nil.blank?
-  rescue
-    Object.class_eval do
-      def blank?
-        respond_to?(:empty?) ? empty? : !self
-      end
-      def present?
-        !blank?
-      end
-    end
-  end
+  require 'active_support/core_ext/object/blank'
 
   namespace :dump do
     def dump_command(command, env = {})
