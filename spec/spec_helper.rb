@@ -35,7 +35,6 @@ end || begin
   ].join("\n")
 end
 
-$:.unshift '../lib/dump_rake'
 require 'dump_rake'
 
 PLUGIN_SPEC_DIR = File.expand_path(File.dirname(__FILE__)) unless defined? PLUGIN_SPEC_DIR

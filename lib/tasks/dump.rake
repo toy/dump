@@ -1,4 +1,3 @@
-$: << File.join(File.dirname(__FILE__), '../../lib')
 require 'dump_rake'
 
 desc 'Short for dump:create' << DumpRake::Env.explain_variables_for_command(:create)

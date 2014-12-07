@@ -1,7 +1,6 @@
 # encoding: UTF-8
 
 Capistrano::Configuration.instance(:i_need_this!).load do
-  $: << File.join(File.dirname(__FILE__), '../lib')
   require 'fileutils'
   require 'shellwords'
 
