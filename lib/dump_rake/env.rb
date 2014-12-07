@@ -69,7 +69,7 @@ class DumpRake
       end
 
       def filter(key, splitter = nil)
-        @filters ||= Hash.new{ |hash, key| hash[key] = Filter.new(*key) }
+        @filters ||= Hash.new{ |h, k| h[k] = Filter.new(*k) }
         @filters[[self[key], splitter]]
       end
 
