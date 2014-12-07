@@ -259,7 +259,7 @@ class DumpRake
     def read_assets_entries(_assets_paths, assets_count)
       Progress.start('Assets', assets_count || 1) do
         found_assets = false
-        # old style — in separate tar
+        # old style - in separate tar
         find_entry('assets.tar') do |assets_tar|
           def assets_tar.rewind
             # rewind will fail - it must go to center of gzip
@@ -275,7 +275,7 @@ class DumpRake
         end
 
         unless found_assets
-          # new style — in same tar
+          # new style - in same tar
           assets_root_link do |tmpdir, prefix|
             stream.each do |entry|
               if entry.full_name.starts_with?("#{prefix}/")
