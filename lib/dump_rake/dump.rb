@@ -52,7 +52,7 @@ class DumpRake
 
     def parts
       @parts ||=
-      if m = name.match(/^(\d{#{4 + 2 + 2 + 2 + 2 + 2}})(-[^@]+)?((?:@[^@]+)+)?\.(tmp|tgz)$/)
+      if (m = name.match(/^(\d{#{4 + 2 + 2 + 2 + 2 + 2}})(-[^@]+)?((?:@[^@]+)+)?\.(tmp|tgz)$/))
         {
           :time => m[1],
           :desc => m[2] && m[2][1, m[2].length],
@@ -163,7 +163,7 @@ class DumpRake
       def get_filter_tags(tags)
         groups = Hash.new{ |hash, key| hash[key] = SortedSet.new }
         tags.to_s.split(',').each do |tag|
-          if m = tag.strip.match(/^(\-|\+)?(.*)$/)
+          if (m = tag.strip.match(/^(\-|\+)?(.*)$/))
             type = {'+' => :mandatory, '-' => :forbidden}[m[1]] || :simple
             unless (claned_tag = clean_tag(m[2])).blank?
               groups[type] << claned_tag
