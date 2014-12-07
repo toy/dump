@@ -7,33 +7,33 @@ class DumpRake
     end
 
     def verify_connection
-      ActiveRecord::Base.connection.verify!(0)
+      connection.verify!(0)
     end
 
     def quote_table_name(table)
-      ActiveRecord::Base.connection.quote_table_name(table)
+      connection.quote_table_name(table)
     end
 
     def quote_column_name(column)
-      ActiveRecord::Base.connection.quote_column_name(column)
+      connection.quote_column_name(column)
     end
 
     def quote_value(value)
-      ActiveRecord::Base.connection.quote(value)
+      connection.quote(value)
     end
 
     def clear_table(table_sql)
-      ActiveRecord::Base.connection.delete("DELETE FROM #{table_sql}", 'Clearing table')
+      connection.delete("DELETE FROM #{table_sql}", 'Clearing table')
     end
 
     def insert_into_table(table_sql, columns_sql, values_sql)
       values_sql = values_sql.join(',') if values_sql.is_a?(Array)
-      ActiveRecord::Base.connection.insert("INSERT INTO #{table_sql} #{columns_sql} VALUES #{values_sql}", 'Loading dump')
+      connection.insert("INSERT INTO #{table_sql} #{columns_sql} VALUES #{values_sql}", 'Loading dump')
     end
 
     def fix_sequence!(table)
-      if ActiveRecord::Base.connection.respond_to?(:reset_pk_sequence!)
-        ActiveRecord::Base.connection.reset_pk_sequence!(table)
+      if connection.respond_to?(:reset_pk_sequence!)
+        connection.reset_pk_sequence!(table)
       end
     end
 
@@ -50,7 +50,7 @@ class DumpRake
     end
 
     def avaliable_tables
-      ActiveRecord::Base.connection.tables
+      connection.tables
     end
 
     def tables_to_dump
@@ -64,7 +64,7 @@ class DumpRake
     end
 
     def table_row_count(table)
-      ActiveRecord::Base.connection.select_value("SELECT COUNT(*) FROM #{quote_table_name(table)}").to_i
+      connection.select_value("SELECT COUNT(*) FROM #{quote_table_name(table)}").to_i
     end
 
     CHUNK_SIZE_MIN = 100 unless const_defined?(:CHUNK_SIZE_MIN)
@@ -84,7 +84,7 @@ class DumpRake
     end
 
     def table_columns(table)
-      ActiveRecord::Base.connection.columns(table)
+      connection.columns(table)
     end
 
     def table_has_primary_column?(table)
@@ -122,7 +122,13 @@ class DumpRake
     end
 
     def select_all_by_sql(sql)
-      ActiveRecord::Base.connection.select_all(sql)
+      connection.select_all(sql)
+    end
+
+  private
+
+    def connection
+      ActiveRecord::Base.connection
     end
   end
 end
