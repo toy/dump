@@ -47,7 +47,10 @@ module Dump
     INDEX_FIELDS = [:name, :unique, :length, :order, :where, :type, :using].freeze
 
     def index_options(index)
-      Hash[*INDEX_FIELDS.map{|field| [field, index.members.include?(field) ? index.send(field) : nil]}.flatten]
+      options = INDEX_FIELDS.map{|field| [field, index.members.include?(field) ? index.send(field) : nil]}
+      non_empty_options = options.select{|pair| !pair[1].nil?}
+
+      Hash[*non_empty_options.flatten]
     end
 
     def add_indexes(indexes)
