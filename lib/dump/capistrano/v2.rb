@@ -1,14 +1,14 @@
 # encoding: UTF-8
 
+require 'fileutils'
+require 'shellwords'
+
+require 'dump_rake/continious_timeout'
+require 'dump_rake/env'
+
+require 'active_support/core_ext/object/blank'
+
 Capistrano::Configuration.instance(:i_need_this!).load do
-  require 'fileutils'
-  require 'shellwords'
-
-  require 'dump_rake/continious_timeout'
-  require 'dump_rake/env'
-
-  require 'active_support/core_ext/object/blank'
-
   namespace :dump do
     def dump_command(command, env = {})
       rake = env.delete(:rake) || 'rake'
