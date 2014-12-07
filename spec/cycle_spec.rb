@@ -5,7 +5,7 @@ require File.dirname(__FILE__) + '/../lib/dump_rake'
 require 'tmpdir'
 
 def database_configs
-  YAML::load(IO.read(PLUGIN_SPEC_DIR + '/db/database.yml'))
+  YAML::load(IO.read(File.expand_path('../db/database.yml', __FILE__)))
 end
 
 def adapters
@@ -45,9 +45,13 @@ ensure
   ActiveRecord::Base.establish_connection(:adapter => 'sqlite3', :database => ':memory:')
 end
 
+def schema_path
+  File.expand_path('../db/schema.rb', __FILE__)
+end
+
 def load_schema
   grab_output do
-    load(DUMMY_SCHEMA_PATH)
+    load(schema_path)
   end
 end
 
@@ -106,7 +110,7 @@ def reset_rake!
   load File.dirname(__FILE__) + '/../lib/tasks/dump.rake'
   Rake::Task.define_task('environment')
   Rake::Task.define_task('db:schema:dump') do
-    File.open(DUMMY_SCHEMA_PATH, 'r') do |r|
+    File.open(schema_path, 'r') do |r|
       if ENV['SCHEMA']
         File.open(ENV['SCHEMA'], 'w') do |w|
           w.write(r.read)
