@@ -159,7 +159,7 @@ Capistrano::Configuration.instance(:i_need_this!).load do
     namespace :local do
       desc 'Shorthand for dump:local:create' << DumpRake::Env.explain_variables_for_command(:create)
       task :default, :roles => :db, :only => {:primary => true} do
-        create
+        local.create
       end
 
       desc 'Create local dump' << DumpRake::Env.explain_variables_for_command(:create)
@@ -294,7 +294,7 @@ Capistrano::Configuration.instance(:i_need_this!).load do
     namespace :backup do
       desc 'Shorthand for dump:backup:create' << DumpRake::Env.explain_variables_for_command(:backup)
       task :default, :roles => :db, :only => {:primary => true} do
-        create
+        backup.create
       end
 
       desc "Creates remote dump and downloads to local (desc defaults to 'backup')" << DumpRake::Env.explain_variables_for_command(:backup)
