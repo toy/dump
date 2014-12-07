@@ -165,8 +165,8 @@ class DumpRake
         tags.to_s.split(',').each do |tag|
           if (m = tag.strip.match(/^(\-|\+)?(.*)$/))
             type = {'+' => :mandatory, '-' => :forbidden}[m[1]] || :simple
-            unless (claned_tag = clean_tag(m[2])).blank?
-              groups[type] << claned_tag
+            unless (cleaned_tag = clean_tag(m[2])).blank?
+              groups[type] << cleaned_tag
             end
           end
         end
