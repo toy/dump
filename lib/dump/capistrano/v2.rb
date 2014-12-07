@@ -8,6 +8,8 @@ require 'dump_rake/env'
 
 require 'active_support/core_ext/object/blank'
 
+require 'English'
+
 Capistrano::Configuration.instance(:i_need_this!).load do
   namespace :dump do
     def dump_command(command, env = {})
@@ -29,13 +31,13 @@ Capistrano::Configuration.instance(:i_need_this!).load do
 
     def got_rsync?
       `which rsync`
-      $?.success?
+      $CHILD_STATUS.success?
     end
 
     def do_transfer_via(via, direction, from, to)
       case via
       when :rsync
-        if run_local('which rsync').present? && $?.success?
+        if run_local('which rsync').present? && $CHILD_STATUS.success?
           execute_on_servers do |servers|
             commands = servers.map do |server|
               target = sessions[server]
@@ -61,9 +63,9 @@ Capistrano::Configuration.instance(:i_need_this!).load do
 
               3.times do
                 break if system(cmd)
-                break unless [10, 11, 12, 23, 30, 35].include?($?.exitstatus)
+                break unless [10, 11, 12, 23, 30, 35].include?($CHILD_STATUS.exitstatus)
               end
-              raise "rsync returned #{$?.exitstatus}" unless $?.success?
+              raise "rsync returned #{$CHILD_STATUS.exitstatus}" unless $CHILD_STATUS.success?
             end
           end
         end
