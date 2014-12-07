@@ -1,6 +1,7 @@
 # encoding: UTF-8
 
 class DumpRake
+  # Base class for dump
   class Dump
     include TableManipulation
     def self.list(options = {})
@@ -143,6 +144,7 @@ class DumpRake
       Pathname(path.to_s.sub(/#{parts[:ext]}$/, ext))
     end
 
+    # Cleanup name of dump
     module CleanNParse
       def clean_str(str, additional = nil)
         str.to_s.strip.gsub(/\s+/, ' ').gsub(/[^A-Za-z0-9 \-_#{Regexp.escape(additional.to_s) if additional}]+/, '_')

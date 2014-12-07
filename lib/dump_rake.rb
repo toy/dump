@@ -19,6 +19,7 @@ require 'dump_rake/dump_reader'
 require 'dump_rake/dump_writer'
 require 'dump_rake/env'
 
+# Main interface
 class DumpRake
   class << self
     def versions(options = {})

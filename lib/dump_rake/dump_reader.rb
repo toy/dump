@@ -1,4 +1,5 @@
 class DumpRake
+  # Reading dump
   class DumpReader < Dump
     attr_reader :stream, :config
 
@@ -15,6 +16,7 @@ class DumpRake
       end
     end
 
+    # Helper class for building summary of dump
     class Summary
       attr_reader :text
       alias_method :to_s, :text

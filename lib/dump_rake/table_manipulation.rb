@@ -1,4 +1,5 @@
 class DumpRake
+  # Methods to work with db using ActiveRecord
   module TableManipulation
   protected
 

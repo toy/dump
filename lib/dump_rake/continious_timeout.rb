@@ -1,11 +1,13 @@
 # based on Timeout
 
 class DumpRake
+  # Timeout if does not finish or defer in requested time
   module ContiniousTimeout
     class TimeoutException < ::Exception; end
 
     class RestartException < ::Exception; end
 
+    # Object with defer method
     class Deferer
       def initialize(thread)
         @thread = thread

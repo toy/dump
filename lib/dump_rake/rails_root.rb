@@ -1,5 +1,6 @@
 # encoding: UTF-8
 
+# Get rails app root (Rails.root or RAILS_ROOT or Dir.pwd)
 class DumpRake
   RailsRoot = case
   when defined?(Rails)
