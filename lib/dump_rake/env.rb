@@ -108,12 +108,13 @@ class DumpRake
       end
 
       def for_command(command, strings = false)
-        variables = variable_names_for_command(command)
-        variables.inject({}) do |env, variable|
-          value = self[variable]
-          env[strings ? DICTIONARY[variable].first : variable] = value if value
-          env
+        env = {}
+        variable_names_for_command(command).each do |variable|
+          if (value = self[variable])
+            env[strings ? DICTIONARY[variable].first : variable] = value
+          end
         end
+        env
       end
 
       def stringify!(hash)
