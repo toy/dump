@@ -54,11 +54,11 @@ class DumpRake
         if assets.present?
           sum.header 'Assets'
           sum.data assets.sort.map{ |entry|
-            if String === entry
+            if entry.is_a?(String)
               entry
             else
               asset, paths = entry
-              if Hash === paths
+              if paths.is_a?(Hash)
                 "#{asset}: #{Summary.pluralize paths[:files], 'file'} (#{Summary.pluralize paths[:total], 'entry'} total)"
               else
                 "#{asset}: #{Summary.pluralize paths, 'entry'}"
@@ -87,7 +87,7 @@ class DumpRake
 
     def find_entry(matcher)
       stream.each do |entry|
-        if matcher === entry.full_name
+        if entry.full_name.match(matcher)
           # we can not return entry - after exiting stream.each the entry will be invalid and will read from tar start
           return yield(entry)
         end
@@ -210,8 +210,8 @@ class DumpRake
       return if config[:assets].blank?
 
       assets = config[:assets]
-      if Hash === assets
-        assets_count = assets.values.sum{ |value| Hash === value ? value[:total] : value }
+      if assets.is_a?(Hash)
+        assets_count = assets.values.sum{ |value| value.is_a?(Hash) ? value[:total] : value }
         assets_paths = assets.keys
       else
         assets_count, assets_paths = nil, assets

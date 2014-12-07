@@ -53,7 +53,7 @@ class DumpRake
     end
 
     def cleanup(options = {})
-      unless options[:leave].nil? || /^\d+$/ === options[:leave] || options[:leave].downcase == 'none'
+      unless options[:leave].nil? || /^\d+$/ =~ options[:leave] || options[:leave].downcase == 'none'
         fail 'LEAVE should be number or "none"'
       end
 

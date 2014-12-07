@@ -28,18 +28,18 @@ describe 'RailsRoot' do
     Object.const_set('Rails', double('rails'))
     expect(Rails).to receive(:root).and_return(@root)
     load 'dump_rake/rails_root.rb'
-    expect(DumpRake::RailsRoot).to be === @root
+    expect(DumpRake::RailsRoot).to equal(@root)
   end
 
   it 'should use RAILS_ROOT if it is present' do
     Object.const_set('RAILS_ROOT', @root)
     load 'dump_rake/rails_root.rb'
-    expect(DumpRake::RailsRoot).to be === @root
+    expect(DumpRake::RailsRoot).to equal(@root)
   end
 
   it 'should use Dir.pwd else' do
     expect(Dir).to receive(:pwd).and_return(@root)
     load 'dump_rake/rails_root.rb'
-    expect(DumpRake::RailsRoot).to be === @root
+    expect(DumpRake::RailsRoot).to equal(@root)
   end
 end
