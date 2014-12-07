@@ -1,7 +1,5 @@
 require 'spec_helper'
-
-require File.dirname(__FILE__) + '/../../../lib/dump_rake'
-
+require 'dump_rake'
 require 'active_record/migration'
 
 def object_of_length(required_length)

@@ -5,7 +5,7 @@ describe 'rake assets' do
   before do
     @rake = Rake::Application.new
     Rake.application = @rake
-    load File.dirname(__FILE__) + '/../../lib/tasks/assets.rake'
+    load 'tasks/assets.rake'
     ENV['ASSETS'] = nil
   end
 

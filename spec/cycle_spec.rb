@@ -1,7 +1,5 @@
 require 'spec_helper'
-
-require File.dirname(__FILE__) + '/../lib/dump_rake'
-
+require 'dump_rake'
 require 'tmpdir'
 
 class Chicken < ActiveRecord::Base
@@ -109,8 +107,8 @@ end
 def reset_rake!
   @rake = Rake::Application.new
   Rake.application = @rake
-  load File.dirname(__FILE__) + '/../lib/tasks/assets.rake'
-  load File.dirname(__FILE__) + '/../lib/tasks/dump.rake'
+  load 'tasks/assets.rake'
+  load 'tasks/dump.rake'
   Rake::Task.define_task('environment')
   Rake::Task.define_task('db:schema:dump') do
     File.open(schema_path, 'r') do |r|
