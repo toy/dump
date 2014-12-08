@@ -1,11 +1,12 @@
-require File.dirname(__FILE__) + '/spec_helper'
-
-require File.dirname(__FILE__) + '/../lib/dump_rake'
-
+require 'spec_helper'
+require 'dump_rake'
 require 'tmpdir'
 
+class Chicken < ActiveRecord::Base
+end
+
 def database_configs
-  YAML::load(IO.read(PLUGIN_SPEC_DIR + "/db/database.yml"))
+  YAML.load(IO.read(File.expand_path('../db/database.yml', __FILE__)))
 end
 
 def adapters
@@ -18,12 +19,12 @@ def use_adapter(adapter)
     case config['adapter']
     when /^mysql/
       ActiveRecord::Base.establish_connection(config.merge('database' => nil))
-      ActiveRecord::Base.connection.drop_database config['database'] rescue nil
+      ActiveRecord::Base.connection.drop_database config['database']
       ActiveRecord::Base.connection.create_database(config['database'])
       ActiveRecord::Base.establish_connection(config)
     when /^postgresql/
       ActiveRecord::Base.establish_connection(config.merge('database' => 'postgres', 'schema_search_path' => 'public'))
-      ActiveRecord::Base.connection.drop_database config['database'] rescue nil
+      ActiveRecord::Base.connection.drop_database config['database']
       ActiveRecord::Base.connection.create_database(config['database'])
       ActiveRecord::Base.establish_connection(config)
     else
@@ -45,10 +46,14 @@ ensure
   ActiveRecord::Base.establish_connection(:adapter => 'sqlite3', :database => ':memory:')
 end
 
+def schema_path
+  File.expand_path('../db/schema.rb', __FILE__)
+end
+
 def load_schema
-  grab_output{
-    load(DUMMY_SCHEMA_PATH)
-  }
+  grab_output do
+    load(schema_path)
+  end
 end
 
 def in_temp_rails_app
@@ -63,7 +68,7 @@ ensure
 end
 
 def create_chickens!(options = {})
-  time = Time.local(2000,"jan",1,20,15,1)
+  time = Time.local(2000, 'jan', 1, 20, 15, 1)
   data = {
     :string => ['', 'lala'],
     :text => ['', 'lala', 'lala' * 100],
@@ -84,12 +89,10 @@ def create_chickens!(options = {})
       end
     end
   end
-  if options[:random]
-    options[:random].to_i.times do
-      Chicken.create! do |chicken|
-        data.each do |type, values|
-          chicken["#{type}_col"] = values[rand(values.length)] if rand > 0.5
-        end
+  options[:random].to_i.times do
+    Chicken.create! do |chicken|
+      data.each do |type, values|
+        chicken["#{type}_col"] = values[rand(values.length)] if rand > 0.5
       end
     end
   end
@@ -102,11 +105,11 @@ end
 def reset_rake!
   @rake = Rake::Application.new
   Rake.application = @rake
-  load File.dirname(__FILE__) + '/../lib/tasks/assets.rake'
-  load File.dirname(__FILE__) + '/../lib/tasks/dump.rake'
+  load 'tasks/assets.rake'
+  load 'tasks/dump.rake'
   Rake::Task.define_task('environment')
   Rake::Task.define_task('db:schema:dump') do
-    File.open(DUMMY_SCHEMA_PATH, 'r') do |r|
+    File.open(schema_path, 'r') do |r|
       if ENV['SCHEMA']
         File.open(ENV['SCHEMA'], 'w') do |w|
           w.write(r.read)
@@ -121,21 +124,21 @@ end
 
 def call_rake
   reset_rake!
-  grab_output{
+  grab_output do
     yield
-  }
+  end
 end
 
 def call_rake_create(*args)
-  call_rake{
+  call_rake do
     DumpRake.create(*args)
-  }
+  end
 end
 
 def call_rake_restore(*args)
-  call_rake{
+  call_rake do
     DumpRake.restore(*args)
-  }
+  end
 end
 
 describe 'full cycle' do
@@ -146,16 +149,16 @@ describe 'full cycle' do
       it "should dump and restore using #{adapter}" do
         in_temp_rails_app do
           use_adapter(adapter) do
-            #add chickens store their attributes and create dump
+            # add chickens store their attributes and create dump
             create_chickens!(:random => 100)
             saved_chicken_data = chicken_data
             call_rake_create(:description => 'chickens')
 
-            #clear database
+            # clear database
             load_schema
             expect(Chicken.all).to eq([])
 
-            #restore dump and verify equality
+            # restore dump and verify equality
             call_rake_restore(:version => 'chickens')
             expect(chicken_data).to eq(saved_chicken_data)
 
@@ -206,7 +209,7 @@ describe 'full cycle' do
       end
     end
 
-    it "should create same dump for all adapters" do
+    it 'should create same dump for all adapters' do
       in_temp_rails_app do
         dumps = []
         adapters.each do |adapter|

@@ -1,4 +1,5 @@
 class DumpRake
+  # Reading dump
   class DumpReader < Dump
     attr_reader :stream, :config
 
@@ -15,6 +16,7 @@ class DumpRake
       end
     end
 
+    # Helper class for building summary of dump
     class Summary
       attr_reader :text
       alias_method :to_s, :text
@@ -54,11 +56,11 @@ class DumpRake
         if assets.present?
           sum.header 'Assets'
           sum.data assets.sort.map{ |entry|
-            if String === entry
+            if entry.is_a?(String)
               entry
             else
               asset, paths = entry
-              if Hash === paths
+              if paths.is_a?(Hash)
                 "#{asset}: #{Summary.pluralize paths[:files], 'file'} (#{Summary.pluralize paths[:total], 'entry'} total)"
               else
                 "#{asset}: #{Summary.pluralize paths, 'entry'}"
@@ -87,7 +89,7 @@ class DumpRake
 
     def find_entry(matcher)
       stream.each do |entry|
-        if matcher === entry.full_name
+        if entry.full_name.match(matcher)
           # we can not return entry - after exiting stream.each the entry will be invalid and will read from tar start
           return yield(entry)
         end
@@ -120,27 +122,26 @@ class DumpRake
         Rake::Task['db:drop'].invoke
         Rake::Task['db:create'].invoke
       when !DumpRake::Env.no?(:migrate_down)
-        if avaliable_tables.include?('schema_migrations')
-          find_entry("schema_migrations.dump") do |entry|
-            migrated = table_rows('schema_migrations').map{ |row| row['version'] }
+        return unless avaliable_tables.include?('schema_migrations')
+        find_entry('schema_migrations.dump') do |entry|
+          migrated = table_rows('schema_migrations').map{ |row| row['version'] }
 
-            dump_migrations = []
-            Marshal.load(entry) # skip header
-            dump_migrations << Marshal.load(entry).first until entry.eof?
+          dump_migrations = []
+          Marshal.load(entry) # skip header
+          dump_migrations << Marshal.load(entry).first until entry.eof?
 
-            migrate_down = (migrated - dump_migrations)
+          migrate_down = (migrated - dump_migrations)
 
-            unless migrate_down.empty?
-              migrate_down.reverse.with_progress('Migrating down') do |version|
-                DumpRake::Env.with_env('VERSION' => version) do
-                  Rake::Task['db:migrate:down'].tap do |task|
-                    begin
-                      task.invoke
-                    rescue ActiveRecord::IrreversibleMigration
-                      $stderr.puts "Irreversible migration: #{version}"
-                    end
-                    task.reenable
+          unless migrate_down.empty?
+            migrate_down.reverse.with_progress('Migrating down') do |version|
+              DumpRake::Env.with_env('VERSION' => version) do
+                Rake::Task['db:migrate:down'].tap do |task|
+                  begin
+                    task.invoke
+                  rescue ActiveRecord::IrreversibleMigration
+                    $stderr.puts "Irreversible migration: #{version}"
                   end
+                  task.reenable
                 end
               end
             end
@@ -154,13 +155,12 @@ class DumpRake
     end
 
     def read_schema
-      if restore_schema?
-        read_entry_to_file('schema.rb') do |f|
-          DumpRake::Env.with_env('SCHEMA' => f.path) do
-            Rake::Task['db:schema:load'].invoke
-          end
-          Rake::Task['db:schema:dump'].invoke
+      return unless restore_schema?
+      read_entry_to_file('schema.rb') do |f|
+        DumpRake::Env.with_env('SCHEMA' => f.path) do
+          Rake::Task['db:schema:load'].invoke
         end
+        Rake::Task['db:schema:dump'].invoke
       end
     end
 
@@ -209,42 +209,41 @@ class DumpRake
 
     def read_assets
       return if DumpRake::Env[:restore_assets] && DumpRake::Env[:restore_assets].empty?
-      unless config[:assets].blank?
-        assets = config[:assets]
-        if Hash === assets
-          assets_count = assets.values.sum{ |value| Hash === value ? value[:total] : value }
-          assets_paths = assets.keys
-        else
-          assets_count, assets_paths = nil, assets
-        end
+      return if config[:assets].blank?
 
-        if DumpRake::Env[:restore_assets]
-          assets_paths.each do |asset|
-            DumpRake::Assets.glob_asset_children(asset, '**/*').reverse.each do |child|
-              if read_asset?(child, DumpRake::RailsRoot)
-                case
-                when File.file?(child)
-                  File.unlink(child)
-                when File.directory?(child)
-                  begin
-                    Dir.unlink(child)
-                  rescue Errno::ENOTEMPTY
-                    nil
-                  end
-                end
+      assets = config[:assets]
+      if assets.is_a?(Hash)
+        assets_count = assets.values.sum{ |value| value.is_a?(Hash) ? value[:total] : value }
+        assets_paths = assets.keys
+      else
+        assets_count, assets_paths = nil, assets
+      end
+
+      if DumpRake::Env[:restore_assets]
+        assets_paths.each do |asset|
+          DumpRake::Assets.glob_asset_children(asset, '**/*').reverse.each do |child|
+            next unless read_asset?(child, DumpRake::RailsRoot)
+            case
+            when File.file?(child)
+              File.unlink(child)
+            when File.directory?(child)
+              begin
+                Dir.unlink(child)
+              rescue Errno::ENOTEMPTY
+                nil
               end
             end
           end
-        else
-          DumpRake::Env.with_env(:assets => assets_paths.join(':')) do
-            Rake::Task['assets:delete'].invoke
-          end
         end
+      else
+        DumpRake::Env.with_env(:assets => assets_paths.join(':')) do
+          Rake::Task['assets:delete'].invoke
+        end
+      end
 
-        read_assets_entries(assets_paths, assets_count) do |stream, root, entry, prefix|
-          if !DumpRake::Env[:restore_assets] || read_asset?(entry.full_name, prefix)
-            stream.extract_entry(root, entry)
-          end
+      read_assets_entries(assets_paths, assets_count) do |stream, root, entry, prefix|
+        if !DumpRake::Env[:restore_assets] || read_asset?(entry.full_name, prefix)
+          stream.extract_entry(root, entry)
         end
       end
     end
@@ -252,14 +251,14 @@ class DumpRake
     def read_asset?(path, prefix)
       DumpRake::Env.filter(:restore_assets, DumpRake::Assets::SPLITTER).custom_pass? do |value|
         File.fnmatch(File.join(prefix, value), path) ||
-        File.fnmatch(File.join(prefix, value, '**'), path)
+          File.fnmatch(File.join(prefix, value, '**'), path)
       end
     end
 
-    def read_assets_entries(assets_paths, assets_count)
+    def read_assets_entries(_assets_paths, assets_count)
       Progress.start('Assets', assets_count || 1) do
         found_assets = false
-        # old style — in separate tar
+        # old style - in separate tar
         find_entry('assets.tar') do |assets_tar|
           def assets_tar.rewind
             # rewind will fail - it must go to center of gzip
@@ -275,7 +274,7 @@ class DumpRake
         end
 
         unless found_assets
-          # new style — in same tar
+          # new style - in same tar
           assets_root_link do |tmpdir, prefix|
             stream.each do |entry|
               if entry.full_name.starts_with?("#{prefix}/")

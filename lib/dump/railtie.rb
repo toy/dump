@@ -1,4 +1,5 @@
 module Dump
+  # Add rake tasks to rails app
   class Railtie < Rails::Railtie
     rake_tasks do
       load 'tasks/assets.rake'

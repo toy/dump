@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/../../spec_helper'
+require 'spec_helper'
 
 def temp_remove_const(where, which)
   around do |example|
@@ -24,22 +24,22 @@ describe 'RailsRoot' do
   temp_remove_const Object, :RAILS_ROOT
   temp_remove_const DumpRake, :RailsRoot
 
-  it "should use Rails if it is present" do
+  it 'should use Rails if it is present' do
     Object.const_set('Rails', double('rails'))
     expect(Rails).to receive(:root).and_return(@root)
     load 'dump_rake/rails_root.rb'
-    expect(DumpRake::RailsRoot).to be === @root
+    expect(DumpRake::RailsRoot).to equal(@root)
   end
 
-  it "should use RAILS_ROOT if it is present" do
+  it 'should use RAILS_ROOT if it is present' do
     Object.const_set('RAILS_ROOT', @root)
     load 'dump_rake/rails_root.rb'
-    expect(DumpRake::RailsRoot).to be === @root
+    expect(DumpRake::RailsRoot).to equal(@root)
   end
 
-  it "should use Dir.pwd else" do
+  it 'should use Dir.pwd else' do
     expect(Dir).to receive(:pwd).and_return(@root)
     load 'dump_rake/rails_root.rb'
-    expect(DumpRake::RailsRoot).to be === @root
+    expect(DumpRake::RailsRoot).to equal(@root)
   end
 end

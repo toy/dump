@@ -11,11 +11,24 @@ require 'archive/tar/minitar'
 require 'dump_rake/archive_tar_minitar_fix'
 require 'progress'
 
+require 'dump_rake/rails_root'
+require 'dump_rake/assets'
+require 'dump_rake/table_manipulation'
+require 'dump_rake/dump'
+require 'dump_rake/dump_reader'
+require 'dump_rake/dump_writer'
+require 'dump_rake/env'
+
+# Main interface
 class DumpRake
   class << self
     def versions(options = {})
       Dump.list(options).each do |dump|
-        puts DumpRake::Env[:show_size] || $stdout.tty? ? "#{dump.human_size.to_s.rjust(7)}\t#{dump}" : dump
+        if DumpRake::Env[:show_size] || $stdout.tty?
+          puts "#{dump.human_size.to_s.rjust(7)}\t#{dump}"
+        else
+          puts dump
+        end
         begin
           case options[:summary].to_s.downcase[0, 1]
           when *%w[1 t y]
@@ -47,14 +60,14 @@ class DumpRake
       if dump
         DumpReader.restore(dump.path)
       else
-        $stderr.puts "Avaliable versions:"
+        $stderr.puts 'Avaliable versions:'
         $stderr.puts Dump.list
       end
     end
 
     def cleanup(options = {})
-      unless options[:leave].nil? || /^\d+$/ === options[:leave] || options[:leave].downcase == 'none'
-        raise 'LEAVE should be number or "none"'
+      unless options[:leave].nil? || /^\d+$/ =~ options[:leave] || options[:leave].downcase == 'none'
+        fail 'LEAVE should be number or "none"'
       end
 
       to_delete = []
@@ -78,8 +91,4 @@ class DumpRake
       end
     end
   end
-end
-
-%w[rails_root assets table_manipulation dump dump_reader dump_writer env].each do |file|
-  require "dump_rake/#{file}"
 end

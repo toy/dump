@@ -2,6 +2,9 @@
 
 class DumpRake
   module Env
+    # Filter strings by simple pattern:
+    #   'a,b,c' will pass only 'a', 'b' and 'c'
+    #   '-a,b,c' will pass everything except 'a', 'b' and 'c'
     class Filter
       attr_reader :invert, :values, :transparent
       def initialize(s, splitter = nil)

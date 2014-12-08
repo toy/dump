@@ -1,6 +1,7 @@
 # encoding: UTF-8
 
 class DumpRake
+  # Base class for dump
   class Dump
     include TableManipulation
     def self.list(options = {})
@@ -19,7 +20,7 @@ class DumpRake
       if path_or_options.is_a?(Hash)
         options = path_or_options
 
-        name = Time.now.utc.strftime("%Y%m%d%H%M%S")
+        name = Time.now.utc.strftime('%Y%m%d%H%M%S')
 
         description = clean_description(options[:desc])
         name += "-#{description}" unless description.blank?
@@ -52,12 +53,12 @@ class DumpRake
 
     def parts
       @parts ||=
-      if m = name.match(/^(\d{#{4+2+2 + 2+2+2}})(-[^@]+)?((?:@[^@]+)+)?\.(tmp|tgz)$/)
+      if (m = name.match(/^(\d{#{4 + 2 + 2 + 2 + 2 + 2}})(-[^@]+)?((?:@[^@]+)+)?\.(tmp|tgz)$/))
         {
           :time => m[1],
           :desc => m[2] && m[2][1, m[2].length],
           :tags => m[3] && m[3][1, m[3].length],
-          :ext => m[4]
+          :ext => m[4],
         }
       else
         {}
@@ -83,7 +84,7 @@ class DumpRake
     def name
       @name ||= File.basename(path)
     end
-    alias to_s name
+    alias_method :to_s, :name
 
     def size
       File.size(path) rescue nil
@@ -93,29 +94,30 @@ class DumpRake
       number = size
       return nil if number.nil?
       degree = 0
-      symbols = %W[B K M G T]
+      symbols = %w[B K M G T]
       while number >= 1000 && degree < symbols.length - 1
         degree += 1
         number /= 1024.0
       end
-      "#{'%.2f' % number}#{symbols[degree]}"
+      format('%.2f%s', number, symbols[degree])
     end
 
     def inspect
-      "#<%s:0x%x %s>" % [self.class, object_id, path.to_s.sub(/^.+(?=..\/[^\/]*$)/, '…')]
+      "#<#{self.class}:0x#{object_id} #{path}>"
     end
 
     def lock
-      if lock = File.open(path, 'r')
-        begin
-          if lock.flock(File::LOCK_EX | File::LOCK_NB)
-            yield
-          end
-        ensure
-          lock.flock(File::LOCK_UN)
-          lock.close
+      lock = File.open(path, 'r')
+      begin
+        if lock.flock(File::LOCK_EX | File::LOCK_NB)
+          yield
         end
+      ensure
+        lock.flock(File::LOCK_UN)
+        lock.close
       end
+    rescue Errno::ENOENT
+      nil
     end
 
     def silence(&block)
@@ -142,32 +144,35 @@ class DumpRake
       Pathname(path.to_s.sub(/#{parts[:ext]}$/, ext))
     end
 
+    # Cleanup name of dump
     module CleanNParse
       def clean_str(str, additional = nil)
         str.to_s.strip.gsub(/\s+/, ' ').gsub(/[^A-Za-z0-9 \-_#{Regexp.escape(additional.to_s) if additional}]+/, '_')
       end
+
       def clean_description(description)
         clean_str(description, '()#')[0, 50].strip
       end
+
       def clean_tag(tag)
         clean_str(tag).downcase.sub(/^\-+/, '')[0, 20].strip
       end
+
       def clean_tags(tags)
         tags.to_s.split(',').map{ |tag| clean_tag(tag) }.uniq.reject(&:blank?).sort
       end
+
       def get_filter_tags(tags)
         groups = Hash.new{ |hash, key| hash[key] = SortedSet.new }
         tags.to_s.split(',').each do |tag|
-          if m = tag.strip.match(/^(\-|\+)?(.*)$/)
-            type = {'+' => :mandatory, '-' => :forbidden}[m[1]] || :simple
-            unless (claned_tag = clean_tag(m[2])).blank?
-              groups[type] << claned_tag
-            end
-          end
+          next unless (m = tag.strip.match(/^(\-|\+)?(.*)$/))
+          type = {'+' => :mandatory, '-' => :forbidden}[m[1]] || :simple
+          next unless (cleaned_tag = clean_tag(m[2])).present?
+          groups[type] << cleaned_tag
         end
         [:simple, :mandatory].each do |type|
           if (clashing = (groups[type] & groups[:forbidden])).present?
-            raise "#{type} tags clashes with forbidden ones: #{clashing}"
+            fail "#{type} tags clashes with forbidden ones: #{clashing}"
           end
         end
         groups.each_with_object({}){ |(key, value), hsh| hsh[key] = value.to_a }

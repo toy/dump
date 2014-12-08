@@ -3,6 +3,7 @@
 require 'dump_rake/env/filter'
 
 class DumpRake
+  # Working with environment variables
   module Env
     DICTIONARY = {
       :desc => %w[DESC DESCRIPTION],
@@ -69,7 +70,7 @@ class DumpRake
       end
 
       def filter(key, splitter = nil)
-        @filters ||= Hash.new{ |hash, key| hash[key] = Filter.new(*key) }
+        @filters ||= Hash.new{ |h, k| h[k] = Filter.new(*k) }
         @filters[[self[key], splitter]]
       end
 
@@ -90,7 +91,7 @@ class DumpRake
           :select => [:like, :tags],
           :assets => [:assets],
           :restore_options => [:migrate_down, :restore_schema, :restore_tables, :restore_assets],
-          :transfer_options => [:transfer_via]
+          :transfer_options => [:transfer_via],
         }
 
         m[:versions] = m[:select] | [:summary]
@@ -108,12 +109,13 @@ class DumpRake
       end
 
       def for_command(command, strings = false)
-        variables = variable_names_for_command(command)
-        variables.inject({}) do |env, variable|
-          value = self[variable]
-          env[strings ? DICTIONARY[variable].first : variable] = value if value
-          env
+        env = {}
+        variable_names_for_command(command).each do |variable|
+          if (value = self[variable])
+            env[strings ? DICTIONARY[variable].first : variable] = value
+          end
         end
+        env
       end
 
       def stringify!(hash)
@@ -124,9 +126,9 @@ class DumpRake
 
       def explain_variables_for_command(command)
         ".\n" <<
-        variable_names_for_command(command).map do |variable_name|
-          "  #{DICTIONARY[variable_name].join(', ')} — #{EXPLANATIONS[variable_name]}\n"
-        end.join('')
+          variable_names_for_command(command).map do |variable_name|
+            "  #{DICTIONARY[variable_name].join(', ')} — #{EXPLANATIONS[variable_name]}\n"
+          end.join('')
       end
 
     private
