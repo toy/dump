@@ -2,7 +2,7 @@
 
 require 'dump_rake/env/filter'
 
-class DumpRake
+module DumpRake
   # Working with environment variables
   module Env
     DICTIONARY = {

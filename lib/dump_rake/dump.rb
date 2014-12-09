@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-class DumpRake
+module DumpRake
   # Base class for dump
   class Dump
     include TableManipulation

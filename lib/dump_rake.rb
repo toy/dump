@@ -20,7 +20,7 @@ require 'dump_rake/dump_writer'
 require 'dump_rake/env'
 
 # Main interface
-class DumpRake
+module DumpRake
   class << self
     def versions(options = {})
       Dump.list(options).each do |dump|

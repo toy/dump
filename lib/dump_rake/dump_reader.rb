@@ -1,4 +1,4 @@
-class DumpRake
+module DumpRake
   # Reading dump
   class DumpReader < Dump
     attr_reader :stream, :config

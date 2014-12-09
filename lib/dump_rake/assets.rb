@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-class DumpRake
+module DumpRake
   # Helper for listing assets for dump
   module Assets
     SPLITTER = /[:,]/
