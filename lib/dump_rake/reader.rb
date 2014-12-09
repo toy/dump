@@ -1,6 +1,6 @@
 module DumpRake
   # Reading dump
-  class DumpReader < Dump
+  class Reader < Snapshot
     attr_reader :stream, :config
 
     def self.restore(path)

@@ -1,6 +1,6 @@
 module DumpRake
   # Creating dump
-  class DumpWriter < Dump
+  class Writer < Snapshot
     attr_reader :stream, :config
 
     def self.create(path)

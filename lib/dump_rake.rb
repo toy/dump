@@ -14,16 +14,16 @@ require 'progress'
 require 'dump_rake/rails_root'
 require 'dump_rake/assets'
 require 'dump_rake/table_manipulation'
-require 'dump_rake/dump'
-require 'dump_rake/dump_reader'
-require 'dump_rake/dump_writer'
+require 'dump_rake/snapshot'
+require 'dump_rake/reader'
+require 'dump_rake/writer'
 require 'dump_rake/env'
 
 # Main interface
 module DumpRake
   class << self
     def versions(options = {})
-      Dump.list(options).each do |dump|
+      Snapshot.list(options).each do |dump|
         if DumpRake::Env[:show_size] || $stdout.tty?
           puts "#{dump.human_size.to_s.rjust(7)}\t#{dump}"
         else
@@ -32,10 +32,10 @@ module DumpRake
         begin
           case options[:summary].to_s.downcase[0, 1]
           when *%w[1 t y]
-            puts DumpReader.summary(dump.path)
+            puts Reader.summary(dump.path)
             puts
           when *%w[2 s]
-            puts DumpReader.summary(dump.path, :schema => true)
+            puts Reader.summary(dump.path, :schema => true)
             puts
           end
         rescue => e
@@ -46,22 +46,22 @@ module DumpRake
     end
 
     def create(options = {})
-      dump = Dump.new(options.merge(:dir => File.join(DumpRake::RailsRoot, 'dump')))
+      dump = Snapshot.new(options.merge(:dir => File.join(DumpRake::RailsRoot, 'dump')))
 
-      DumpWriter.create(dump.tmp_path)
+      Writer.create(dump.tmp_path)
 
       File.rename(dump.tmp_path, dump.tgz_path)
       puts File.basename(dump.tgz_path)
     end
 
     def restore(options = {})
-      dump = Dump.list(options).last
+      dump = Snapshot.list(options).last
 
       if dump
-        DumpReader.restore(dump.path)
+        Reader.restore(dump.path)
       else
         $stderr.puts 'Avaliable versions:'
-        $stderr.puts Dump.list
+        $stderr.puts Snapshot.list
       end
     end
 
@@ -72,10 +72,10 @@ module DumpRake
 
       to_delete = []
 
-      all_dumps = Dump.list(options.merge(:all => true))
+      all_dumps = Snapshot.list(options.merge(:all => true))
       to_delete.concat(all_dumps.select{ |dump| dump.ext != 'tgz' })
 
-      dumps = Dump.list(options)
+      dumps = Snapshot.list(options)
       leave = (options[:leave] || 5).to_i
       to_delete.concat(dumps[0, dumps.length - leave]) if dumps.length > leave
 

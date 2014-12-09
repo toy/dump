@@ -2,7 +2,7 @@
 
 module DumpRake
   # Base class for dump
-  class Dump
+  class Snapshot
     include TableManipulation
     def self.list(options = {})
       dumps = Dir[File.join(DumpRake::RailsRoot, 'dump', options[:all] ? '*.*' : '*.tgz')].sort.select{ |path| File.file?(path) }.map{ |path| new(path) }
