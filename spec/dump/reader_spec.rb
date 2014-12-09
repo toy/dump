@@ -1,22 +1,22 @@
 require 'spec_helper'
-require 'dump_rake'
+require 'dump/reader'
 require 'active_record/migration'
 
-DumpReader = DumpRake::DumpReader
-describe DumpReader do
+Reader = Dump::Reader
+describe Reader do
   describe 'restore' do
     it 'should create selves instance and open' do
       @dump = double('dump')
       expect(@dump).to receive(:open)
-      expect(DumpReader).to receive(:new).with('/abc/123.tmp').and_return(@dump)
-      DumpReader.restore('/abc/123.tmp')
+      expect(Reader).to receive(:new).with('/abc/123.tmp').and_return(@dump)
+      Reader.restore('/abc/123.tmp')
     end
 
     it 'should call dump subroutines' do
       @dump = double('dump')
       allow(@dump).to receive(:open).and_yield(@dump)
       allow(@dump).to receive(:silence).and_yield
-      allow(DumpReader).to receive(:new).and_return(@dump)
+      allow(Reader).to receive(:new).and_return(@dump)
 
       expect(@dump).to receive(:read_config).ordered
       expect(@dump).to receive(:migrate_down).ordered
@@ -24,12 +24,12 @@ describe DumpReader do
       expect(@dump).to receive(:read_tables).ordered
       expect(@dump).to receive(:read_assets).ordered
 
-      DumpReader.restore('/abc/123.tmp')
+      Reader.restore('/abc/123.tmp')
     end
   end
 
   describe 'summary' do
-    Summary = DumpReader::Summary
+    Summary = Reader::Summary
     describe Summary do
       it 'should format text' do
         @summary = Summary.new
@@ -67,8 +67,8 @@ describe DumpReader do
     it 'should create selves instance and open' do
       @dump = double('dump')
       expect(@dump).to receive(:open)
-      expect(DumpReader).to receive(:new).with('/abc/123.tmp').and_return(@dump)
-      DumpReader.summary('/abc/123.tmp')
+      expect(Reader).to receive(:new).with('/abc/123.tmp').and_return(@dump)
+      Reader.summary('/abc/123.tmp')
     end
 
     {
@@ -83,7 +83,7 @@ describe DumpReader do
         @dump = double('dump')
         allow(@dump).to receive(:config).and_return(:tables => tables, :assets => assets)
         allow(@dump).to receive(:open).and_yield(@dump)
-        allow(DumpReader).to receive(:new).and_return(@dump)
+        allow(Reader).to receive(:new).and_return(@dump)
         expect(@dump).to receive(:read_config)
 
         @summary = double('summary')
@@ -93,7 +93,7 @@ describe DumpReader do
         expect(@summary).to receive(:data).with(formatted_assets)
         allow(Summary).to receive(:new).and_return(@summary)
 
-        expect(DumpReader.summary('/abc/123.tmp')).to eq(@summary)
+        expect(Reader.summary('/abc/123.tmp')).to eq(@summary)
       end
     end
 
@@ -110,7 +110,7 @@ describe DumpReader do
       allow(@dump).to receive(:config).and_return(:tables => tables, :assets => assets)
       allow(@dump).to receive(:open).and_yield(@dump)
       allow(@dump).to receive(:schema).and_return(schema)
-      allow(DumpReader).to receive(:new).and_return(@dump)
+      allow(Reader).to receive(:new).and_return(@dump)
       expect(@dump).to receive(:read_config)
 
       @summary = double('summary')
@@ -122,7 +122,7 @@ describe DumpReader do
       expect(@summary).to receive(:data).with(schema_lines)
       allow(Summary).to receive(:new).and_return(@summary)
 
-      expect(DumpReader.summary('/abc/123.tmp', :schema => true)).to eq(@summary)
+      expect(Reader.summary('/abc/123.tmp', :schema => true)).to eq(@summary)
     end
   end
 
@@ -133,7 +133,7 @@ describe DumpReader do
       expect(Zlib::GzipReader).to receive(:open).with(Pathname('123.tgz')).and_yield(@gzip)
       expect(Archive::Tar::Minitar::Input).to receive(:open).with(@gzip).and_yield(@stream)
 
-      @dump = DumpReader.new('123.tgz')
+      @dump = Reader.new('123.tgz')
       @dump.open do |dump|
         expect(dump).to eq(@dump)
         expect(dump.stream).to eq(@stream)
@@ -147,7 +147,7 @@ describe DumpReader do
       @e2 = double('e2', :full_name => 'first.dump', :read => 'first.dump_data')
       @e3 = double('e3', :full_name => 'second.dump', :read => 'second.dump_data')
       @stream = [@e1, @e2, @e3]
-      @dump = DumpReader.new('123.tgz')
+      @dump = Reader.new('123.tgz')
       allow(@dump).to receive(:stream).and_return(@stream)
     end
 
@@ -210,7 +210,7 @@ describe DumpReader do
   describe 'subroutines' do
     before do
       @stream = double('stream')
-      @dump = DumpReader.new('123.tgz')
+      @dump = Reader.new('123.tgz')
       allow(@dump).to receive(:stream).and_return(@stream)
       allow(Progress).to receive(:io).and_return(StringIO.new)
     end
@@ -230,13 +230,13 @@ describe DumpReader do
         expect(Rake::Task).not_to receive(:[])
         expect(@dump).not_to receive(:find_entry)
 
-        DumpRake::Env.with_env(:migrate_down => '0') do
+        Dump::Env.with_env(:migrate_down => '0') do
           @dump.migrate_down
         end
-        DumpRake::Env.with_env(:migrate_down => 'no') do
+        Dump::Env.with_env(:migrate_down => 'no') do
           @dump.migrate_down
         end
-        DumpRake::Env.with_env(:migrate_down => 'false') do
+        Dump::Env.with_env(:migrate_down => 'false') do
           @dump.migrate_down
         end
       end
@@ -249,7 +249,7 @@ describe DumpReader do
         expect(@load_task).to receive(:invoke)
         expect(@dump_task).to receive(:invoke)
 
-        DumpRake::Env.with_env(:migrate_down => 'reset') do
+        Dump::Env.with_env(:migrate_down => 'reset') do
           @dump.migrate_down
         end
       end
@@ -260,7 +260,7 @@ describe DumpReader do
             allow(@dump).to receive(:avaliable_tables).and_return(%w[first])
             expect(@dump).not_to receive(:find_entry)
 
-            DumpRake::Env.with_env(:migrate_down => migrate_down_value) do
+            Dump::Env.with_env(:migrate_down => migrate_down_value) do
               @dump.migrate_down
             end
           end
@@ -269,7 +269,7 @@ describe DumpReader do
             allow(@dump).to receive(:avaliable_tables).and_return(%w[schema_migrations first])
             expect(@dump).to receive(:find_entry).with('schema_migrations.dump')
 
-            DumpRake::Env.with_env(:migrate_down => migrate_down_value) do
+            Dump::Env.with_env(:migrate_down => migrate_down_value) do
               @dump.migrate_down
             end
           end
@@ -289,7 +289,7 @@ describe DumpReader do
             @versions = []
             @migrate_down_task = double('migrate_down_task')
             expect(@migrate_down_task).to receive('invoke').exactly(3).times do
-              version = DumpRake::Env['VERSION']
+              version = Dump::Env['VERSION']
               @versions << version
               if version == '6'
                 fail ActiveRecord::IrreversibleMigration
@@ -301,7 +301,7 @@ describe DumpReader do
 
             expect(Rake::Task).to receive(:[]).with('db:migrate:down').exactly(3).times.and_return(@migrate_down_task)
 
-            DumpRake::Env.with_env(:migrate_down => migrate_down_value) do
+            Dump::Env.with_env(:migrate_down => migrate_down_value) do
               @dump.migrate_down
             end
             expect(@versions).to eq(%w[5 6 7].reverse)
@@ -326,7 +326,7 @@ describe DumpReader do
         @file = double('tempfile', :path => '/temp/123-arst')
         allow(@dump).to receive(:read_entry_to_file).and_yield(@file)
 
-        expect(DumpRake::Env).to receive(:with_env).with('SCHEMA' => '/temp/123-arst')
+        expect(Dump::Env).to receive(:with_env).with('SCHEMA' => '/temp/123-arst')
         @dump.read_schema
       end
 
@@ -378,7 +378,7 @@ describe DumpReader do
           expect(@dump).to receive(:read_table).with('first', 1)
           expect(@dump).not_to receive(:read_table).with('second', 3)
 
-          DumpRake::Env.with_env(:restore_tables => 'first') do
+          Dump::Env.with_env(:restore_tables => 'first') do
             @dump.read_tables
           end
         end
@@ -389,7 +389,7 @@ describe DumpReader do
           expect(@dump).not_to receive(:verify_connection)
           expect(@dump).not_to receive(:read_table)
 
-          DumpRake::Env.with_env(:restore_tables => '') do
+          Dump::Env.with_env(:restore_tables => '') do
             @dump.read_tables
           end
         end
@@ -522,7 +522,7 @@ describe DumpReader do
           allow(@dump).to receive(:find_entry)
 
           expect(@task).to receive(:invoke) do
-            expect(DumpRake::Env[:assets]).to eq('images:videos')
+            expect(Dump::Env[:assets]).to eq('images:videos')
           end
 
           @dump.read_assets
@@ -533,14 +533,14 @@ describe DumpReader do
             @assets = %w[images videos]
             allow(@dump).to receive(:config).and_return({:assets => @assets})
 
-            expect(DumpRake::Assets).to receive('glob_asset_children').with('images', '**/*').and_return(%w[images images/a.jpg images/b.jpg])
-            expect(DumpRake::Assets).to receive('glob_asset_children').with('videos', '**/*').and_return(%w[videos videos/a.mov])
+            expect(Dump::Assets).to receive('glob_asset_children').with('images', '**/*').and_return(%w[images images/a.jpg images/b.jpg])
+            expect(Dump::Assets).to receive('glob_asset_children').with('videos', '**/*').and_return(%w[videos videos/a.mov])
 
-            expect(@dump).to receive('read_asset?').with('images/b.jpg', DumpRake::RailsRoot).ordered.and_return(false)
-            expect(@dump).to receive('read_asset?').with('images/a.jpg', DumpRake::RailsRoot).ordered.and_return(true)
-            expect(@dump).to receive('read_asset?').with('images', DumpRake::RailsRoot).ordered.and_return(true)
-            expect(@dump).to receive('read_asset?').with('videos/a.mov', DumpRake::RailsRoot).ordered.and_return(false)
-            expect(@dump).to receive('read_asset?').with('videos', DumpRake::RailsRoot).ordered.and_return(false)
+            expect(@dump).to receive('read_asset?').with('images/b.jpg', Dump.rails_root).ordered.and_return(false)
+            expect(@dump).to receive('read_asset?').with('images/a.jpg', Dump.rails_root).ordered.and_return(true)
+            expect(@dump).to receive('read_asset?').with('images', Dump.rails_root).ordered.and_return(true)
+            expect(@dump).to receive('read_asset?').with('videos/a.mov', Dump.rails_root).ordered.and_return(false)
+            expect(@dump).to receive('read_asset?').with('videos', Dump.rails_root).ordered.and_return(false)
 
             expect(File).to receive('file?').with('images/a.jpg').and_return(true)
             expect(File).to receive('unlink').with('images/a.jpg')
@@ -549,7 +549,7 @@ describe DumpReader do
             expect(File).to receive('directory?').with('images').and_return(true)
             expect(Dir).to receive('unlink').with('images').and_raise(Errno::ENOTEMPTY)
 
-            DumpRake::Env.with_env(:restore_assets => 'images/a.*:stylesheets') do
+            Dump::Env.with_env(:restore_assets => 'images/a.*:stylesheets') do
               @dump.read_assets
             end
           end
@@ -558,7 +558,7 @@ describe DumpReader do
             @assets = %w[images videos]
             allow(@dump).to receive(:config).and_return({:assets => @assets})
 
-            expect(DumpRake::Assets).not_to receive('glob_asset_children')
+            expect(Dump::Assets).not_to receive('glob_asset_children')
 
             expect(@dump).not_to receive('read_asset?')
 
@@ -566,7 +566,7 @@ describe DumpReader do
             expect(File).not_to receive('file?')
             expect(File).not_to receive('unlink')
 
-            DumpRake::Env.with_env(:restore_assets => '') do
+            Dump::Env.with_env(:restore_assets => '') do
               @dump.read_assets
             end
           end
@@ -604,7 +604,7 @@ describe DumpReader do
             @entries = %w[a b c d].map do |s|
               file = double("file_#{s}")
               each_excpectation.and_yield(file)
-              expect(@inp).to receive(:extract_entry).with(DumpRake::RailsRoot, file)
+              expect(@inp).to receive(:extract_entry).with(Dump.rails_root, file)
               file
             end
             expect(Archive::Tar::Minitar).to receive(:open).with(@assets_tar).and_yield(@inp)
@@ -652,13 +652,13 @@ describe DumpReader do
         @filter = double('filter')
         allow(@filter).to receive('custom_pass?')
 
-        expect(DumpRake::Env).to receive('filter').with(:restore_assets, DumpRake::Assets::SPLITTER).and_return(@filter)
+        expect(Dump::Env).to receive('filter').with(:restore_assets, Dump::Assets::SPLITTER).and_return(@filter)
 
         @dump.read_asset?('a', 'b')
       end
 
       it 'should test path usint fnmatch' do
-        DumpRake::Env.with_env(:restore_assets => '[a-b]') do
+        Dump::Env.with_env(:restore_assets => '[a-b]') do
           expect(@dump.read_asset?('x/a', 'x')).to be_truthy
           expect(@dump.read_asset?('x/b/file', 'x')).to be_truthy
           expect(@dump.read_asset?('x/c', 'x')).to be_falsey

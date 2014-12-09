@@ -1,12 +1,13 @@
 require 'spec_helper'
+require 'dump/snapshot'
 
-describe DumpRake::Dump do
+describe Dump::Snapshot do
   def dump_path(file_name)
-    File.join(DumpRake::RailsRoot, 'dump', file_name)
+    File.join(Dump.rails_root, 'dump', file_name)
   end
 
   def new_dump(file_name)
-    DumpRake::Dump.new(dump_path(file_name))
+    Dump::Snapshot.new(dump_path(file_name))
   end
 
   describe 'lock' do
@@ -17,7 +18,7 @@ describe DumpRake::Dump do
     it 'should not yield if file does not exist' do
       expect(@yield_receiver).not_to receive(:fire)
 
-      DumpRake::Dump.new('hello').lock do
+      Dump::Snapshot.new('hello').lock do
         @yield_receiver.fire
       end
     end
@@ -31,7 +32,7 @@ describe DumpRake::Dump do
       expect(@file).to receive(:close)
       expect(File).to receive(:open).and_return(@file)
 
-      DumpRake::Dump.new('hello').lock do
+      Dump::Snapshot.new('hello').lock do
         @yield_receiver.fire
       end
     end
@@ -45,7 +46,7 @@ describe DumpRake::Dump do
       expect(@file).to receive(:close)
       expect(File).to receive(:open).and_return(@file)
 
-      DumpRake::Dump.new('hello').lock do
+      Dump::Snapshot.new('hello').lock do
         @yield_receiver.fire
       end
     end
@@ -53,11 +54,11 @@ describe DumpRake::Dump do
 
   describe 'new' do
     it 'should init with path if String sent' do
-      expect(DumpRake::Dump.new('hello').path).to eq(Pathname('hello'))
+      expect(Dump::Snapshot.new('hello').path).to eq(Pathname('hello'))
     end
 
     it 'should init with path if Pathname sent' do
-      expect(DumpRake::Dump.new(Pathname('hello')).path).to eq(Pathname('hello'))
+      expect(Dump::Snapshot.new(Pathname('hello')).path).to eq(Pathname('hello'))
     end
 
     describe 'with options' do
@@ -69,23 +70,23 @@ describe DumpRake::Dump do
       end
 
       it 'should generate path with no options' do
-        expect(DumpRake::Dump.new.path).to eq(Pathname('19650414065945.tgz'))
+        expect(Dump::Snapshot.new.path).to eq(Pathname('19650414065945.tgz'))
       end
 
       it 'should generate with dir' do
-        expect(DumpRake::Dump.new(:dir => 'dump_dir').path).to eq(Pathname('dump_dir/19650414065945.tgz'))
+        expect(Dump::Snapshot.new(:dir => 'dump_dir').path).to eq(Pathname('dump_dir/19650414065945.tgz'))
       end
 
       it 'should generate path with description' do
-        expect(DumpRake::Dump.new(:dir => 'dump_dir', :desc => 'hello world').path).to eq(Pathname('dump_dir/19650414065945-hello world.tgz'))
+        expect(Dump::Snapshot.new(:dir => 'dump_dir', :desc => 'hello world').path).to eq(Pathname('dump_dir/19650414065945-hello world.tgz'))
       end
 
       it 'should generate path with tags' do
-        expect(DumpRake::Dump.new(:dir => 'dump_dir', :tags => ' mirror, hello world ').path).to eq(Pathname('dump_dir/19650414065945@hello world,mirror.tgz'))
+        expect(Dump::Snapshot.new(:dir => 'dump_dir', :tags => ' mirror, hello world ').path).to eq(Pathname('dump_dir/19650414065945@hello world,mirror.tgz'))
       end
 
       it 'should generate path with description and tags' do
-        expect(DumpRake::Dump.new(:dir => 'dump_dir', :desc => 'Anniversary backup', :tags => ' mirror, hello world ').path).to eq(Pathname('dump_dir/19650414065945-Anniversary backup@hello world,mirror.tgz'))
+        expect(Dump::Snapshot.new(:dir => 'dump_dir', :desc => 'Anniversary backup', :tags => ' mirror, hello world ').path).to eq(Pathname('dump_dir/19650414065945-Anniversary backup@hello world,mirror.tgz'))
       end
     end
   end
@@ -103,17 +104,17 @@ describe DumpRake::Dump do
 
       it 'should search for files in dump dir when asked for list' do
         expect(Dir).to receive(:[]).with(dump_path('*.tgz')).and_return([])
-        DumpRake::Dump.list
+        Dump::Snapshot.list
       end
 
       it 'should return selves instances for each found file' do
         stub_glob
-        DumpRake::Dump.list.all?{ |dump| expect(dump).to be_a(DumpRake::Dump) }
+        Dump::Snapshot.list.all?{ |dump| expect(dump).to be_a(Dump::Snapshot) }
       end
 
       it 'should return dumps with name containting :like' do
         stub_glob
-        expect(DumpRake::Dump.list(:like => '3')).to eq(DumpRake::Dump.list.values_at(0, 1))
+        expect(Dump::Snapshot.list(:like => '3')).to eq(Dump::Snapshot.list.values_at(0, 1))
       end
     end
 
@@ -130,7 +131,7 @@ describe DumpRake::Dump do
       end
 
       it 'should return all dumps if no tags send' do
-        expect(DumpRake::Dump.list(:tags => '')).to eq(DumpRake::Dump.list)
+        expect(Dump::Snapshot.list(:tags => '')).to eq(Dump::Snapshot.list)
       end
 
       {
@@ -145,7 +146,7 @@ describe DumpRake::Dump do
         '+d,+a'          => [2, 3, 4, 5],
       }.each do |tags, ids|
         it "should return dumps filtered by #{tags}" do
-          expect(DumpRake::Dump.list(:tags => tags)).to eq(DumpRake::Dump.list.values_at(*ids))
+          expect(Dump::Snapshot.list(:tags => tags)).to eq(Dump::Snapshot.list.values_at(*ids))
         end
       end
     end
@@ -187,7 +188,7 @@ describe DumpRake::Dump do
 
   describe 'path' do
     it 'should return path' do
-      expect(new_dump('19650414065945.tgz').path).to eq(Pathname(File.join(DumpRake::RailsRoot, 'dump', '19650414065945.tgz')))
+      expect(new_dump('19650414065945.tgz').path).to eq(Pathname(File.join(Dump.rails_root, 'dump', '19650414065945.tgz')))
     end
   end
 
@@ -213,59 +214,59 @@ describe DumpRake::Dump do
 
   describe 'clean_description' do
     it "should shorten string to 50 chars and replace special symblos with '-'" do
-      expect(DumpRake::Dump.new('').send(:clean_description, 'Special  Dump #12837192837 (before fixind *&^*&^ photos)')).to eq('Special Dump #12837192837 (before fixind _ photos)')
-      expect(DumpRake::Dump.new('').send(:clean_description, "To#{'o' * 100} long description")).to eq("T#{'o' * 49}")
+      expect(Dump::Snapshot.new('').send(:clean_description, 'Special  Dump #12837192837 (before fixind *&^*&^ photos)')).to eq('Special Dump #12837192837 (before fixind _ photos)')
+      expect(Dump::Snapshot.new('').send(:clean_description, "To#{'o' * 100} long description")).to eq("T#{'o' * 49}")
     end
 
     it 'should accept non string' do
-      expect(DumpRake::Dump.new('').send(:clean_description, nil)).to eq('')
+      expect(Dump::Snapshot.new('').send(:clean_description, nil)).to eq('')
     end
   end
 
   describe 'clean_tag' do
     it "should shorten string to 20 chars and replace special symblos with '-'" do
-      expect(DumpRake::Dump.new('').send(:clean_tag, 'Very special  tag #12837192837 (fixind *&^*&^)')).to eq('very special tag _12')
-      expect(DumpRake::Dump.new('').send(:clean_tag, "To#{'o' * 100} long tag")).to eq("t#{'o' * 19}")
+      expect(Dump::Snapshot.new('').send(:clean_tag, 'Very special  tag #12837192837 (fixind *&^*&^)')).to eq('very special tag _12')
+      expect(Dump::Snapshot.new('').send(:clean_tag, "To#{'o' * 100} long tag")).to eq("t#{'o' * 19}")
     end
 
     it "should not allow '-' or '+' to be first symbol" do
-      expect(DumpRake::Dump.new('').send(:clean_tag, ' Very special tag')).to eq('very special tag')
-      expect(DumpRake::Dump.new('').send(:clean_tag, '-Very special tag')).to eq('very special tag')
-      expect(DumpRake::Dump.new('').send(:clean_tag, '-----------')).to eq('')
-      expect(DumpRake::Dump.new('').send(:clean_tag, '+Very special tag')).to eq('_very special tag')
-      expect(DumpRake::Dump.new('').send(:clean_tag, '+++++++++++')).to eq('_')
+      expect(Dump::Snapshot.new('').send(:clean_tag, ' Very special tag')).to eq('very special tag')
+      expect(Dump::Snapshot.new('').send(:clean_tag, '-Very special tag')).to eq('very special tag')
+      expect(Dump::Snapshot.new('').send(:clean_tag, '-----------')).to eq('')
+      expect(Dump::Snapshot.new('').send(:clean_tag, '+Very special tag')).to eq('_very special tag')
+      expect(Dump::Snapshot.new('').send(:clean_tag, '+++++++++++')).to eq('_')
     end
 
     it 'should accept non string' do
-      expect(DumpRake::Dump.new('').send(:clean_tag, nil)).to eq('')
+      expect(Dump::Snapshot.new('').send(:clean_tag, nil)).to eq('')
     end
   end
 
   describe 'clean_tags' do
     it 'should split string and return uniq non blank sorted tags' do
-      expect(DumpRake::Dump.new('').send(:clean_tags, ' perfect  tag , hello,Hello,this  is (*^(*&')).to eq(['hello', 'perfect tag', 'this is _'])
-      expect(DumpRake::Dump.new('').send(:clean_tags, "l#{'o' * 100}ng tag")).to eq(["l#{'o' * 19}"])
+      expect(Dump::Snapshot.new('').send(:clean_tags, ' perfect  tag , hello,Hello,this  is (*^(*&')).to eq(['hello', 'perfect tag', 'this is _'])
+      expect(Dump::Snapshot.new('').send(:clean_tags, "l#{'o' * 100}ng tag")).to eq(["l#{'o' * 19}"])
     end
 
     it 'should accept non string' do
-      expect(DumpRake::Dump.new('').send(:clean_tags, nil)).to eq([])
+      expect(Dump::Snapshot.new('').send(:clean_tags, nil)).to eq([])
     end
   end
 
   describe 'get_filter_tags' do
     it 'should split string and return uniq non blank sorted tags' do
-      expect(DumpRake::Dump.new('').send(:get_filter_tags, 'a,+b,+c,-d')).to eq({:simple => %w[a], :mandatory => %w[b c], :forbidden => %w[d]})
-      expect(DumpRake::Dump.new('').send(:get_filter_tags, ' a , + b , + c , - d ')).to eq({:simple => %w[a], :mandatory => %w[b c], :forbidden => %w[d]})
-      expect(DumpRake::Dump.new('').send(:get_filter_tags, ' a , + c , + b , - d ')).to eq({:simple => %w[a], :mandatory => %w[b c], :forbidden => %w[d]})
-      expect(DumpRake::Dump.new('').send(:get_filter_tags, ' a , + b , + , - ')).to eq({:simple => %w[a], :mandatory => %w[b], :forbidden => []})
-      expect(DumpRake::Dump.new('').send(:get_filter_tags, ' a , a , + b , + b , - d , - d ')).to eq({:simple => %w[a], :mandatory => %w[b], :forbidden => %w[d]})
-      expect{ DumpRake::Dump.new('').send(:get_filter_tags, 'a,+a') }.not_to raise_error
-      expect{ DumpRake::Dump.new('').send(:get_filter_tags, 'a,-a') }.to raise_error
-      expect{ DumpRake::Dump.new('').send(:get_filter_tags, '+a,-a') }.to raise_error
+      expect(Dump::Snapshot.new('').send(:get_filter_tags, 'a,+b,+c,-d')).to eq({:simple => %w[a], :mandatory => %w[b c], :forbidden => %w[d]})
+      expect(Dump::Snapshot.new('').send(:get_filter_tags, ' a , + b , + c , - d ')).to eq({:simple => %w[a], :mandatory => %w[b c], :forbidden => %w[d]})
+      expect(Dump::Snapshot.new('').send(:get_filter_tags, ' a , + c , + b , - d ')).to eq({:simple => %w[a], :mandatory => %w[b c], :forbidden => %w[d]})
+      expect(Dump::Snapshot.new('').send(:get_filter_tags, ' a , + b , + , - ')).to eq({:simple => %w[a], :mandatory => %w[b], :forbidden => []})
+      expect(Dump::Snapshot.new('').send(:get_filter_tags, ' a , a , + b , + b , - d , - d ')).to eq({:simple => %w[a], :mandatory => %w[b], :forbidden => %w[d]})
+      expect{ Dump::Snapshot.new('').send(:get_filter_tags, 'a,+a') }.not_to raise_error
+      expect{ Dump::Snapshot.new('').send(:get_filter_tags, 'a,-a') }.to raise_error
+      expect{ Dump::Snapshot.new('').send(:get_filter_tags, '+a,-a') }.to raise_error
     end
 
     it 'should accept non string' do
-      expect(DumpRake::Dump.new('').send(:get_filter_tags, nil)).to eq({:simple => [], :mandatory => [], :forbidden => []})
+      expect(Dump::Snapshot.new('').send(:get_filter_tags, nil)).to eq({:simple => [], :mandatory => [], :forbidden => []})
     end
   end
 
@@ -273,10 +274,10 @@ describe DumpRake::Dump do
     it 'should create tem dir, chdir there, symlink rails app root to assets, yield and unlink assets ever if something raised' do
       expect(Dir).to receive(:mktmpdir).and_yield('/tmp/abc')
       expect(Dir).to receive(:chdir).with('/tmp/abc').and_yield
-      expect(File).to receive(:symlink).with(DumpRake::RailsRoot, 'assets')
+      expect(File).to receive(:symlink).with(Dump.rails_root, 'assets')
       expect(File).to receive(:unlink).with('assets')
       expect do
-        DumpRake::Dump.new('').send(:assets_root_link) do |dir, prefix|
+        Dump::Snapshot.new('').send(:assets_root_link) do |dir, prefix|
           expect(dir).to eq('/tmp/abc')
           expect(prefix).to eq('assets')
           @yielded = true

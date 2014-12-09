@@ -1,6 +1,7 @@
 require 'spec_helper'
+require 'dump/env/filter'
 
-Filter = DumpRake::Env::Filter
+Filter = Dump::Env::Filter
 describe Filter do
   it 'should pass everything if initialized with nil' do
     filter = Filter.new(nil)

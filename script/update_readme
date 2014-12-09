@@ -4,17 +4,17 @@
 require 'bundler/setup'
 
 require 'pathname'
-require 'dump_rake/env'
+require 'dump/env'
 
 readme = Pathname('README.markdown')
 lines = readme.readlines.map(&:rstrip)
 readme.open('w') do |f|
   lines.each do |line|
     line.sub!(/^`(.+?)`.*—.*$/) do
-      key, names = DumpRake::Env::DICTIONARY.find{ |_key, values| values.include?(Regexp.last_match[1])  }
+      key, names = Dump::Env::DICTIONARY.find{ |_key, values| values.include?(Regexp.last_match[1])  }
       if key
         names = names.map{ |name| "`#{name}`" }.join(', ')
-        explanation = DumpRake::Env::EXPLANATIONS[key]
+        explanation = Dump::Env::EXPLANATIONS[key]
         "#{names} — #{explanation}"
       end
     end

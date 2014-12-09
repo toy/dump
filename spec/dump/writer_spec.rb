@@ -1,28 +1,28 @@
 require 'spec_helper'
-require 'dump_rake'
+require 'dump/writer'
 
-DumpWriter = DumpRake::DumpWriter
-describe DumpWriter do
+Writer = Dump::Writer
+describe Writer do
   describe 'create' do
     it 'should create selves instance and open' do
       @dump = double('dump')
       expect(@dump).to receive(:open)
-      expect(DumpWriter).to receive(:new).with('/abc/123.tmp').and_return(@dump)
-      DumpWriter.create('/abc/123.tmp')
+      expect(Writer).to receive(:new).with('/abc/123.tmp').and_return(@dump)
+      Writer.create('/abc/123.tmp')
     end
 
     it 'should call dump subroutines' do
       @dump = double('dump')
       allow(@dump).to receive(:open).and_yield(@dump)
       allow(@dump).to receive(:silence).and_yield
-      allow(DumpWriter).to receive(:new).and_return(@dump)
+      allow(Writer).to receive(:new).and_return(@dump)
 
       expect(@dump).to receive(:write_schema).ordered
       expect(@dump).to receive(:write_tables).ordered
       expect(@dump).to receive(:write_assets).ordered
       expect(@dump).to receive(:write_config).ordered
 
-      DumpWriter.create('/abc/123.tmp')
+      Writer.create('/abc/123.tmp')
     end
   end
 
@@ -30,7 +30,7 @@ describe DumpWriter do
     it 'should create dir for dump' do
       allow(Zlib::GzipWriter).to receive(:open)
       expect(FileUtils).to receive(:mkpath).with('/abc/def/ghi')
-      DumpWriter.new('/abc/def/ghi/123.tgz').open
+      Writer.new('/abc/def/ghi/123.tgz').open
     end
 
     it 'should set stream to gzipped tar writer' do
@@ -41,7 +41,7 @@ describe DumpWriter do
       expect(Archive::Tar::Minitar::Output).to receive(:open).with(@gzip).and_yield(@stream)
       expect(@gzip).to receive(:mtime=).with(Time.utc(2000))
 
-      @dump = DumpWriter.new('123.tgz')
+      @dump = Writer.new('123.tgz')
       expect(@dump).to receive(:lock).and_yield
       @dump.open do |dump|
         expect(dump).to eq(@dump)
@@ -55,7 +55,7 @@ describe DumpWriter do
       @tar = double('tar')
       @stream = double('stream', :tar => @tar)
       @config = {:tables => {}}
-      @dump = DumpWriter.new('123.tgz')
+      @dump = Writer.new('123.tgz')
       allow(@dump).to receive(:stream).and_return(@stream)
       allow(@dump).to receive(:config).and_return(@config)
       allow(Progress).to receive(:io).and_return(StringIO.new)
@@ -89,7 +89,7 @@ describe DumpWriter do
       it 'should set ENV[SCHEMA] to path of returned file' do
         @file = double('file', :path => 'db/schema.rb')
         allow(@dump).to receive(:create_file).and_yield(@file)
-        expect(DumpRake::Env).to receive(:with_env).with('SCHEMA' => 'db/schema.rb')
+        expect(Dump::Env).to receive(:with_env).with('SCHEMA' => 'db/schema.rb')
         @dump.write_schema
       end
 
@@ -181,7 +181,7 @@ describe DumpWriter do
         allow(@dump).to receive(:assets_to_dump).and_return(%w[images videos])
         allow(@dump).to receive(:create_file).and_yield(@file)
 
-        expect(Dir).to receive(:chdir).with(DumpRake::RailsRoot)
+        expect(Dir).to receive(:chdir).with(Dump.rails_root)
         @dump.write_assets
       end
 
@@ -303,7 +303,7 @@ describe DumpWriter do
         @task = double('task')
         allow(Rake::Task).to receive(:[]).and_return(@task)
         allow(@task).to receive(:invoke)
-        DumpRake::Env.with_env(:assets => 'images:videos') do
+        Dump::Env.with_env(:assets => 'images:videos') do
           expect(@dump.assets_to_dump).to eq(%w[images videos])
         end
       end
@@ -312,14 +312,14 @@ describe DumpWriter do
         @task = double('task')
         allow(Rake::Task).to receive(:[]).and_return(@task)
         allow(@task).to receive(:invoke)
-        DumpRake::Env.with_env(:assets => 'images,videos') do
+        Dump::Env.with_env(:assets => 'images,videos') do
           expect(@dump.assets_to_dump).to eq(%w[images videos])
         end
       end
 
       it 'should return empty array if calling rake task assets raises an exception' do
         allow(Rake::Task).to receive(:[]).and_raise('task assets not found')
-        DumpRake::Env.with_env(:assets => 'images:videos') do
+        Dump::Env.with_env(:assets => 'images:videos') do
           expect(@dump.assets_to_dump).to eq([])
         end
       end

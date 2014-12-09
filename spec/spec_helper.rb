@@ -1,9 +1,6 @@
 ENV['RAILS_ENV'] ||= 'test'
 
 require 'dummy_rails_app'
-require 'dump_rake'
-
-ActiveRecord::Base.logger = Logger.new(File.join(DumpRake::RailsRoot, 'log/dump.log'))
 
 def grab_output
   real_stdout, $stdout = $stdout, StringIO.new

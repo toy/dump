@@ -1,6 +1,6 @@
 # based on Timeout
 
-class DumpRake
+module Dump
   # Timeout if does not finish or defer in requested time
   module ContiniousTimeout
     class TimeoutException < ::Exception; end

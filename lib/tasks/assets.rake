@@ -1,14 +1,14 @@
-require 'dump_rake'
+require 'dump'
 
 task :assets do
-  ENV['ASSETS'] ||= DumpRake::Assets.assets
+  ENV['ASSETS'] ||= Dump::Assets.assets
 end
 
 namespace :assets do
-  desc 'Delete assets' << DumpRake::Env.explain_variables_for_command(:assets)
+  desc 'Delete assets' << Dump::Env.explain_variables_for_command(:assets)
   task :delete => :assets do
     ENV['ASSETS'].split(':').each do |asset|
-      DumpRake::Assets.glob_asset_children(asset, '*').each do |child|
+      Dump::Assets.glob_asset_children(asset, '*').each do |child|
         FileUtils.remove_entry(child)
       end
     end

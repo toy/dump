@@ -1,6 +1,7 @@
 require 'spec_helper'
+require 'dump/env'
 
-Env = DumpRake::Env
+Env = Dump::Env
 describe Env do
   def silence_warnings
     old_verbose, $VERBOSE = $VERBOSE, nil
