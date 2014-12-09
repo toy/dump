@@ -1,19 +1,11 @@
 # encoding: UTF-8
 
-require 'pathname'
-require 'find'
 require 'fileutils'
-require 'zlib'
-require 'tempfile'
 
 require 'rake'
-require 'archive/tar/minitar'
-require 'dump_rake/archive_tar_minitar_fix'
 require 'progress'
 
 require 'dump_rake/rails_root'
-require 'dump_rake/assets'
-require 'dump_rake/table_manipulation'
 require 'dump_rake/snapshot'
 require 'dump_rake/reader'
 require 'dump_rake/writer'

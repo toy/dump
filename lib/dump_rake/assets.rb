@@ -1,5 +1,7 @@
 # encoding: UTF-8
 
+require 'dump_rake'
+
 module DumpRake
   # Helper for listing assets for dump
   module Assets

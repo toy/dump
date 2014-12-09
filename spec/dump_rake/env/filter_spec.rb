@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'dump_rake/env/filter'
 
 Filter = DumpRake::Env::Filter
 describe Filter do

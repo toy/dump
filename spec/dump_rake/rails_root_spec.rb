@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'dump_rake/rails_root'
 
 def temp_remove_const(where, which)
   around do |example|

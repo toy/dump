@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'dump_rake/snapshot'
 
 describe DumpRake::Snapshot do
   def dump_path(file_name)

@@ -1,3 +1,11 @@
+require 'dump_rake/snapshot'
+require 'dump_rake/archive_tar_minitar'
+require 'dump_rake/assets'
+require 'progress'
+require 'rake'
+require 'zlib'
+require 'tempfile'
+
 module DumpRake
   # Creating dump
   class Writer < Snapshot

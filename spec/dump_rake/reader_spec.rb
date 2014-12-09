@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'dump_rake'
+require 'dump_rake/reader'
 require 'active_record/migration'
 
 Reader = DumpRake::Reader

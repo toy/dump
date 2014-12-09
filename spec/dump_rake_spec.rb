@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'dump_rake'
 
 describe DumpRake do
   describe 'versions' do

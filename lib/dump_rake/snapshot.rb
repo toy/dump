@@ -1,5 +1,9 @@
 # encoding: UTF-8
 
+require 'dump_rake/rails_root'
+require 'dump_rake/table_manipulation'
+require 'pathname'
+
 module DumpRake
   # Base class for dump
   class Snapshot

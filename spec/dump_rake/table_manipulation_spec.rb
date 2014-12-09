@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'dump_rake'
+require 'dump_rake/table_manipulation'
 
 TableManipulation = DumpRake::TableManipulation
 describe TableManipulation do

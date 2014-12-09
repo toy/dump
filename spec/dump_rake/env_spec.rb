@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'dump_rake/env'
 
 Env = DumpRake::Env
 describe Env do

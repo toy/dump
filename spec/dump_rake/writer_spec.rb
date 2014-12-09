@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'dump_rake'
+require 'dump_rake/writer'
 
 Writer = DumpRake::Writer
 describe Writer do

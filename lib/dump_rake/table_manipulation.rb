@@ -1,3 +1,5 @@
+require 'dump_rake/env'
+
 module DumpRake
   # Methods to work with db using ActiveRecord
   module TableManipulation

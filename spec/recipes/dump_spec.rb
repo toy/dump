@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'dump_rake'
 require 'capistrano'
 
 describe 'cap dump' do
