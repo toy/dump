@@ -69,8 +69,8 @@ module Dump
       connection.select_value("SELECT COUNT(*) FROM #{quote_table_name(table)}").to_i
     end
 
-    CHUNK_SIZE_MIN = 100 unless const_defined?(:CHUNK_SIZE_MIN)
-    CHUNK_SIZE_MAX = 3_000 unless const_defined?(:CHUNK_SIZE_MAX)
+    CHUNK_SIZE_MIN = 100
+    CHUNK_SIZE_MAX = 3_000
     def table_chunk_size(table)
       expected_row_size = table_columns(table).map do |column|
         case column.type

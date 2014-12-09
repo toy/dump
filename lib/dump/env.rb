@@ -20,7 +20,7 @@ module Dump
       :restore_tables => %w[RESTORE_TABLES],
       :restore_assets => %w[RESTORE_ASSETS],
       :show_size => %w[SHOW_SIZE], # internal
-    }.freeze unless defined? DICTIONARY
+    }.freeze
 
     EXPLANATIONS = {
       :desc => 'free form description of dump',
@@ -36,7 +36,7 @@ module Dump
       :restore_schema => 'don\'t read/change schema if you pass "0", "no" or "false" (useful to just restore data for table; note that schema info tables are also not restored)',
       :restore_tables => 'works as TABLES, but for restoring',
       :restore_assets => 'works as ASSETS, but for restoring',
-    }.freeze unless defined? EXPLANATIONS
+    }.freeze
 
     class << self
       def with_env(hash)
