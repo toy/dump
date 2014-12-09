@@ -13,7 +13,7 @@ module Dump
         fail 'Unknown rails app root'
       end.to_s
     end
-  end
 
-  extend RailsRoot
+    Dump.extend RailsRoot
+  end
 end
