@@ -11,7 +11,7 @@ require 'dump/reader'
 require 'dump/writer'
 require 'dump/env'
 
-require 'dump/railtie' if defined?(Rails)
+require 'dump/railtie' if defined?(Rails::Railtie)
 
 # Main interface
 module Dump
