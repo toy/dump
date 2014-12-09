@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'dump_rake/rails_root'
+require 'dump/rails_root'
 
 def temp_remove_const(where, which)
   around do |example|
@@ -16,7 +16,7 @@ def temp_remove_const(where, which)
 end
 
 describe 'RailsRoot' do
-  include DumpRake::RailsRoot
+  include Dump::RailsRoot
 
   before do
     @root = double('root')

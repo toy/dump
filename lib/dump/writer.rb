@@ -1,12 +1,12 @@
-require 'dump_rake/snapshot'
-require 'dump_rake/archive_tar_minitar'
-require 'dump_rake/assets'
+require 'dump/snapshot'
+require 'dump/archive_tar_minitar'
+require 'dump/assets'
 require 'progress'
 require 'rake'
 require 'zlib'
 require 'tempfile'
 
-module DumpRake
+module Dump
   # Creating dump
   class Writer < Snapshot
     attr_reader :stream, :config
@@ -50,7 +50,7 @@ module DumpRake
 
     def write_schema
       create_file('schema.rb') do |f|
-        DumpRake::Env.with_env('SCHEMA' => f.path) do
+        Dump::Env.with_env('SCHEMA' => f.path) do
           Rake::Task['db:schema:dump'].invoke
         end
       end
@@ -91,7 +91,7 @@ module DumpRake
       return if assets.blank?
 
       config[:assets] = {}
-      Dir.chdir(DumpRake.rails_root) do
+      Dir.chdir(Dump.rails_root) do
         assets = Dir[*assets].uniq
         assets.with_progress('Assets') do |asset|
           paths = Dir[File.join(asset, '**/*')]
@@ -118,7 +118,7 @@ module DumpRake
 
     def assets_to_dump
       Rake::Task['assets'].invoke
-      DumpRake::Env[:assets].split(DumpRake::Assets::SPLITTER)
+      Dump::Env[:assets].split(Dump::Assets::SPLITTER)
     rescue
       []
     end

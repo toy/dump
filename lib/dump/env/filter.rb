@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-module DumpRake
+module Dump
   module Env
     # Filter strings by simple pattern:
     #   'a,b,c' will pass only 'a', 'b' and 'c'

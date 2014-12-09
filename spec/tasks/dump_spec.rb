@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'dump_rake'
+require 'dump'
 require 'rake'
 
 describe 'rake dump' do
@@ -23,16 +23,16 @@ describe 'rake dump' do
       @task = @rake['dump:versions']
     end
 
-    it 'should call DumpRake.versions' do
-      expect(DumpRake).to receive(:versions)
+    it 'should call Dump.versions' do
+      expect(Dump).to receive(:versions)
       @task.invoke
     end
 
-    DumpRake::Env.variable_names_for_command(:versions) do |variable|
-      DumpRake::Env::DICTIONARY[variable].each do |name|
+    Dump::Env.variable_names_for_command(:versions) do |variable|
+      Dump::Env::DICTIONARY[variable].each do |name|
         it "should pass version if it is set through environment variable #{name}" do
-          expect(DumpRake).to receive(:versions).with(variable => '21376')
-          DumpRake::Env.with_env name => '21376' do
+          expect(Dump).to receive(:versions).with(variable => '21376')
+          Dump::Env.with_env name => '21376' do
             @task.invoke
           end
         end
@@ -45,16 +45,16 @@ describe 'rake dump' do
       @task = @rake['dump:create']
     end
 
-    it 'should call DumpRake.create' do
-      expect(DumpRake).to receive(:create)
+    it 'should call Dump.create' do
+      expect(Dump).to receive(:create)
       @task.invoke
     end
 
-    DumpRake::Env.variable_names_for_command(:create) do |variable|
-      DumpRake::Env::DICTIONARY[variable].each do |name|
+    Dump::Env.variable_names_for_command(:create) do |variable|
+      Dump::Env::DICTIONARY[variable].each do |name|
         it "should pass description if it is set through environment variable #{name}" do
-          expect(DumpRake).to receive(:create).with(variable => 'simple dump')
-          DumpRake::Env.with_env name => 'simple dump' do
+          expect(Dump).to receive(:create).with(variable => 'simple dump')
+          Dump::Env.with_env name => 'simple dump' do
             @task.invoke
           end
         end
@@ -67,16 +67,16 @@ describe 'rake dump' do
       @task = @rake['dump:restore']
     end
 
-    it 'should call DumpRake.restore' do
-      expect(DumpRake).to receive(:restore)
+    it 'should call Dump.restore' do
+      expect(Dump).to receive(:restore)
       @task.invoke
     end
 
-    DumpRake::Env.variable_names_for_command(:restore) do |variable|
-      DumpRake::Env::DICTIONARY[variable].each do |name|
+    Dump::Env.variable_names_for_command(:restore) do |variable|
+      Dump::Env::DICTIONARY[variable].each do |name|
         it "should pass version if it is set through environment variable #{name}" do
-          expect(DumpRake).to receive(:restore).with(variable => '21378')
-          DumpRake::Env.with_env name => '21378' do
+          expect(Dump).to receive(:restore).with(variable => '21378')
+          Dump::Env.with_env name => '21378' do
             @task.invoke
           end
         end
@@ -89,16 +89,16 @@ describe 'rake dump' do
       @task = @rake['dump:cleanup']
     end
 
-    it 'should call DumpRake.cleanup' do
-      expect(DumpRake).to receive(:cleanup)
+    it 'should call Dump.cleanup' do
+      expect(Dump).to receive(:cleanup)
       @task.invoke
     end
 
-    DumpRake::Env.variable_names_for_command(:cleanup) do |variable|
-      DumpRake::Env::DICTIONARY[variable].each do |name|
+    Dump::Env.variable_names_for_command(:cleanup) do |variable|
+      Dump::Env::DICTIONARY[variable].each do |name|
         it "should pass number of dumps to leave if it is set through environment variable #{name}" do
-          expect(DumpRake).to receive(:versions).with(variable => '21376')
-          DumpRake::Env.with_env name => '21376' do
+          expect(Dump).to receive(:versions).with(variable => '21376')
+          Dump::Env.with_env name => '21376' do
             @task.invoke
           end
         end

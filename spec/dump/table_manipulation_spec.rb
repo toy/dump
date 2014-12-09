@@ -1,7 +1,7 @@
 require 'spec_helper'
-require 'dump_rake/table_manipulation'
+require 'dump/table_manipulation'
 
-TableManipulation = DumpRake::TableManipulation
+TableManipulation = Dump::TableManipulation
 describe TableManipulation do
   include TableManipulation
 
@@ -99,31 +99,31 @@ describe TableManipulation do
       end
 
       it 'should select certain tables' do
-        DumpRake::Env.with_env(:tables => 'first,third,-fifth') do
+        Dump::Env.with_env(:tables => 'first,third,-fifth') do
           expect(tables_to_dump).to eq(%w[first schema_info schema_migrations])
         end
       end
 
       it 'should select skip certain tables' do
-        DumpRake::Env.with_env(:tables => '-first,third,-fifth') do
+        Dump::Env.with_env(:tables => '-first,third,-fifth') do
           expect(tables_to_dump).to eq(%w[second schema_info schema_migrations sessions])
         end
       end
 
       it 'should not exclude sessions table from result if asked to exclude nothing' do
-        DumpRake::Env.with_env(:tables => '-') do
+        Dump::Env.with_env(:tables => '-') do
           expect(tables_to_dump).to eq(%w[first second schema_info schema_migrations sessions])
         end
       end
 
       it 'should not exclude schema tables' do
-        DumpRake::Env.with_env(:tables => '-second,schema_info,schema_migrations') do
+        Dump::Env.with_env(:tables => '-second,schema_info,schema_migrations') do
           expect(tables_to_dump).to eq(%w[first schema_info schema_migrations sessions])
         end
       end
 
       it 'should not exclude schema tables ever if asked to dump only certain tables' do
-        DumpRake::Env.with_env(:tables => 'second') do
+        Dump::Env.with_env(:tables => 'second') do
           expect(tables_to_dump).to eq(%w[second schema_info schema_migrations])
         end
       end

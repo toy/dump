@@ -1,7 +1,7 @@
 require 'spec_helper'
-require 'dump_rake/writer'
+require 'dump/writer'
 
-Writer = DumpRake::Writer
+Writer = Dump::Writer
 describe Writer do
   describe 'create' do
     it 'should create selves instance and open' do
@@ -89,7 +89,7 @@ describe Writer do
       it 'should set ENV[SCHEMA] to path of returned file' do
         @file = double('file', :path => 'db/schema.rb')
         allow(@dump).to receive(:create_file).and_yield(@file)
-        expect(DumpRake::Env).to receive(:with_env).with('SCHEMA' => 'db/schema.rb')
+        expect(Dump::Env).to receive(:with_env).with('SCHEMA' => 'db/schema.rb')
         @dump.write_schema
       end
 
@@ -181,7 +181,7 @@ describe Writer do
         allow(@dump).to receive(:assets_to_dump).and_return(%w[images videos])
         allow(@dump).to receive(:create_file).and_yield(@file)
 
-        expect(Dir).to receive(:chdir).with(DumpRake.rails_root)
+        expect(Dir).to receive(:chdir).with(Dump.rails_root)
         @dump.write_assets
       end
 
@@ -303,7 +303,7 @@ describe Writer do
         @task = double('task')
         allow(Rake::Task).to receive(:[]).and_return(@task)
         allow(@task).to receive(:invoke)
-        DumpRake::Env.with_env(:assets => 'images:videos') do
+        Dump::Env.with_env(:assets => 'images:videos') do
           expect(@dump.assets_to_dump).to eq(%w[images videos])
         end
       end
@@ -312,14 +312,14 @@ describe Writer do
         @task = double('task')
         allow(Rake::Task).to receive(:[]).and_return(@task)
         allow(@task).to receive(:invoke)
-        DumpRake::Env.with_env(:assets => 'images,videos') do
+        Dump::Env.with_env(:assets => 'images,videos') do
           expect(@dump.assets_to_dump).to eq(%w[images videos])
         end
       end
 
       it 'should return empty array if calling rake task assets raises an exception' do
         allow(Rake::Task).to receive(:[]).and_raise('task assets not found')
-        DumpRake::Env.with_env(:assets => 'images:videos') do
+        Dump::Env.with_env(:assets => 'images:videos') do
           expect(@dump.assets_to_dump).to eq([])
         end
       end

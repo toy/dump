@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-module DumpRake
+module Dump
   # Get rails app root (Rails.root or RAILS_ROOT or fail)
   module RailsRoot
     def rails_root

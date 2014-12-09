@@ -1,11 +1,11 @@
 require 'spec_helper'
-require 'dump_rake'
+require 'dump'
 require 'tmpdir'
 
 class Chicken < ActiveRecord::Base
 end
 
-ActiveRecord::Base.logger = Logger.new(File.join(DumpRake.rails_root, 'log/dump.log'))
+ActiveRecord::Base.logger = Logger.new(File.join(Dump.rails_root, 'log/dump.log'))
 
 def database_configs
   YAML.load(IO.read(File.expand_path('../db/database.yml', __FILE__)))
@@ -122,13 +122,13 @@ end
 
 def call_rake_create(*args)
   call_rake do
-    DumpRake.create(*args)
+    Dump.create(*args)
   end
 end
 
 def call_rake_restore(*args)
   call_rake do
-    DumpRake.restore(*args)
+    Dump.restore(*args)
   end
 end
 
@@ -140,7 +140,7 @@ describe 'full cycle' do
     end
   end
   before do
-    allow(DumpRake).to receive(:rails_root).and_return(@tmp_dir)
+    allow(Dump).to receive(:rails_root).and_return(@tmp_dir)
     allow(Progress).to receive(:io).and_return(StringIO.new)
   end
 
@@ -210,7 +210,7 @@ describe 'full cycle' do
       adapters.each do |adapter|
         use_adapter(adapter) do
           dump_name = call_rake_create(:desc => adapter)[:stdout].strip
-          dump_path = File.join(DumpRake.rails_root, 'dump', dump_name)
+          dump_path = File.join(Dump.rails_root, 'dump', dump_name)
 
           data = []
           Zlib::GzipReader.open(dump_path) do |gzip|

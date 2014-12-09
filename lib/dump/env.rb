@@ -1,8 +1,8 @@
 # encoding: UTF-8
 
-require 'dump_rake/env/filter'
+require 'dump/env/filter'
 
-module DumpRake
+module Dump
   # Working with environment variables
   module Env
     DICTIONARY = {

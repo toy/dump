@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'dump_rake'
+require 'dump'
 require 'rake'
 
 describe 'rake assets' do
@@ -15,7 +15,7 @@ describe 'rake assets' do
       public/images/a
       public/images/b
     end_src
-    expect(File).to receive(:readlines).with(File.join(DumpRake.rails_root, 'config/assets')).and_return(StringIO.new(data).readlines)
+    expect(File).to receive(:readlines).with(File.join(Dump.rails_root, 'config/assets')).and_return(StringIO.new(data).readlines)
     @rake['assets'].invoke
     expect(ENV['ASSETS']).to eq('public/images/a:public/images/b')
   end
@@ -38,7 +38,7 @@ describe 'rake assets' do
       public/images/b
     end_src
     allow(File).to receive(:readlines).and_return(StringIO.new(data).readlines)
-    DumpRake::Env.with_env :assets => 'public/images' do
+    Dump::Env.with_env :assets => 'public/images' do
       @rake['assets'].invoke
       expect(ENV['ASSETS']).to eq('public/images')
     end
@@ -57,8 +57,8 @@ describe 'rake assets' do
       it 'should go through each asset from config' do
         allow(ENV).to receive(:[]).with('ASSETS').and_return('images:videos')
 
-        expect(File).to receive(:expand_path).with('images', DumpRake.rails_root).and_return('')
-        expect(File).to receive(:expand_path).with('videos', DumpRake.rails_root).and_return('')
+        expect(File).to receive(:expand_path).with('images', Dump.rails_root).and_return('')
+        expect(File).to receive(:expand_path).with('videos', Dump.rails_root).and_return('')
 
         @rake['assets:delete'].invoke
       end
@@ -67,8 +67,8 @@ describe 'rake assets' do
         @assets = %w[images videos]
         allow(ENV).to receive(:[]).with('ASSETS').and_return(@assets.join(':'))
         @assets.each do |asset|
-          mask = File.join(DumpRake.rails_root, asset, '*')
-          paths = %w[file1 file2 dir].map{ |file| File.join(DumpRake.rails_root, asset, file) }
+          mask = File.join(Dump.rails_root, asset, '*')
+          paths = %w[file1 file2 dir].map{ |file| File.join(Dump.rails_root, asset, file) }
           expect(Dir).to receive(:[]).with(mask).and_return([paths[0], paths[1], paths[2]])
           paths.each do |path|
             expect(FileUtils).to receive(:remove_entry).with(path)
@@ -82,8 +82,8 @@ describe 'rake assets' do
         @assets = %w[images / /private ../ ../.. ./../ dir/.. dir/../..]
         allow(ENV).to receive(:[]).with('ASSETS').and_return(@assets.join(':'))
 
-        expect(Dir).to receive(:[]).with(File.join(DumpRake.rails_root, 'images/*')).and_return([])
-        expect(Dir).to receive(:[]).with(File.join(DumpRake.rails_root, '*')).and_return([])
+        expect(Dir).to receive(:[]).with(File.join(Dump.rails_root, 'images/*')).and_return([])
+        expect(Dir).to receive(:[]).with(File.join(Dump.rails_root, '*')).and_return([])
         expect(FileUtils).not_to receive(:remove_entry)
 
         @rake['assets:delete'].invoke

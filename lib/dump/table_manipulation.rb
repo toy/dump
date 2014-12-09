@@ -1,6 +1,6 @@
-require 'dump_rake/env'
+require 'dump/env'
 
-module DumpRake
+module Dump
   # Methods to work with db using ActiveRecord
   module TableManipulation
   protected
@@ -56,9 +56,9 @@ module DumpRake
     end
 
     def tables_to_dump
-      if DumpRake::Env[:tables]
+      if Dump::Env[:tables]
         avaliable_tables.select do |table|
-          schema_tables.include?(table) || DumpRake::Env.filter(:tables).pass?(table)
+          schema_tables.include?(table) || Dump::Env.filter(:tables).pass?(table)
         end
       else
         avaliable_tables - %w[sessions]

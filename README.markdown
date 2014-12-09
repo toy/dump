@@ -2,7 +2,7 @@
 [![Build Status](https://img.shields.io/travis/toy/dump/master.svg?style=flat)](https://travis-ci.org/toy/dump)
 [![Code Climate](https://img.shields.io/codeclimate/github/toy/dump.svg?style=flat)](https://codeclimate.com/github/toy/dump)
 
-# DumpRake
+# Dump
 
 Rails app rake and capistrano tasks to create and restore dumps of database and assets.
 

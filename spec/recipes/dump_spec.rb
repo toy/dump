@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'dump_rake'
+require 'dump'
 require 'capistrano'
 
 describe 'cap dump' do
@@ -12,21 +12,21 @@ describe 'cap dump' do
   end
 
   def all_dictionary_variables
-    DumpRake::Env::DICTIONARY.each_with_object({}) do |(key, value), filled_env|
+    Dump::Env::DICTIONARY.each_with_object({}) do |(key, value), filled_env|
       filled_env[key] = value.join(' ')
     end
   end
 
   def self.test_passing_environment_variables(place, command, command_strings, options = {})
-    DumpRake::Env.variable_names_for_command(command).each do |variable|
+    Dump::Env.variable_names_for_command(command).each do |variable|
       command_string = command_strings[variable]
-      DumpRake::Env::DICTIONARY[variable].each do |name|
+      Dump::Env::DICTIONARY[variable].each do |name|
         it "should pass #{variable} if it is set through environment variable #{name}" do
           violated 'command_string not specified' unless command_string
           full_command_string = command_string
           full_command_string = "cd #{@remote_path}; #{command_string}" if place == :remote
           expect(@cap.dump).to receive(:"run_#{place}").with(full_command_string).and_return(options[:return_value] || '')
-          DumpRake::Env.with_env name => options[:value] || 'some data' do
+          Dump::Env.with_env name => options[:value] || 'some data' do
             cap_task = options[:cap_task] || "dump:#{place}:#{command}"
             grab_output{ @cap.find_and_execute_task(cap_task) }
           end
@@ -168,7 +168,7 @@ describe 'cap dump' do
       it 'should call local rake task with additional tag local' do
         expect(@cap.dump).to receive(:run_local).with('rake -s dump:create TAGS\\=local,photos').and_return('123.tgz')
         grab_output do
-          DumpRake::Env.with_env :tags => 'photos' do
+          Dump::Env.with_env :tags => 'photos' do
             @cap.find_and_execute_task('dump:local:create')
           end
         end
@@ -321,7 +321,7 @@ describe 'cap dump' do
       it 'should call remote rake task with default rails_env and additional tag remote' do
         expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; rake -s dump:create PROGRESS_TTY\\=\\+ RAILS_ENV\\=production TAGS\\=remote,photos").and_return('123.tgz')
         grab_output do
-          DumpRake::Env.with_env :tags => 'photos' do
+          Dump::Env.with_env :tags => 'photos' do
             @cap.find_and_execute_task('dump:remote:create')
           end
         end
@@ -401,8 +401,8 @@ describe 'cap dump' do
 
       it 'should block sending summary to versions' do
         expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions PROGRESS_TTY\\=\\+ RAILS_ENV\\=production").and_return('')
-        DumpRake::Env::DICTIONARY[:summary].each do |name|
-          DumpRake::Env.with_env name => 'true' do
+        Dump::Env::DICTIONARY[:summary].each do |name|
+          Dump::Env.with_env name => 'true' do
             @cap.find_and_execute_task('dump:remote:download')
           end
         end
@@ -470,13 +470,13 @@ describe 'cap dump' do
       dst = way[1]
       describe name do
         it 'should create auto-backup with tag auto-backup' do
-          expect(@cap.dump.namespaces[dst]).to receive(:create){ expect(DumpRake::Env[:tags]).to eq('auto-backup'); '' }
+          expect(@cap.dump.namespaces[dst]).to receive(:create){ expect(Dump::Env[:tags]).to eq('auto-backup'); '' }
           @cap.find_and_execute_task("dump:mirror:#{dir}")
         end
 
         it 'should create auto-backup with additional tag auto-backup' do
-          expect(@cap.dump.namespaces[dst]).to receive(:create){ expect(DumpRake::Env[:tags]).to eq('auto-backup,photos'); '' }
-          DumpRake::Env.with_env :tags => 'photos' do
+          expect(@cap.dump.namespaces[dst]).to receive(:create){ expect(Dump::Env[:tags]).to eq('auto-backup,photos'); '' }
+          Dump::Env.with_env :tags => 'photos' do
             @cap.find_and_execute_task("dump:mirror:#{dir}")
           end
         end
@@ -489,14 +489,14 @@ describe 'cap dump' do
 
         it "should call local:create if auto-backup succeedes with tags mirror and mirror-#{dir}" do
           allow(@cap.dump.namespaces[dst]).to receive(:create).and_return('123.tgz')
-          expect(@cap.dump.namespaces[src]).to receive(:create){ expect(DumpRake::Env[:tags]).to eq('mirror'); '' }
+          expect(@cap.dump.namespaces[src]).to receive(:create){ expect(Dump::Env[:tags]).to eq('mirror'); '' }
           @cap.find_and_execute_task("dump:mirror:#{dir}")
         end
 
         it "should call local:create if auto-backup succeedes with additional tags mirror and mirror-#{dir}" do
           allow(@cap.dump.namespaces[dst]).to receive(:create).and_return('123.tgz')
-          expect(@cap.dump.namespaces[src]).to receive(:create){ expect(DumpRake::Env[:tags]).to eq('mirror,photos'); '' }
-          DumpRake::Env.with_env :tags => 'photos' do
+          expect(@cap.dump.namespaces[src]).to receive(:create){ expect(Dump::Env[:tags]).to eq('mirror,photos'); '' }
+          Dump::Env.with_env :tags => 'photos' do
             @cap.find_and_execute_task("dump:mirror:#{dir}")
           end
         end
@@ -513,13 +513,13 @@ describe 'cap dump' do
           allow(@cap.dump.namespaces[dst]).to receive(:create).and_return('123.tgz')
           allow(@cap.dump.namespaces[src]).to receive(:create).and_return('123.tgz')
           test_env = proc do
-            expect(DumpRake::Env[:like]).to eq('123.tgz')
-            expect(DumpRake::Env[:tags]).to eq(nil)
-            expect(DumpRake::Env[:desc]).to eq(nil)
+            expect(Dump::Env[:like]).to eq('123.tgz')
+            expect(Dump::Env[:tags]).to eq(nil)
+            expect(Dump::Env[:desc]).to eq(nil)
           end
           expect(@cap.dump.namespaces[src]).to receive(:"#{dir}load").ordered(&test_env)
           expect(@cap.dump.namespaces[dst]).to receive(:restore).ordered(&test_env)
-          DumpRake::Env.with_env all_dictionary_variables do
+          Dump::Env.with_env all_dictionary_variables do
             @cap.find_and_execute_task("dump:mirror:#{dir}")
           end
         end
@@ -547,7 +547,7 @@ describe 'cap dump' do
 
     it 'should call remote:create with tag backup' do
       expect(@cap.dump.remote).to receive(:create) do
-        expect(DumpRake::Env[:tags]).to eq('backup')
+        expect(Dump::Env[:tags]).to eq('backup')
         ''
       end
       @cap.find_and_execute_task('dump:backup')
@@ -555,20 +555,20 @@ describe 'cap dump' do
 
     it 'should call remote:create with additional tag backup' do
       expect(@cap.dump.remote).to receive(:create) do
-        expect(DumpRake::Env[:tags]).to eq('backup,photos')
+        expect(Dump::Env[:tags]).to eq('backup,photos')
         ''
       end
-      DumpRake::Env.with_env :tags => 'photos' do
+      Dump::Env.with_env :tags => 'photos' do
         @cap.find_and_execute_task('dump:backup')
       end
     end
 
     it 'should pass description if it is set' do
       expect(@cap.dump.remote).to receive(:create) do
-        expect(DumpRake::Env[:desc]).to eq('remote dump')
+        expect(Dump::Env[:desc]).to eq('remote dump')
         ''
       end
-      DumpRake::Env.with_env :desc => 'remote dump' do
+      Dump::Env.with_env :desc => 'remote dump' do
         @cap.find_and_execute_task('dump:backup')
       end
     end
@@ -576,12 +576,12 @@ describe 'cap dump' do
     it 'should send only ver variable' do
       allow(@cap.dump.remote).to receive(:create).and_return('123.tgz')
       expect(@cap.dump.remote).to receive(:download) do
-        expect(DumpRake::Env[:like]).to eq('123.tgz')
-        expect(DumpRake::Env[:tags]).to eq(nil)
-        expect(DumpRake::Env[:desc]).to eq(nil)
+        expect(Dump::Env[:like]).to eq('123.tgz')
+        expect(Dump::Env[:tags]).to eq(nil)
+        expect(Dump::Env[:desc]).to eq(nil)
         ''
       end
-      DumpRake::Env.with_env all_dictionary_variables do
+      Dump::Env.with_env all_dictionary_variables do
         @cap.find_and_execute_task('dump:backup')
       end
     end
