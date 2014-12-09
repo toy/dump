@@ -91,7 +91,7 @@ module DumpRake
       return if assets.blank?
 
       config[:assets] = {}
-      Dir.chdir(DumpRake::RailsRoot) do
+      Dir.chdir(DumpRake.rails_root) do
         assets = Dir[*assets].uniq
         assets.with_progress('Assets') do |asset|
           paths = Dir[File.join(asset, '**/*')]

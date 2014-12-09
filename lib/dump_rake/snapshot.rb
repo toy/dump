@@ -9,7 +9,7 @@ module DumpRake
   class Snapshot
     include TableManipulation
     def self.list(options = {})
-      dumps = Dir[File.join(DumpRake::RailsRoot, 'dump', options[:all] ? '*.*' : '*.tgz')].sort.select{ |path| File.file?(path) }.map{ |path| new(path) }
+      dumps = Dir[File.join(DumpRake.rails_root, 'dump', options[:all] ? '*.*' : '*.tgz')].sort.select{ |path| File.file?(path) }.map{ |path| new(path) }
       dumps = dumps.select{ |dump| dump.name[options[:like]] } if options[:like]
       if options[:tags]
         tags = get_filter_tags(options[:tags])
@@ -132,9 +132,9 @@ module DumpRake
 
     def assets_root_link
       prefix = 'assets'
-      Dir.mktmpdir('assets', File.join(DumpRake::RailsRoot, 'tmp')) do |dir|
+      Dir.mktmpdir('assets', File.join(DumpRake.rails_root, 'tmp')) do |dir|
         Dir.chdir(dir) do
-          File.symlink(DumpRake::RailsRoot, prefix)
+          File.symlink(DumpRake.rails_root, prefix)
           begin
             yield dir, prefix
           ensure

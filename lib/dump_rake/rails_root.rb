@@ -1,13 +1,19 @@
 # encoding: UTF-8
 
-# Get rails app root (Rails.root or RAILS_ROOT or Dir.pwd)
 module DumpRake
-  RailsRoot = case
-  when defined?(Rails)
-    Rails.root
-  when defined?(RAILS_ROOT)
-    RAILS_ROOT
-  else
-    Dir.pwd
-  end.to_s
+  # Get rails app root (Rails.root or RAILS_ROOT or fail)
+  module RailsRoot
+    def rails_root
+      case
+      when defined?(Rails)
+        Rails.root
+      when defined?(RAILS_ROOT)
+        RAILS_ROOT
+      else
+        fail 'Unknown rails app root'
+      end.to_s
+    end
+  end
+
+  extend RailsRoot
 end

@@ -38,7 +38,7 @@ module DumpRake
     end
 
     def create(options = {})
-      dump = Snapshot.new(options.merge(:dir => File.join(DumpRake::RailsRoot, 'dump')))
+      dump = Snapshot.new(options.merge(:dir => File.join(rails_root, 'dump')))
 
       Writer.create(dump.tmp_path)
 

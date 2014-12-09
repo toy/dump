@@ -181,7 +181,7 @@ describe Writer do
         allow(@dump).to receive(:assets_to_dump).and_return(%w[images videos])
         allow(@dump).to receive(:create_file).and_yield(@file)
 
-        expect(Dir).to receive(:chdir).with(DumpRake::RailsRoot)
+        expect(Dir).to receive(:chdir).with(DumpRake.rails_root)
         @dump.write_assets
       end
 

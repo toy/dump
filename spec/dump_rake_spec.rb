@@ -85,7 +85,7 @@ describe DumpRake do
       it "should create file in 'rails app root'/dump" do
         allow(File).to receive(:rename)
         expect(DumpRake::Writer).to receive(:create) do |path|
-          expect(File.dirname(path)).to eq(File.join(DumpRake::RailsRoot, 'dump'))
+          expect(File.dirname(path)).to eq(File.join(DumpRake.rails_root, 'dump'))
         end
         grab_output do
           DumpRake.create

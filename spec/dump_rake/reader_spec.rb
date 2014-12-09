@@ -536,11 +536,11 @@ describe Reader do
             expect(DumpRake::Assets).to receive('glob_asset_children').with('images', '**/*').and_return(%w[images images/a.jpg images/b.jpg])
             expect(DumpRake::Assets).to receive('glob_asset_children').with('videos', '**/*').and_return(%w[videos videos/a.mov])
 
-            expect(@dump).to receive('read_asset?').with('images/b.jpg', DumpRake::RailsRoot).ordered.and_return(false)
-            expect(@dump).to receive('read_asset?').with('images/a.jpg', DumpRake::RailsRoot).ordered.and_return(true)
-            expect(@dump).to receive('read_asset?').with('images', DumpRake::RailsRoot).ordered.and_return(true)
-            expect(@dump).to receive('read_asset?').with('videos/a.mov', DumpRake::RailsRoot).ordered.and_return(false)
-            expect(@dump).to receive('read_asset?').with('videos', DumpRake::RailsRoot).ordered.and_return(false)
+            expect(@dump).to receive('read_asset?').with('images/b.jpg', DumpRake.rails_root).ordered.and_return(false)
+            expect(@dump).to receive('read_asset?').with('images/a.jpg', DumpRake.rails_root).ordered.and_return(true)
+            expect(@dump).to receive('read_asset?').with('images', DumpRake.rails_root).ordered.and_return(true)
+            expect(@dump).to receive('read_asset?').with('videos/a.mov', DumpRake.rails_root).ordered.and_return(false)
+            expect(@dump).to receive('read_asset?').with('videos', DumpRake.rails_root).ordered.and_return(false)
 
             expect(File).to receive('file?').with('images/a.jpg').and_return(true)
             expect(File).to receive('unlink').with('images/a.jpg')
@@ -604,7 +604,7 @@ describe Reader do
             @entries = %w[a b c d].map do |s|
               file = double("file_#{s}")
               each_excpectation.and_yield(file)
-              expect(@inp).to receive(:extract_entry).with(DumpRake::RailsRoot, file)
+              expect(@inp).to receive(:extract_entry).with(DumpRake.rails_root, file)
               file
             end
             expect(Archive::Tar::Minitar).to receive(:open).with(@assets_tar).and_yield(@inp)

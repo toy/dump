@@ -230,7 +230,7 @@ module DumpRake
       if DumpRake::Env[:restore_assets]
         assets_paths.each do |asset|
           DumpRake::Assets.glob_asset_children(asset, '**/*').reverse.each do |child|
-            next unless read_asset?(child, DumpRake::RailsRoot)
+            next unless read_asset?(child, DumpRake.rails_root)
             case
             when File.file?(child)
               File.unlink(child)
@@ -274,7 +274,7 @@ module DumpRake
           end
           Archive::Tar::Minitar.open(assets_tar) do |inp|
             inp.each do |entry|
-              yield inp, DumpRake::RailsRoot, entry, nil
+              yield inp, DumpRake.rails_root, entry, nil
               Progress.step if assets_count
             end
           end

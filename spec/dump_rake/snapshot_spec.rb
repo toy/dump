@@ -3,7 +3,7 @@ require 'dump_rake/snapshot'
 
 describe DumpRake::Snapshot do
   def dump_path(file_name)
-    File.join(DumpRake::RailsRoot, 'dump', file_name)
+    File.join(DumpRake.rails_root, 'dump', file_name)
   end
 
   def new_dump(file_name)
@@ -188,7 +188,7 @@ describe DumpRake::Snapshot do
 
   describe 'path' do
     it 'should return path' do
-      expect(new_dump('19650414065945.tgz').path).to eq(Pathname(File.join(DumpRake::RailsRoot, 'dump', '19650414065945.tgz')))
+      expect(new_dump('19650414065945.tgz').path).to eq(Pathname(File.join(DumpRake.rails_root, 'dump', '19650414065945.tgz')))
     end
   end
 
@@ -274,7 +274,7 @@ describe DumpRake::Snapshot do
     it 'should create tem dir, chdir there, symlink rails app root to assets, yield and unlink assets ever if something raised' do
       expect(Dir).to receive(:mktmpdir).and_yield('/tmp/abc')
       expect(Dir).to receive(:chdir).with('/tmp/abc').and_yield
-      expect(File).to receive(:symlink).with(DumpRake::RailsRoot, 'assets')
+      expect(File).to receive(:symlink).with(DumpRake.rails_root, 'assets')
       expect(File).to receive(:unlink).with('assets')
       expect do
         DumpRake::Snapshot.new('').send(:assets_root_link) do |dir, prefix|
