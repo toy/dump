@@ -58,17 +58,6 @@ def load_schema
   end
 end
 
-def in_temp_rails_app
-  old_rails_root = DumpRake.rails_root.dup
-  Dir.mktmpdir do |dir|
-    DumpRake.rails_root.replace(dir)
-    allow(Progress).to receive(:io).and_return(StringIO.new)
-    yield
-  end
-ensure
-  DumpRake.rails_root.replace(old_rails_root)
-end
-
 def create_chickens!(options = {})
   time = Time.local(2000, 'jan', 1, 20, 15, 1)
   data = {
@@ -144,102 +133,105 @@ def call_rake_restore(*args)
 end
 
 describe 'full cycle' do
+  around do |example|
+    Dir.mktmpdir do |dir|
+      @tmp_dir = dir
+      example.run
+    end
+  end
+  before do
+    allow(DumpRake).to receive(:rails_root).and_return(@tmp_dir)
+    allow(Progress).to receive(:io).and_return(StringIO.new)
+  end
+
   begin
     database_configs
 
     adapters.each do |adapter|
       it "should dump and restore using #{adapter}" do
-        in_temp_rails_app do
-          use_adapter(adapter) do
-            # add chickens store their attributes and create dump
-            create_chickens!(:random => 100)
-            saved_chicken_data = chicken_data
-            call_rake_create(:description => 'chickens')
+        use_adapter(adapter) do
+          # add chickens store their attributes and create dump
+          create_chickens!(:random => 100)
+          saved_chicken_data = chicken_data
+          call_rake_create(:description => 'chickens')
 
-            # clear database
-            load_schema
-            expect(Chicken.all).to eq([])
+          # clear database
+          load_schema
+          expect(Chicken.all).to eq([])
 
-            # restore dump and verify equality
-            call_rake_restore(:version => 'chickens')
-            expect(chicken_data).to eq(saved_chicken_data)
+          # restore dump and verify equality
+          call_rake_restore(:version => 'chickens')
+          expect(chicken_data).to eq(saved_chicken_data)
 
-            # go throught create/restore cycle and verify equality
-            call_rake_create
-            load_schema
-            expect(Chicken.all).to be_empty
-            call_rake_restore
-            expect(chicken_data).to eq(saved_chicken_data)
-          end
+          # go throught create/restore cycle and verify equality
+          call_rake_create
+          load_schema
+          expect(Chicken.all).to be_empty
+          call_rake_restore
+          expect(chicken_data).to eq(saved_chicken_data)
         end
       end
     end
 
     adapters.each do |adapter|
       it "should not break id incrementing using #{adapter}" do
-        in_temp_rails_app do
-          use_adapter(adapter) do
-            create_chickens!(:random => 100)
-            call_rake_create(:description => 'chickens')
-            load_schema
-            call_rake_restore(:version => 'chickens')
-            create_chickens!
-          end
+        use_adapter(adapter) do
+          create_chickens!(:random => 100)
+          call_rake_create(:description => 'chickens')
+          load_schema
+          call_rake_restore(:version => 'chickens')
+          create_chickens!
         end
       end
     end
 
     adapters.combination(2) do |adapter_src, adapter_dst|
       it "should dump using #{adapter_src} and restore using #{adapter_dst}" do
-        in_temp_rails_app do
-          saved_chicken_data = nil
-          use_adapter(adapter_src) do
-            expect(Chicken.all).to be_empty
+        saved_chicken_data = nil
+        use_adapter(adapter_src) do
+          expect(Chicken.all).to be_empty
 
-            create_chickens!(:random => 100)
-            saved_chicken_data = chicken_data
-            call_rake_create
-          end
+          create_chickens!(:random => 100)
+          saved_chicken_data = chicken_data
+          call_rake_create
+        end
 
-          use_adapter(adapter_dst) do
-            expect(Chicken.all).to be_empty
+        use_adapter(adapter_dst) do
+          expect(Chicken.all).to be_empty
 
-            call_rake_restore
-            expect(chicken_data).to eq(saved_chicken_data)
-          end
+          call_rake_restore
+          expect(chicken_data).to eq(saved_chicken_data)
         end
       end
     end
 
     it 'should create same dump for all adapters' do
-      in_temp_rails_app do
-        dumps = []
-        adapters.each do |adapter|
-          use_adapter(adapter) do
-            dump_name = call_rake_create(:desc => adapter)[:stdout].strip
-            dump_path = File.join(DumpRake.rails_root, 'dump', dump_name)
+      dumps = []
+      adapters.each do |adapter|
+        use_adapter(adapter) do
+          dump_name = call_rake_create(:desc => adapter)[:stdout].strip
+          dump_path = File.join(DumpRake.rails_root, 'dump', dump_name)
 
-            data = []
-            Zlib::GzipReader.open(dump_path) do |gzip|
-              Archive::Tar::Minitar.open(gzip, 'r') do |stream|
-                stream.each do |entry|
-                  entry_data = if entry.full_name == 'schema.rb'
-                    entry.read
-                  else
-                    Marshal.load(entry.read)
-                  end
-                  data << [entry.full_name, entry_data]
+          data = []
+          Zlib::GzipReader.open(dump_path) do |gzip|
+            Archive::Tar::Minitar.open(gzip, 'r') do |stream|
+              stream.each do |entry|
+                entry_data = if entry.full_name == 'schema.rb'
+                  entry.read
+                else
+                  Marshal.load(entry.read)
                 end
+                data << [entry.full_name, entry_data]
               end
             end
-            dumps << {:path => dump_path, :data => data.sort}
           end
+          dumps << {:path => dump_path, :data => data.sort}
         end
+      end
 
-        dumps.combination(2) do |dump_a, dump_b|
-          expect(dump_a[:path]).not_to eq(dump_b[:path])
-          expect(dump_a[:data]).to eq(dump_b[:data])
-        end
+      dumps.combination(2) do |dump_a, dump_b|
+        expect(dump_a[:path]).not_to eq(dump_b[:path])
+        expect(dump_a[:data]).to eq(dump_b[:data])
       end
     end
   rescue Errno::ENOENT => e
