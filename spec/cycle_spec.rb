@@ -5,6 +5,8 @@ require 'tmpdir'
 class Chicken < ActiveRecord::Base
 end
 
+ActiveRecord::Base.logger = Logger.new(File.join(DumpRake::RailsRoot, 'log/dump.log'))
+
 def database_configs
   YAML.load(IO.read(File.expand_path('../db/database.yml', __FILE__)))
 end
