@@ -26,18 +26,18 @@ describe 'RailsRoot' do
   temp_remove_const Object, :Rails
   temp_remove_const Object, :RAILS_ROOT
 
-  it 'should use Rails if it is present' do
+  it 'uses Rails if it is present' do
     Object.const_set('Rails', double('rails'))
     expect(Rails).to receive(:root).and_return(@root)
     expect(rails_root).to equal(@root)
   end
 
-  it 'should use RAILS_ROOT if it is present' do
+  it 'uses RAILS_ROOT if it is present' do
     Object.const_set('RAILS_ROOT', @root)
     expect(rails_root).to equal(@root)
   end
 
-  it 'should fail otherwaise' do
+  it 'fails otherwaise' do
     expect{ rails_root }.to raise_error
   end
 end

@@ -3,24 +3,24 @@ require 'dump'
 
 describe Dump do
   describe 'versions' do
-    it 'should call Snapshot.list if called without version' do
+    it 'calls Snapshot.list if called without version' do
       expect(Dump::Snapshot).to receive(:list).and_return([])
       Dump.versions
     end
 
-    it 'should call Snapshot.list with options if called with version' do
+    it 'calls Snapshot.list with options if called with version' do
       expect(Dump::Snapshot).to receive(:list).with(:like => '123').and_return([])
       Dump.versions(:like => '123')
     end
 
-    it 'should print versions' do
+    it 'prints versions' do
       expect(Dump::Snapshot).to receive(:list).and_return(%w[123.tgz 456.tgz])
       expect(grab_output do
         Dump.versions
       end[:stdout]).to eq("123.tgz\n456.tgz\n")
     end
 
-    it 'should not show summary if not asked for' do
+    it 'does not show summary if not asked for' do
       dumps = %w[123.tgz 456.tgz].map do |s|
         dump = double("dump_#{s}", :path => double("dump_#{s}_path"))
         expect(Dump::Reader).not_to receive(:summary)
@@ -34,7 +34,7 @@ describe Dump do
       end
     end
 
-    it 'should show summary if asked for' do
+    it 'shows summary if asked for' do
       dumps = %w[123.tgz 456.tgz].map do |s|
         dump = double("dump_#{s}", :path => double("dump_#{s}_path"))
         expect(Dump::Reader).to receive(:summary).with(dump.path)
@@ -48,7 +48,7 @@ describe Dump do
       end
     end
 
-    it 'should show summary with scmema if asked for' do
+    it 'shows summary with scmema if asked for' do
       dumps = %w[123.tgz 456.tgz].map do |s|
         dump = double("dump_#{s}", :path => double("dump_#{s}_path"))
         expect(Dump::Reader).to receive(:summary).with(dump.path, :schema => true)
@@ -62,7 +62,7 @@ describe Dump do
       end
     end
 
-    it 'should show output to stderr if summary raises error' do
+    it 'shows output to stderr if summary raises error' do
       allow(Dump::Reader).to receive(:summary)
       dumps = %w[123.tgz 456.tgz].map do |s|
         double("dump_#{s}", :path => double("dump_#{s}_path"))
@@ -82,7 +82,7 @@ describe Dump do
 
   describe 'create' do
     describe 'naming' do
-      it "should create file in 'rails app root'/dump" do
+      it "creates file in 'rails app root'/dump" do
         allow(File).to receive(:rename)
         expect(Dump::Writer).to receive(:create) do |path|
           expect(File.dirname(path)).to eq(File.join(Dump.rails_root, 'dump'))
@@ -92,7 +92,7 @@ describe Dump do
         end
       end
 
-      it "should create file with name like 'yyyymmddhhmmss.tmp' when called without description" do
+      it "creates file with name like 'yyyymmddhhmmss.tmp' when called without description" do
         allow(File).to receive(:rename)
         expect(Dump::Writer).to receive(:create) do |path|
           expect(File.basename(path)).to match(/^\d{14}\.tmp$/)
@@ -102,7 +102,7 @@ describe Dump do
         end
       end
 
-      it "should create file with name like 'yyyymmddhhmmss-Some text and _.tmp' when called with description 'Some text and !@'" do
+      it "creates file with name like 'yyyymmddhhmmss-Some text and _.tmp' when called with description 'Some text and !@'" do
         allow(File).to receive(:rename)
         expect(Dump::Writer).to receive(:create) do |path|
           expect(File.basename(path)).to match(/^\d{14}-Some text and _\.tmp$/)
@@ -112,7 +112,7 @@ describe Dump do
         end
       end
 
-      it "should create file with name like 'yyyymmddhhmmss@super tag,second.tmp' when called with description 'Some text and !@'" do
+      it "creates file with name like 'yyyymmddhhmmss@super tag,second.tmp' when called with description 'Some text and !@'" do
         allow(File).to receive(:rename)
         expect(Dump::Writer).to receive(:create) do |path|
           expect(File.basename(path)).to match(/^\d{14}-Some text and _\.tmp$/)
@@ -122,7 +122,7 @@ describe Dump do
         end
       end
 
-      it 'should rename file after creating' do
+      it 'renames file after creating' do
         expect(File).to receive(:rename) do |tmp_path, tgz_path|
           expect(File.basename(tmp_path)).to match(/^\d{14}-Some text and _\.tmp$/)
           expect(File.basename(tgz_path)).to match(/^\d{14}-Some text and _\.tgz$/)
@@ -133,7 +133,7 @@ describe Dump do
         end
       end
 
-      it 'should output file name' do
+      it 'outputs file name' do
         allow(File).to receive(:rename)
         allow(Dump::Writer).to receive(:create)
         expect(grab_output do
@@ -143,7 +143,7 @@ describe Dump do
     end
 
     describe 'writing' do
-      it 'should dump schema, tables, assets' do
+      it 'dumps schema, tables, assets' do
         allow(File).to receive(:rename)
         @dump = double('dump')
         expect(Dump::Writer).to receive(:create)
@@ -157,7 +157,7 @@ describe Dump do
 
   describe 'restore' do
     describe 'without version' do
-      it 'should call Snapshot.list' do
+      it 'calls Snapshot.list' do
         allow(Dump::Snapshot).to receive(:list)
         expect(Dump::Snapshot).to receive(:list).and_return([])
         grab_output do
@@ -165,7 +165,7 @@ describe Dump do
         end
       end
 
-      it 'should not call Reader.restore and should call Snapshot.list and output it to $stderr if there are no versions at all' do
+      it 'does not call Reader.restore and should call Snapshot.list and output it to $stderr if there are no versions at all' do
         allow(Dump::Snapshot).to receive(:list).and_return([])
         expect(Dump::Reader).not_to receive(:restore)
         all_dumps = double('all_dumps')
@@ -177,7 +177,7 @@ describe Dump do
         end
       end
 
-      it 'should not call Reader.restore and should call Snapshot.list and output it to $stderr if there are no versions at all' do
+      it 'does not call Reader.restore and should call Snapshot.list and output it to $stderr if there are no versions at all' do
         allow(Dump::Snapshot).to receive(:list).and_return([])
         expect(Dump::Reader).not_to receive(:restore)
         all_dumps = double('all_dumps')
@@ -189,7 +189,7 @@ describe Dump do
         end
       end
 
-      it 'should call Reader.restore if there are versions' do
+      it 'calls Reader.restore if there are versions' do
         @dump = double('dump', :path => 'dump/213.tgz')
         expect(Dump::Snapshot).to receive(:list).once.and_return([@dump])
         expect(Dump::Reader).to receive(:restore).with('dump/213.tgz')
@@ -201,7 +201,7 @@ describe Dump do
     end
 
     describe 'with version' do
-      it 'should call Snapshot.list with options' do
+      it 'calls Snapshot.list with options' do
         allow(Dump::Snapshot).to receive(:list)
         expect(Dump::Snapshot).to receive(:list).with(:like => '213').and_return([])
         grab_output do
@@ -209,7 +209,7 @@ describe Dump do
         end
       end
 
-      it 'should not call Reader.restore and should call versions if desired version not found' do
+      it 'does not call Reader.restore and should call versions if desired version not found' do
         allow(Dump::Snapshot).to receive(:list).and_return([])
         expect(Dump::Reader).not_to receive(:restore)
         all_dumps = double('all_dumps')
@@ -221,7 +221,7 @@ describe Dump do
         end
       end
 
-      it 'should call Reader.restore if there is desired version' do
+      it 'calls Reader.restore if there is desired version' do
         @dump = double('dump', :path => 'dump/213.tgz')
         expect(Dump::Snapshot).to receive(:list).once.and_return([@dump])
         expect(Dump::Reader).to receive(:restore).with('dump/213.tgz')
@@ -232,7 +232,7 @@ describe Dump do
         end
       end
 
-      it 'should call Reader.restore on last version if found multiple matching versions' do
+      it 'calls Reader.restore on last version if found multiple matching versions' do
         @dump_a = double('dump_a', :path => 'dump/213-a.tgz')
         @dump_b = double('dump_b', :path => 'dump/213-b.tgz')
         expect(Dump::Snapshot).to receive(:list).once.and_return([@dump_a, @dump_b])
@@ -246,13 +246,13 @@ describe Dump do
   end
 
   describe 'cleanup' do
-    it 'should call ask for all files in dump dir and for dumps' do
+    it 'calls ask for all files in dump dir and for dumps' do
       expect(Dump::Snapshot).to receive(:list).with(:all => true).and_return([])
       expect(Dump::Snapshot).to receive(:list).with({}).and_return([])
       Dump.cleanup
     end
 
-    it 'should call Snapshot.list with options if called with version and tags' do
+    it 'calls Snapshot.list with options if called with version and tags' do
       expect(Dump::Snapshot).to receive(:list).with(:like => '123', :tags => 'a,b,c', :all => true).and_return([])
       expect(Dump::Snapshot).to receive(:list).with(:like => '123', :tags => 'a,b,c').and_return([])
       Dump.cleanup(:like => '123', :tags => 'a,b,c')
@@ -267,7 +267,7 @@ describe Dump do
       {:leave => '15'} => [],
       {:leave => 'none'} => [0..9],
     }.each do |options, ids|
-      it "should call delete #{ids} dumps when called with #{options}" do
+      it "calls delete #{ids} dumps when called with #{options}" do
         dumps = %w[a b c d e f g h i j].map do |s|
           double("dump_#{s}", :ext => 'tgz', :path => double("dump_#{s}_path"))
         end
@@ -297,7 +297,7 @@ describe Dump do
       end
     end
 
-    it 'should print to stderr if can not delete dump' do
+    it 'prints to stderr if can not delete dump' do
       dumps = %w[a b c d e f g h i j].map do |s|
         dump = double("dump_#{s}", :ext => 'tgz', :path => double("dump_#{s}_path"))
         allow(dump).to receive(:lock).and_yield
@@ -318,7 +318,7 @@ describe Dump do
       end
     end
 
-    it "should raise if called with :leave which is not a number or 'none'" do
+    it "raises if called with :leave which is not a number or 'none'" do
       expect do
         Dump.cleanup(:leave => 'nothing')
       end.to raise_error

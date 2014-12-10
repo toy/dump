@@ -148,7 +148,7 @@ describe 'full cycle' do
     database_configs
 
     adapters.each do |adapter|
-      it "should dump and restore using #{adapter}" do
+      it "dumps and restores using #{adapter}" do
         use_adapter(adapter) do
           # add chickens store their attributes and create dump
           create_chickens!(:random => 100)
@@ -174,7 +174,7 @@ describe 'full cycle' do
     end
 
     adapters.each do |adapter|
-      it "should not break id incrementing using #{adapter}" do
+      it "does not break id incrementing using #{adapter}" do
         use_adapter(adapter) do
           create_chickens!(:random => 100)
           call_rake_create(:description => 'chickens')
@@ -186,7 +186,7 @@ describe 'full cycle' do
     end
 
     adapters.combination(2) do |adapter_src, adapter_dst|
-      it "should dump using #{adapter_src} and restore using #{adapter_dst}" do
+      it "dumps using #{adapter_src} and restores using #{adapter_dst}" do
         saved_chicken_data = nil
         use_adapter(adapter_src) do
           expect(Chicken.all).to be_empty
@@ -205,7 +205,7 @@ describe 'full cycle' do
       end
     end
 
-    it 'should create same dump for all adapters' do
+    it 'creates same dump for all adapters' do
       dumps = []
       adapters.each do |adapter|
         use_adapter(adapter) do

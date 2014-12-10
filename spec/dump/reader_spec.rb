@@ -5,14 +5,14 @@ require 'active_record/migration'
 Reader = Dump::Reader
 describe Reader do
   describe 'restore' do
-    it 'should create selves instance and open' do
+    it 'creates instance and opens' do
       @dump = double('dump')
       expect(@dump).to receive(:open)
       expect(Reader).to receive(:new).with('/abc/123.tmp').and_return(@dump)
       Reader.restore('/abc/123.tmp')
     end
 
-    it 'should call dump subroutines' do
+    it 'calls dump subroutines' do
       @dump = double('dump')
       allow(@dump).to receive(:open).and_yield(@dump)
       allow(@dump).to receive(:silence).and_yield
@@ -31,7 +31,7 @@ describe Reader do
   describe 'summary' do
     Summary = Reader::Summary
     describe Summary do
-      it 'should format text' do
+      it 'formats text' do
         @summary = Summary.new
         @summary.header 'One'
         @summary.data(%w[fff ggg jjj ppp qqq www])
@@ -57,14 +57,14 @@ describe Reader do
         expect("#{@summary}").to eq(output.gsub(/#{output[/^\s+/]}/, '  '))
       end
 
-      it 'should pluralize' do
+      it 'pluralizes' do
         expect(Summary.pluralize(0, 'file')).to eq('0 files')
         expect(Summary.pluralize(1, 'file')).to eq('1 file')
         expect(Summary.pluralize(10, 'file')).to eq('10 files')
       end
     end
 
-    it 'should create selves instance and open' do
+    it 'creates instance and opens' do
       @dump = double('dump')
       expect(@dump).to receive(:open)
       expect(Reader).to receive(:new).with('/abc/123.tmp').and_return(@dump)
@@ -76,7 +76,7 @@ describe Reader do
       {'path/a' => 10, 'path/b' => 20} => ['path/a: 10 entries', 'path/b: 20 entries'],
       %w[path/a path/b] => %w[path/a path/b],
     }.each do |assets, formatted_assets|
-      it 'should call dump subroutines and create summary' do
+      it 'calls dump subroutines and creates summary' do
         tables = {'a' => 10, 'b' => 20, 'c' => 666}
         formatted_tables = ['a: 10 rows', 'b: 20 rows', 'c: 666 rows']
 
@@ -97,7 +97,7 @@ describe Reader do
       end
     end
 
-    it 'should call dump subroutines and create summary with schema' do
+    it 'calls dump subroutines and creates summary with schema' do
       tables = {'a' => 10, 'b' => 20, 'c' => 666}
       formatted_tables = ['a: 10 rows', 'b: 20 rows', 'c: 666 rows']
       assets = formatted_assets = %w[path/a path/b]
@@ -127,7 +127,7 @@ describe Reader do
   end
 
   describe 'open' do
-    it 'should set stream to gzipped tar reader' do
+    it 'sets stream to gzipped tar reader' do
       @gzip = double('gzip')
       @stream = double('stream')
       expect(Zlib::GzipReader).to receive(:open).with(Pathname('123.tgz')).and_yield(@gzip)
@@ -152,19 +152,19 @@ describe Reader do
     end
 
     describe 'find_entry' do
-      it 'should find first entry in stream equal string' do
+      it 'finds first entry in stream equal string' do
         @dump.find_entry('config') do |entry|
           expect(entry).to eq(@e1)
         end
       end
 
-      it 'should find first entry in stream matching regexp' do
+      it 'finds first entry in stream matching regexp' do
         @dump.find_entry(/\.dump$/) do |entry|
           expect(entry).to eq(@e2)
         end
       end
 
-      it 'should return result of block' do
+      it 'returns result of block' do
         expect(@dump.find_entry(/\.dump$/) do |_entry|
           'hello'
         end).to eq('hello')
@@ -172,23 +172,23 @@ describe Reader do
     end
 
     describe 'read_entry' do
-      it 'should call find_entry' do
+      it 'calls find_entry' do
         expect(@dump).to receive(:find_entry).with('config').and_yield(@e1)
         @dump.read_entry('config')
       end
 
-      it 'should read entries data' do
+      it 'reads entries data' do
         expect(@dump.read_entry('config')).to eq('config_data')
       end
     end
 
     describe 'read_entry_to_file' do
-      it 'should call find_entry' do
+      it 'calls find_entry' do
         expect(@dump).to receive(:find_entry).with('config')
         @dump.read_entry_to_file('config')
       end
 
-      it 'should open temp file, write data there, rewind and yield that file' do
+      it 'opens temp file, writes data there, rewinds and yields that file' do
         @entry = double('entry')
         allow(@dump).to receive(:find_entry).and_yield(@entry)
         @temp = double('temp')
@@ -216,7 +216,7 @@ describe Reader do
     end
 
     describe 'read_config' do
-      it 'should read config' do
+      it 'reads config' do
         @data = {:tables => {:first => 1}, :assets => %w[images videos]}
         expect(@dump).to receive(:read_entry).with('config').and_return(Marshal.dump(@data))
 
@@ -226,7 +226,7 @@ describe Reader do
     end
 
     describe 'migrate_down' do
-      it 'should not invoke rake tasks or find_entry if migrate_down is 0, no or false' do
+      it 'does not invoke rake tasks or find_entry if migrate_down is 0, no or false' do
         expect(Rake::Task).not_to receive(:[])
         expect(@dump).not_to receive(:find_entry)
 
@@ -241,7 +241,7 @@ describe Reader do
         end
       end
 
-      it 'should invoke db:drop and db:create if migrate_down is reset' do
+      it 'invokes db:drop and db:create if migrate_down is reset' do
         @load_task = double('drop_task')
         @dump_task = double('create_task')
         expect(Rake::Task).to receive(:[]).with('db:drop').and_return(@load_task)
@@ -256,7 +256,7 @@ describe Reader do
 
       [nil, '1'].each do |migrate_down_value|
         describe "when migrate_down is #{migrate_down_value.inspect}" do
-          it 'should not find_entry if table schema_migrations is not present' do
+          it 'does not find_entry if table schema_migrations is not present' do
             allow(@dump).to receive(:avaliable_tables).and_return(%w[first])
             expect(@dump).not_to receive(:find_entry)
 
@@ -265,7 +265,7 @@ describe Reader do
             end
           end
 
-          it 'should find schema_migrations.dump if table schema_migrations is present' do
+          it 'finds schema_migrations.dump if table schema_migrations is present' do
             allow(@dump).to receive(:avaliable_tables).and_return(%w[schema_migrations first])
             expect(@dump).to receive(:find_entry).with('schema_migrations.dump')
 
@@ -274,7 +274,7 @@ describe Reader do
             end
           end
 
-          it 'should call migrate down for each version not present in schema_migrations table' do
+          it 'calls migrate down for each version not present in schema_migrations table' do
             @entry = StringIO.new
             Marshal.dump(['version'], @entry)
             %w[1 2 3 4].each do |i|
@@ -317,12 +317,12 @@ describe Reader do
         allow(@task).to receive(:invoke)
       end
 
-      it 'should read schema.rb to temp file' do
+      it 'reads schema.rb to temp file' do
         expect(@dump).to receive(:read_entry_to_file).with('schema.rb')
         @dump.read_schema
       end
 
-      it 'should set ENV SCHEMA to temp files path' do
+      it 'sets ENV SCHEMA to temp files path' do
         @file = double('tempfile', :path => '/temp/123-arst')
         allow(@dump).to receive(:read_entry_to_file).and_yield(@file)
 
@@ -330,7 +330,7 @@ describe Reader do
         @dump.read_schema
       end
 
-      it 'should call task db:schema:load and db:schema:dump' do
+      it 'calls task db:schema:load and db:schema:dump' do
         @file = double('tempfile', :path => '/temp/123-arst')
         allow(@dump).to receive(:read_entry_to_file).and_yield(@file)
 
@@ -346,7 +346,7 @@ describe Reader do
     end
 
     describe 'schema' do
-      it 'should read schema' do
+      it 'reads schema' do
         @data = 'create table, rows, etc...'
         expect(@dump).to receive(:read_entry).with('schema.rb').and_return(@data)
         expect(@dump.schema).to eq(@data)
@@ -354,13 +354,13 @@ describe Reader do
     end
 
     describe 'read_tables' do
-      it 'should verify connection' do
+      it 'verifies connection' do
         allow(@dump).to receive(:config).and_return({:tables => []})
         expect(@dump).to receive(:verify_connection)
         @dump.read_tables
       end
 
-      it 'should call read_table for each table in config' do
+      it 'calls read_table for each table in config' do
         allow(@dump).to receive(:verify_connection)
         allow(@dump).to receive(:config).and_return({:tables => {'first' => 1, 'second' => 3}})
 
@@ -371,7 +371,7 @@ describe Reader do
       end
 
       describe 'when called with restore_tables' do
-        it 'should verify connection and call read_table for each table in restore_tables' do
+        it 'verifies connection and calls read_table for each table in restore_tables' do
           allow(@dump).to receive(:config).and_return({:tables => {'first' => 1, 'second' => 3}})
 
           expect(@dump).to receive(:verify_connection)
@@ -383,7 +383,7 @@ describe Reader do
           end
         end
 
-        it 'should not verfiy connection or call read_table for empty restore_tables' do
+        it 'does not verfiy connection or call read_table for empty restore_tables' do
           allow(@dump).to receive(:config).and_return({:tables => {'first' => 1, 'second' => 3}})
 
           expect(@dump).not_to receive(:verify_connection)
@@ -397,13 +397,13 @@ describe Reader do
     end
 
     describe 'read_table' do
-      it 'should not read table if no entry found for table' do
+      it 'does not read table if no entry found for table' do
         expect(@dump).to receive(:find_entry).with('first.dump').and_return(nil)
         expect(@dump).not_to receive(:quote_table_name)
         @dump.read_table('first', 10)
       end
 
-      it 'should clear table and read table if entry found for table' do
+      it 'clears table and reads table if entry found for table' do
         @entry = double('entry', :to_str => Marshal.dump('data'), :eof? => true)
         expect(@dump).to receive(:columns_insert_sql).with('data')
         expect(@dump).to receive(:find_entry).with('first.dump').and_yield(@entry)
@@ -412,7 +412,7 @@ describe Reader do
         @dump.read_table('first', 10)
       end
 
-      it 'should clear schema table before writing' do
+      it 'clears schema table before writing' do
         @entry = double('entry', :to_str => Marshal.dump('data'), :eof? => true)
         expect(@dump).to receive(:columns_insert_sql).with('data')
         expect(@dump).to receive(:find_entry).with('schema_migrations.dump').and_yield(@entry)
@@ -437,7 +437,7 @@ describe Reader do
 
           allow(@dump).to receive(:find_entry).and_yield(@entry)
         end
-        it 'should read to eof' do
+        it 'reads to eof' do
           create_entry(2500)
           allow(@dump).to receive(:clear_table)
           allow(@dump).to receive(:insert_into_table)
@@ -449,7 +449,7 @@ describe Reader do
           match{ |actual| actual.length == n }
         end
 
-        it 'should try to insert rows in slices of 1000 rows' do
+        it 'tries to insert rows in slices of 1000 rows' do
           create_entry(2500)
           allow(@dump).to receive(:clear_table)
           expect(@dump).to receive(:insert_into_table).with(anything, anything, object_of_length(1000)).twice
@@ -458,7 +458,7 @@ describe Reader do
           @dump.read_table('first', 2500)
         end
 
-        it 'should try to insert row by row if slice method fails' do
+        it 'tries to insert row by row if slice method fails' do
           create_entry(2500)
           allow(@dump).to receive(:clear_table)
           expect(@dump).to receive(:insert_into_table).with(anything, anything, kind_of(Array)).exactly(3).times.and_raise('sql error')
@@ -466,7 +466,7 @@ describe Reader do
           @dump.read_table('first', 2500)
         end
 
-        it 'should quote table, columns and values and send them to insert_into_table' do
+        it 'quotes table, columns and values and sends them to insert_into_table' do
           create_entry(100)
           allow(@dump).to receive(:clear_table)
           expect(@dump).to receive(:quote_table_name).with('first').and_return('`first`')
@@ -489,13 +489,13 @@ describe Reader do
         allow(@dump).to receive(:assets_root_link).and_yield('/tmp', 'assets')
       end
 
-      it 'should not read assets if config[:assets] is nil' do
+      it 'does not read assets if config[:assets] is nil' do
         allow(@dump).to receive(:config).and_return({})
         expect(@dump).not_to receive(:find_entry)
         @dump.read_assets
       end
 
-      it 'should not read assets if config[:assets] is blank' do
+      it 'does not read assets if config[:assets] is blank' do
         allow(@dump).to receive(:config).and_return({:assets => []})
         expect(@dump).not_to receive(:find_entry)
         @dump.read_assets
@@ -506,7 +506,7 @@ describe Reader do
           allow(@stream).to receive(:each)
         end
 
-        it 'should call assets:delete' do
+        it 'calls assets:delete' do
           @assets = %w[images videos]
           allow(@dump).to receive(:config).and_return({:assets => @assets})
           allow(@dump).to receive(:find_entry)
@@ -516,7 +516,7 @@ describe Reader do
           @dump.read_assets
         end
 
-        it 'should call assets:delete with ASSETS set to config[:assets] joined with :' do
+        it 'calls assets:delete with ASSETS set to config[:assets] joined with :' do
           @assets = %w[images videos]
           allow(@dump).to receive(:config).and_return({:assets => @assets})
           allow(@dump).to receive(:find_entry)
@@ -529,7 +529,7 @@ describe Reader do
         end
 
         describe 'when called with restore_assets' do
-          it 'should delete files and dirs only in requested paths' do
+          it 'deletes files and dirs only in requested paths' do
             @assets = %w[images videos]
             allow(@dump).to receive(:config).and_return({:assets => @assets})
 
@@ -554,7 +554,7 @@ describe Reader do
             end
           end
 
-          it 'should not delete any files and dirs for empty list' do
+          it 'does not delete any files and dirs for empty list' do
             @assets = %w[images videos]
             allow(@dump).to receive(:config).and_return({:assets => @assets})
 
@@ -574,7 +574,7 @@ describe Reader do
       end
 
       describe 'old style' do
-        it 'should find assets.tar' do
+        it 'finds assets.tar' do
           @assets = %w[images videos]
           allow(@dump).to receive(:config).and_return({:assets => @assets})
           allow(Dir).to receive(:glob).and_return([])
@@ -590,7 +590,7 @@ describe Reader do
           {'images' => 0, 'videos' => 0},
           {'images' => {:files => 0, :total => 0}, 'videos' => {:files => 0, :total => 0}},
         ].each do |assets|
-          it 'should rewrite rewind method to empty method - to not raise exception, open tar and extract each entry' do
+          it 'rewrites rewind method to empty method - to not raise exception, opens tar and extracts each entry' do
             allow(@dump).to receive(:config).and_return({:assets => assets})
             allow(Dir).to receive(:glob).and_return([])
             allow(FileUtils).to receive(:remove_entry)
@@ -624,7 +624,7 @@ describe Reader do
           {'images' => 0, 'videos' => 0},
           {'images' => {:files => 0, :total => 0}, 'videos' => {:files => 0, :total => 0}},
         ].each do |assets|
-          it 'should extract each entry' do
+          it 'extracts each entry' do
             allow(@dump).to receive(:config).and_return({:assets => assets})
             allow(Dir).to receive(:glob).and_return([])
             allow(FileUtils).to receive(:remove_entry)
@@ -648,7 +648,7 @@ describe Reader do
     end
 
     describe 'read_asset?' do
-      it 'should create filter and call custom_pass? on it' do
+      it 'creates filter and call custom_pass? on it' do
         @filter = double('filter')
         allow(@filter).to receive('custom_pass?')
 
@@ -657,7 +657,7 @@ describe Reader do
         @dump.read_asset?('a', 'b')
       end
 
-      it 'should test path usint fnmatch' do
+      it 'tests path usint fnmatch' do
         Dump::Env.with_env(:restore_assets => '[a-b]') do
           expect(@dump.read_asset?('x/a', 'x')).to be_truthy
           expect(@dump.read_asset?('x/b/file', 'x')).to be_truthy

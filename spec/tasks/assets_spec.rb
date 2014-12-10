@@ -10,7 +10,7 @@ describe 'rake assets' do
     ENV['ASSETS'] = nil
   end
 
-  it "should set ENV['ASSETS'] to paths from config/assets" do
+  it "sets ENV['ASSETS'] to paths from config/assets" do
     data = <<-end_src
       public/images/a
       public/images/b
@@ -20,7 +20,7 @@ describe 'rake assets' do
     expect(ENV['ASSETS']).to eq('public/images/a:public/images/b')
   end
 
-  it 'should ignore comments in config/assets' do
+  it 'ignores comments in config/assets' do
     data = <<-end_src
       #comment
       #comment
@@ -32,7 +32,7 @@ describe 'rake assets' do
     expect(ENV['ASSETS']).to eq('public/images/a:public/images/b')
   end
 
-  it "should not change ENV['ASSETS'] if it already exists" do
+  it "does not change ENV['ASSETS'] if it already exists" do
     data = <<-end_src
       public/images/a
       public/images/b
@@ -49,12 +49,12 @@ describe 'rake assets' do
       allow(FileUtils).to receive(:remove_entry)
     end
 
-    it 'should require assets task' do
+    it 'requires assets task' do
       expect(@rake['assets:delete'].prerequisites).to include('assets')
     end
 
     describe 'deleting existing assets' do
-      it 'should go through each asset from config' do
+      it 'goes through each asset from config' do
         allow(ENV).to receive(:[]).with('ASSETS').and_return('images:videos')
 
         expect(File).to receive(:expand_path).with('images', Dump.rails_root).and_return('')
@@ -63,7 +63,7 @@ describe 'rake assets' do
         @rake['assets:delete'].invoke
       end
 
-      it 'should glob all assets and delete content' do
+      it 'globs all assets and deletes content' do
         @assets = %w[images videos]
         allow(ENV).to receive(:[]).with('ASSETS').and_return(@assets.join(':'))
         @assets.each do |asset|
@@ -78,7 +78,7 @@ describe 'rake assets' do
         @rake['assets:delete'].invoke
       end
 
-      it 'should not glob risky paths' do
+      it 'does not glob risky paths' do
         @assets = %w[images / /private ../ ../.. ./../ dir/.. dir/../..]
         allow(ENV).to receive(:[]).with('ASSETS').and_return(@assets.join(':'))
 

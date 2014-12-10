@@ -4,14 +4,14 @@ require 'dump/writer'
 Writer = Dump::Writer
 describe Writer do
   describe 'create' do
-    it 'should create selves instance and open' do
+    it 'creates instance and open' do
       @dump = double('dump')
       expect(@dump).to receive(:open)
       expect(Writer).to receive(:new).with('/abc/123.tmp').and_return(@dump)
       Writer.create('/abc/123.tmp')
     end
 
-    it 'should call dump subroutines' do
+    it 'calls dump subroutines' do
       @dump = double('dump')
       allow(@dump).to receive(:open).and_yield(@dump)
       allow(@dump).to receive(:silence).and_yield
@@ -27,13 +27,13 @@ describe Writer do
   end
 
   describe 'open' do
-    it 'should create dir for dump' do
+    it 'creates dir for dump' do
       allow(Zlib::GzipWriter).to receive(:open)
       expect(FileUtils).to receive(:mkpath).with('/abc/def/ghi')
       Writer.new('/abc/def/ghi/123.tgz').open
     end
 
-    it 'should set stream to gzipped tar writer' do
+    it 'sets stream to gzipped tar writer' do
       allow(FileUtils).to receive(:mkpath)
       @gzip = double('gzip')
       @stream = double('stream')
@@ -62,7 +62,7 @@ describe Writer do
     end
 
     describe 'create_file' do
-      it 'should create temp file, yield it for writing, create file in tar and write it there' do
+      it 'creates temp file, yields it for writing, creates file in tar and writes it there' do
         @temp = double('temp', :open => true, :length => 6, :read => 'qwfpgj')
         expect(@temp).to receive(:write).with('qwfpgj')
         allow(@temp).to receive(:eof?).and_return(false, true)
@@ -81,19 +81,19 @@ describe Writer do
     end
 
     describe 'write_schema' do
-      it 'should create file schema.rb' do
+      it 'creates file schema.rb' do
         expect(@dump).to receive(:create_file).with('schema.rb')
         @dump.write_schema
       end
 
-      it 'should set ENV[SCHEMA] to path of returned file' do
+      it 'sets ENV[SCHEMA] to path of returned file' do
         @file = double('file', :path => 'db/schema.rb')
         allow(@dump).to receive(:create_file).and_yield(@file)
         expect(Dump::Env).to receive(:with_env).with('SCHEMA' => 'db/schema.rb')
         @dump.write_schema
       end
 
-      it 'should call rake task db:schema:dump' do
+      it 'calls rake task db:schema:dump' do
         @file = double('file', :path => 'db/schema.rb')
         allow(@dump).to receive(:create_file).and_yield(@file)
         @task = double('task')
@@ -104,13 +104,13 @@ describe Writer do
     end
 
     describe 'write_tables' do
-      it 'should verify connection' do
+      it 'verifies connection' do
         allow(@dump).to receive(:tables_to_dump).and_return([])
         expect(@dump).to receive(:verify_connection)
         @dump.write_tables
       end
 
-      it 'should call write_table for each table returned by tables_to_dump' do
+      it 'calls write_table for each table returned by tables_to_dump' do
         allow(@dump).to receive(:verify_connection)
         allow(@dump).to receive(:tables_to_dump).and_return(%w[first second])
 
@@ -122,20 +122,20 @@ describe Writer do
     end
 
     describe 'write_table' do
-      it 'should get row count and store it to config' do
+      it 'gets row count and store it to config' do
         expect(@dump).to receive(:table_row_count).with('first').and_return(666)
         allow(@dump).to receive(:create_file)
         @dump.write_table('first')
         expect(@config[:tables]['first']).to eq(666)
       end
 
-      it 'should create_file' do
+      it 'create_files' do
         allow(@dump).to receive(:table_row_count).and_return(666)
         expect(@dump).to receive(:create_file)
         @dump.write_table('first')
       end
 
-      it 'should dump column names and values of each row' do
+      it 'dumps column names and values of each row' do
         @column_definitions = [
           double('column', :name => 'id'),
           double('column', :name => 'name'),
@@ -171,12 +171,12 @@ describe Writer do
         allow(@dump).to receive(:assets_root_link).and_yield('/tmp', 'assets')
       end
 
-      it 'should call assets_to_dump' do
+      it 'calls assets_to_dump' do
         expect(@dump).to receive(:assets_to_dump).and_return([])
         @dump.write_assets
       end
 
-      it 'should change root to rails app root' do
+      it 'changes root to rails app root' do
         @file = double('file')
         allow(@dump).to receive(:assets_to_dump).and_return(%w[images videos])
         allow(@dump).to receive(:create_file).and_yield(@file)
@@ -185,7 +185,7 @@ describe Writer do
         @dump.write_assets
       end
 
-      it 'should put assets to config' do
+      it 'puts assets to config' do
         @file = double('file')
         allow(@dump).to receive(:assets_to_dump).and_return(%w[images/* videos])
         allow(@dump).to receive(:create_file).and_yield(@file)
@@ -200,7 +200,7 @@ describe Writer do
         expect(@config[:assets]).to eq({'images/a' => counts, 'images/b' => counts, 'videos' => counts})
       end
 
-      it 'should use glob to find files' do
+      it 'uses glob to find files' do
         @file = double('file')
         allow(@dump).to receive(:assets_to_dump).and_return(%w[images/* videos])
         allow(@dump).to receive(:create_file).and_yield(@file)
@@ -216,7 +216,7 @@ describe Writer do
         @dump.write_assets
       end
 
-      it 'should pack each file from assets_root_link' do
+      it 'packs each file from assets_root_link' do
         @file = double('file')
         allow(@dump).to receive(:assets_to_dump).and_return(%w[images/* videos])
         allow(@dump).to receive(:create_file).and_yield(@file)
@@ -234,7 +234,7 @@ describe Writer do
         @dump.write_assets
       end
 
-      it 'should pack each file' do
+      it 'packs each file' do
         @file = double('file')
         allow(@dump).to receive(:assets_to_dump).and_return(%w[images/* videos])
         allow(@dump).to receive(:create_file).and_yield(@file)
@@ -254,7 +254,7 @@ describe Writer do
         @dump.write_assets
       end
 
-      it 'should not raise if something fails when packing' do
+      it 'does not raise if something fails when packing' do
         @file = double('file')
         allow(@dump).to receive(:assets_to_dump).and_return(%w[videos])
         allow(@dump).to receive(:create_file).and_yield(@file)
@@ -276,12 +276,12 @@ describe Writer do
     end
 
     describe 'write_config' do
-      it 'should create file config' do
+      it 'creates file config' do
         expect(@dump).to receive(:create_file).with('config')
         @dump.write_config
       end
 
-      it 'should dump column names and values of each row' do
+      it 'dumps column names and values of each row' do
         @file = double('file')
         allow(@dump).to receive(:create_file).and_yield(@file)
         @config.replace({:tables => {'first' => 1, 'second' => 2}, :assets => %w[images videos]})
@@ -292,14 +292,14 @@ describe Writer do
     end
 
     describe 'assets_to_dump' do
-      it 'should call rake task assets' do
+      it 'calls rake task assets' do
         @task = double('task')
         expect(Rake::Task).to receive(:[]).with('assets').and_return(@task)
         expect(@task).to receive(:invoke)
         @dump.assets_to_dump
       end
 
-      it 'should return array of assets if separator is colon' do
+      it 'returns array of assets if separator is colon' do
         @task = double('task')
         allow(Rake::Task).to receive(:[]).and_return(@task)
         allow(@task).to receive(:invoke)
@@ -308,7 +308,7 @@ describe Writer do
         end
       end
 
-      it 'should return array of assets if separator is comma' do
+      it 'returns array of assets if separator is comma' do
         @task = double('task')
         allow(Rake::Task).to receive(:[]).and_return(@task)
         allow(@task).to receive(:invoke)
@@ -317,7 +317,7 @@ describe Writer do
         end
       end
 
-      it 'should return empty array if calling rake task assets raises an exception' do
+      it 'returns empty array if calling rake task assets raises an exception' do
         allow(Rake::Task).to receive(:[]).and_raise('task assets not found')
         Dump::Env.with_env(:assets => 'images:videos') do
           expect(@dump.assets_to_dump).to eq([])

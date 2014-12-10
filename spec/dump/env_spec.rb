@@ -23,7 +23,7 @@ describe Env do
   end
 
   describe 'with_env' do
-    it 'should set env to new_value for duration of block' do
+    it 'sets env to new_value for duration of block' do
       ENV['LIKE'] = 'old_value'
 
       expect(ENV['LIKE']).to eq('old_value')
@@ -33,7 +33,7 @@ describe Env do
       expect(ENV['LIKE']).to eq('old_value')
     end
 
-    it 'should use dictionary' do
+    it 'uses dictionary' do
       ENV['LIKE'] = 'old_value'
 
       expect(ENV['LIKE']).to eq('old_value')
@@ -45,16 +45,16 @@ describe Env do
   end
 
   describe '[]' do
-    it 'should mimic ENV' do
+    it 'mimics ENV' do
       ENV['VERSION'] = 'VERSION_value'
       expect(Env['VERSION']).to eq(ENV['VERSION'])
     end
 
-    it 'should return nil on non existing env variable' do
+    it 'returns nil on non existing env variable' do
       expect(Env['DESCRIPTON']).to eq(nil)
     end
 
-    it 'should get first value that is set' do
+    it 'gets first value that is set' do
       ENV['VERSION'] = 'VERSION_value'
       expect(Env[:like]).to eq('VERSION_value')
       ENV['VER'] = 'VER_value'
@@ -63,7 +63,7 @@ describe Env do
       expect(Env[:like]).to eq('LIKE_value')
     end
 
-    it 'should return nil for unset variable' do
+    it 'returns nil for unset variable' do
       expect(Env[:desc]).to eq(nil)
     end
   end
@@ -73,7 +73,7 @@ describe Env do
       Env.instance_variable_set(:@filters, nil)
     end
 
-    it 'should return Filter' do
+    it 'returns Filter' do
       ENV['TABLES'] = 'a,b,c'
       filter = Env.filter('TABLES')
       expect(filter).to be_instance_of(Env::Filter)
@@ -81,7 +81,7 @@ describe Env do
       expect(filter.values).to eq(%w[a b c])
     end
 
-    it 'should cache created filter' do
+    it 'caches created filter' do
       ENV['TABLES'] = 'a,b,c'
       ENV['TABLES2'] = 'a,b,c'
       expect(Env::Filter).to receive(:new).with('a,b,c', nil).once
@@ -93,14 +93,14 @@ describe Env do
 
   describe 'for_command' do
     describe 'when no vars present' do
-      it 'should return empty hash for every command' do
+      it 'returns empty hash for every command' do
         expect(Env.for_command(:create)).to eq({})
         expect(Env.for_command(:restore)).to eq({})
         expect(Env.for_command(:versions)).to eq({})
         expect(Env.for_command(:bad)).to eq({})
       end
 
-      it 'should return empty hash for every command when asking for string keys' do
+      it 'returns empty hash for every command when asking for string keys' do
         expect(Env.for_command(:create, true)).to eq({})
         expect(Env.for_command(:restore, true)).to eq({})
         expect(Env.for_command(:versions, true)).to eq({})
@@ -114,14 +114,14 @@ describe Env do
         ENV['DESC'] = 'Description'
       end
 
-      it 'should return hash with symbol keys for every command' do
+      it 'returns hash with symbol keys for every command' do
         expect(Env.for_command(:create)).to eq({:desc => 'Description'})
         expect(Env.for_command(:restore)).to eq({:like => 'Version'})
         expect(Env.for_command(:versions)).to eq({:like => 'Version'})
         expect(Env.for_command(:bad)).to eq({})
       end
 
-      it 'should return hash with symbol keys for every command when asking for string keys' do
+      it 'returns hash with symbol keys for every command when asking for string keys' do
         expect(Env.for_command(:create, true)).to eq({'DESC' => 'Description'})
         expect(Env.for_command(:restore, true)).to eq({'LIKE' => 'Version'})
         expect(Env.for_command(:versions, true)).to eq({'LIKE' => 'Version'})
@@ -131,7 +131,7 @@ describe Env do
   end
 
   describe 'stringify!' do
-    it 'should convert keys to strings' do
+    it 'converts keys to strings' do
       @env = {:desc => 'text', :tags => 'a b c', 'LEAVE' => 'none', 'OTHER' => 'data'}
       Env.stringify!(@env)
       expect(@env).to eq({'DESC' => 'text', 'TAGS' => 'a b c', 'LEAVE' => 'none', 'OTHER' => 'data'})
