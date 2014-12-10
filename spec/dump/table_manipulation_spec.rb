@@ -12,48 +12,48 @@ describe TableManipulation do
   end
 
   describe 'verify_connection' do
-    it 'should return result of ActiveRecord::Base.connection.verify!' do
-      expect(ActiveRecord::Base.connection).to receive(:verify!).and_return(:result)
+    it 'should return result of connection.verify!' do
+      expect(connection).to receive(:verify!).and_return(:result)
       expect(verify_connection).to eq(:result)
     end
   end
 
   describe 'quote_table_name' do
-    it 'should return result of ActiveRecord::Base.connection.quote_table_name' do
-      expect(ActiveRecord::Base.connection).to receive(:quote_table_name).with('first').and_return('`first`')
+    it 'should return result of connection.quote_table_name' do
+      expect(connection).to receive(:quote_table_name).with('first').and_return('`first`')
       expect(quote_table_name('first')).to eq('`first`')
     end
   end
 
   describe 'quote_column_name' do
-    it 'should return result of ActiveRecord::Base.connection.quote_column_name' do
-      expect(ActiveRecord::Base.connection).to receive(:quote_column_name).with('first').and_return('`first`')
+    it 'should return result of connection.quote_column_name' do
+      expect(connection).to receive(:quote_column_name).with('first').and_return('`first`')
       expect(quote_column_name('first')).to eq('`first`')
     end
   end
 
   describe 'quote_value' do
-    it 'should return result of ActiveRecord::Base.connection.quote_value' do
-      expect(ActiveRecord::Base.connection).to receive(:quote).with('first').and_return('`first`')
+    it 'should return result of connection.quote_value' do
+      expect(connection).to receive(:quote).with('first').and_return('`first`')
       expect(quote_value('first')).to eq('`first`')
     end
   end
 
   describe 'clear_table' do
-    it 'should call ActiveRecord::Base.connection.delete with sql for deleting everything from table' do
-      expect(ActiveRecord::Base.connection).to receive(:delete).with('DELETE FROM `first`', anything)
+    it 'should call connection.delete with sql for deleting everything from table' do
+      expect(connection).to receive(:delete).with('DELETE FROM `first`', anything)
       clear_table('`first`')
     end
   end
 
   describe 'insert_into_table' do
-    it 'should call ActiveRecord::Base.connection.insert with sql for insert if values is string' do
-      expect(ActiveRecord::Base.connection).to receive(:insert).with('INSERT INTO `table` (`c1`,`c2`) VALUES (`v1`,`v2`)', anything)
+    it 'should call connection.insert with sql for insert if values is string' do
+      expect(connection).to receive(:insert).with('INSERT INTO `table` (`c1`,`c2`) VALUES (`v1`,`v2`)', anything)
       insert_into_table('`table`', '(`c1`,`c2`)', '(`v1`,`v2`)')
     end
 
-    it 'should call ActiveRecord::Base.connection.insert with sql for insert if values is array' do
-      expect(ActiveRecord::Base.connection).to receive(:insert).with('INSERT INTO `table` (`c1`,`c2`) VALUES (`v11`,`v12`),(`v21`,`v22`)', anything)
+    it 'should call connection.insert with sql for insert if values is array' do
+      expect(connection).to receive(:insert).with('INSERT INTO `table` (`c1`,`c2`) VALUES (`v11`,`v12`),(`v21`,`v22`)', anything)
       insert_into_table('`table`', '(`c1`,`c2`)', ['(`v11`,`v12`)', '(`v21`,`v22`)'])
     end
   end
@@ -83,19 +83,19 @@ describe TableManipulation do
   end
 
   describe 'tables_to_dump' do
-    it 'should call ActiveRecord::Base.connection.tables' do
-      expect(ActiveRecord::Base.connection).to receive(:tables).and_return([])
+    it 'should call connection.tables' do
+      expect(connection).to receive(:tables).and_return([])
       tables_to_dump
     end
 
     it 'should exclude sessions table from result' do
-      expect(ActiveRecord::Base.connection).to receive(:tables).and_return(%w[first second schema_info schema_migrations sessions])
+      expect(connection).to receive(:tables).and_return(%w[first second schema_info schema_migrations sessions])
       expect(tables_to_dump).to eq(%w[first second schema_info schema_migrations])
     end
 
     describe 'with user defined tables' do
       before do
-        expect(ActiveRecord::Base.connection).to receive(:tables).and_return(%w[first second schema_info schema_migrations sessions])
+        expect(connection).to receive(:tables).and_return(%w[first second schema_info schema_migrations sessions])
       end
 
       it 'should select certain tables' do
@@ -132,7 +132,7 @@ describe TableManipulation do
 
   describe 'table_row_count' do
     it 'should ruturn row count for table' do
-      expect(ActiveRecord::Base.connection).to receive(:select_value).with("SELECT COUNT(*) FROM #{quote_table_name('first')}").and_return('666')
+      expect(connection).to receive(:select_value).with("SELECT COUNT(*) FROM #{quote_table_name('first')}").and_return('666')
       expect(table_row_count('first')).to eq(666)
     end
   end
@@ -164,7 +164,7 @@ describe TableManipulation do
   describe 'table_columns' do
     it 'should return table column definitions' do
       columns = [double(:column), double(:column), double(:column)]
-      expect(ActiveRecord::Base.connection).to receive(:columns).with('first').and_return(columns)
+      expect(connection).to receive(:columns).with('first').and_return(columns)
       expect(table_columns('first')).to eq(columns)
     end
   end
@@ -235,7 +235,7 @@ describe TableManipulation do
 
     it 'should get rows in one pass if table has no primary column' do
       expect(self).to receive(:table_has_primary_column?).with('first').and_return(false)
-      expect(self).to_not receive(:table_chunk_size)
+      allow(self).to receive(:table_chunk_size).with('first').and_return(10_000)
       verify_getting_rows_in_one_pass
     end
   end
@@ -243,7 +243,7 @@ describe TableManipulation do
   describe 'select_all_by_sql' do
     it 'should return all rows returned by database' do
       rows = [double(:row), double(:row), double(:row)]
-      expect(ActiveRecord::Base.connection).to receive(:select_all).with('SELECT * FROM abc WHERE x = y').and_return(rows)
+      expect(connection).to receive(:select_all).with('SELECT * FROM abc WHERE x = y').and_return(rows)
       expect(select_all_by_sql('SELECT * FROM abc WHERE x = y')).to eq(rows)
     end
   end

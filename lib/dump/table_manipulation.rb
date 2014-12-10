@@ -31,7 +31,8 @@ module Dump
 
     def insert_into_table(table_sql, columns_sql, values_sql)
       values_sql = values_sql.join(',') if values_sql.is_a?(Array)
-      connection.insert("INSERT INTO #{table_sql} #{columns_sql} VALUES #{values_sql}", 'Loading dump')
+      sql = "INSERT INTO #{table_sql} #{columns_sql} VALUES #{values_sql}"
+      connection.insert(sql, 'Loading dump')
     end
 
     def fix_sequence!(table)
@@ -58,7 +59,8 @@ module Dump
     def tables_to_dump
       if Dump::Env[:tables]
         avaliable_tables.select do |table|
-          schema_tables.include?(table) || Dump::Env.filter(:tables).pass?(table)
+          schema_tables.include?(table) ||
+            Dump::Env.filter(:tables).pass?(table)
         end
       else
         avaliable_tables - %w[sessions]
@@ -66,13 +68,14 @@ module Dump
     end
 
     def table_row_count(table)
-      connection.select_value("SELECT COUNT(*) FROM #{quote_table_name(table)}").to_i
+      sql = "SELECT COUNT(*) FROM #{quote_table_name(table)}"
+      connection.select_value(sql).to_i
     end
 
     CHUNK_SIZE_MIN = 100
     CHUNK_SIZE_MAX = 3_000
     def table_chunk_size(table)
-      expected_row_size = table_columns(table).map do |column|
+      expected_row_size = table_columns(table).sum do |column|
         case column.type
         when :text
           Math.sqrt(column.limit || 2_147_483_647)
@@ -81,8 +84,12 @@ module Dump
         else
           column.limit || 10
         end
-      end.sum
-      [[(10_000_000 / expected_row_size).round, CHUNK_SIZE_MIN].max, CHUNK_SIZE_MAX].min
+      end
+      [
+        CHUNK_SIZE_MIN,
+        (10_000_000 / expected_row_size).round,
+        CHUNK_SIZE_MAX,
+      ].sort[1]
     end
 
     def table_columns(table)
@@ -91,7 +98,9 @@ module Dump
 
     def table_has_primary_column?(table)
       # bad test for primary column, but primary even for primary column is nil
-      table_columns(table).any?{ |column| column.name == table_primary_key(table) && column.type == :integer }
+      table_columns(table).any? do |column|
+        column.name == table_primary_key(table) && column.type == :integer
+      end
     end
 
     def table_primary_key(_table)
@@ -99,10 +108,12 @@ module Dump
     end
 
     def each_table_row(table, row_count, &block)
-      if table_has_primary_column?(table) && row_count > (chunk_size = table_chunk_size(table))
+      chunk_size = table_chunk_size(table)
+      if table_has_primary_column?(table) && row_count > chunk_size
         # adapted from ActiveRecord::Batches
         primary_key = table_primary_key(table)
-        quoted_primary_key = "#{quote_table_name(table)}.#{quote_column_name(primary_key)}"
+        quoted_primary_key =
+          "#{quote_table_name(table)}.#{quote_column_name(primary_key)}"
         select_where_primary_key =
           "SELECT * FROM #{quote_table_name(table)}" \
             " WHERE #{quoted_primary_key} %s" \
@@ -112,7 +123,8 @@ module Dump
         until rows.blank?
           rows.each(&block)
           break if rows.count < chunk_size
-          rows = select_all_by_sql(select_where_primary_key % "> #{rows.last[primary_key].to_i}")
+          sql = select_where_primary_key % "> #{rows.last[primary_key].to_i}"
+          rows = select_all_by_sql(sql)
         end
       else
         table_rows(table).each(&block)
