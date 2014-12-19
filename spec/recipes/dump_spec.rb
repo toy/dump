@@ -36,7 +36,6 @@ describe 'cap dump' do
   end
 
   describe :dump_command do
-
     it 'returns escaped string' do
       expect(@cap.dump.dump_command(:hello, :rake => 'rake', 'x x' => 'a b')).to eq('rake -s dump:hello x\\ x\\=a\\ b')
     end
@@ -54,7 +53,6 @@ describe 'cap dump' do
     [:up, :down].each do |direction|
       describe direction do
         describe 'if method not set' do
-
           it 'calls got_rsync?' do
             expect(@cap.dump).to receive(:got_rsync?)
             grab_output{ @cap.dump.do_transfer(direction, 'a.tgz', 'b.tgz') }

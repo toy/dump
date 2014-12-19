@@ -272,7 +272,6 @@ describe Writer do
           @dump.write_assets
         end
       end
-
     end
 
     describe 'write_config' do
