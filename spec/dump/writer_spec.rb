@@ -7,22 +7,22 @@ describe Writer do
     it 'creates instance and open' do
       @dump = double('dump')
       expect(@dump).to receive(:open)
-      expect(Writer).to receive(:new).with('/abc/123.tmp').and_return(@dump)
-      Writer.create('/abc/123.tmp')
+      expect(described_class).to receive(:new).with('/abc/123.tmp').and_return(@dump)
+      described_class.create('/abc/123.tmp')
     end
 
     it 'calls dump subroutines' do
       @dump = double('dump')
       allow(@dump).to receive(:open).and_yield(@dump)
       allow(@dump).to receive(:silence).and_yield
-      allow(Writer).to receive(:new).and_return(@dump)
+      allow(described_class).to receive(:new).and_return(@dump)
 
       expect(@dump).to receive(:write_schema).ordered
       expect(@dump).to receive(:write_tables).ordered
       expect(@dump).to receive(:write_assets).ordered
       expect(@dump).to receive(:write_config).ordered
 
-      Writer.create('/abc/123.tmp')
+      described_class.create('/abc/123.tmp')
     end
   end
 
@@ -30,7 +30,7 @@ describe Writer do
     it 'creates dir for dump' do
       allow(Zlib::GzipWriter).to receive(:open)
       expect(FileUtils).to receive(:mkpath).with('/abc/def/ghi')
-      Writer.new('/abc/def/ghi/123.tgz').open
+      described_class.new('/abc/def/ghi/123.tgz').open
     end
 
     it 'sets stream to gzipped tar writer' do
@@ -41,7 +41,7 @@ describe Writer do
       expect(Archive::Tar::Minitar::Output).to receive(:open).with(@gzip).and_yield(@stream)
       expect(@gzip).to receive(:mtime=).with(Time.utc(2000))
 
-      @dump = Writer.new('123.tgz')
+      @dump = described_class.new('123.tgz')
       expect(@dump).to receive(:lock).and_yield
       @dump.open do |dump|
         expect(dump).to eq(@dump)
@@ -55,7 +55,7 @@ describe Writer do
       @tar = double('tar')
       @stream = double('stream', :tar => @tar)
       @config = {:tables => {}}
-      @dump = Writer.new('123.tgz')
+      @dump = described_class.new('123.tgz')
       allow(@dump).to receive(:stream).and_return(@stream)
       allow(@dump).to receive(:config).and_return(@config)
       allow(Progress).to receive(:io).and_return(StringIO.new)

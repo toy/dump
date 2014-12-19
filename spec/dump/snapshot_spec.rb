@@ -18,7 +18,7 @@ describe Dump::Snapshot do
     it 'does not yield if file does not exist' do
       expect(@yield_receiver).not_to receive(:fire)
 
-      Dump::Snapshot.new('hello').lock do
+      described_class.new('hello').lock do
         @yield_receiver.fire
       end
     end
@@ -32,7 +32,7 @@ describe Dump::Snapshot do
       expect(@file).to receive(:close)
       expect(File).to receive(:open).and_return(@file)
 
-      Dump::Snapshot.new('hello').lock do
+      described_class.new('hello').lock do
         @yield_receiver.fire
       end
     end
@@ -46,7 +46,7 @@ describe Dump::Snapshot do
       expect(@file).to receive(:close)
       expect(File).to receive(:open).and_return(@file)
 
-      Dump::Snapshot.new('hello').lock do
+      described_class.new('hello').lock do
         @yield_receiver.fire
       end
     end
@@ -54,11 +54,11 @@ describe Dump::Snapshot do
 
   describe 'new' do
     it 'inits with path if String sent' do
-      expect(Dump::Snapshot.new('hello').path).to eq(Pathname('hello'))
+      expect(described_class.new('hello').path).to eq(Pathname('hello'))
     end
 
     it 'inits with path if Pathname sent' do
-      expect(Dump::Snapshot.new(Pathname('hello')).path).to eq(Pathname('hello'))
+      expect(described_class.new(Pathname('hello')).path).to eq(Pathname('hello'))
     end
 
     describe 'with options' do
@@ -70,23 +70,23 @@ describe Dump::Snapshot do
       end
 
       it 'generates path with no options' do
-        expect(Dump::Snapshot.new.path).to eq(Pathname('19650414065945.tgz'))
+        expect(described_class.new.path).to eq(Pathname('19650414065945.tgz'))
       end
 
       it 'generates with dir' do
-        expect(Dump::Snapshot.new(:dir => 'dump_dir').path).to eq(Pathname('dump_dir/19650414065945.tgz'))
+        expect(described_class.new(:dir => 'dump_dir').path).to eq(Pathname('dump_dir/19650414065945.tgz'))
       end
 
       it 'generates path with description' do
-        expect(Dump::Snapshot.new(:dir => 'dump_dir', :desc => 'hello world').path).to eq(Pathname('dump_dir/19650414065945-hello world.tgz'))
+        expect(described_class.new(:dir => 'dump_dir', :desc => 'hello world').path).to eq(Pathname('dump_dir/19650414065945-hello world.tgz'))
       end
 
       it 'generates path with tags' do
-        expect(Dump::Snapshot.new(:dir => 'dump_dir', :tags => ' mirror, hello world ').path).to eq(Pathname('dump_dir/19650414065945@hello world,mirror.tgz'))
+        expect(described_class.new(:dir => 'dump_dir', :tags => ' mirror, hello world ').path).to eq(Pathname('dump_dir/19650414065945@hello world,mirror.tgz'))
       end
 
       it 'generates path with description and tags' do
-        expect(Dump::Snapshot.new(:dir => 'dump_dir', :desc => 'Anniversary backup', :tags => ' mirror, hello world ').path).to eq(Pathname('dump_dir/19650414065945-Anniversary backup@hello world,mirror.tgz'))
+        expect(described_class.new(:dir => 'dump_dir', :desc => 'Anniversary backup', :tags => ' mirror, hello world ').path).to eq(Pathname('dump_dir/19650414065945-Anniversary backup@hello world,mirror.tgz'))
       end
     end
   end
@@ -104,17 +104,17 @@ describe Dump::Snapshot do
 
       it 'searches for files in dump dir when asked for list' do
         expect(Dir).to receive(:[]).with(dump_path('*.tgz')).and_return([])
-        Dump::Snapshot.list
+        described_class.list
       end
 
       it 'returns instances for each found file' do
         stub_glob
-        Dump::Snapshot.list.all?{ |dump| expect(dump).to be_a(Dump::Snapshot) }
+        described_class.list.all?{ |dump| expect(dump).to be_a(described_class) }
       end
 
       it 'returns dumps with name containting :like' do
         stub_glob
-        expect(Dump::Snapshot.list(:like => '3')).to eq(Dump::Snapshot.list.values_at(0, 1))
+        expect(described_class.list(:like => '3')).to eq(described_class.list.values_at(0, 1))
       end
     end
 
@@ -131,7 +131,7 @@ describe Dump::Snapshot do
       end
 
       it 'returns all dumps if no tags send' do
-        expect(Dump::Snapshot.list(:tags => '')).to eq(Dump::Snapshot.list)
+        expect(described_class.list(:tags => '')).to eq(described_class.list)
       end
 
       {
@@ -146,7 +146,7 @@ describe Dump::Snapshot do
         '+d,+a'          => [2, 3, 4, 5],
       }.each do |tags, ids|
         it "returns dumps filtered by #{tags}" do
-          expect(Dump::Snapshot.list(:tags => tags)).to eq(Dump::Snapshot.list.values_at(*ids))
+          expect(described_class.list(:tags => tags)).to eq(described_class.list.values_at(*ids))
         end
       end
     end
@@ -214,59 +214,59 @@ describe Dump::Snapshot do
 
   describe 'clean_description' do
     it "shortens string to 50 chars and replace special symblos with '-'" do
-      expect(Dump::Snapshot.new('').send(:clean_description, 'Special  Dump #12837192837 (before fixind *&^*&^ photos)')).to eq('Special Dump #12837192837 (before fixind _ photos)')
-      expect(Dump::Snapshot.new('').send(:clean_description, "To#{'o' * 100} long description")).to eq("T#{'o' * 49}")
+      expect(described_class.new('').send(:clean_description, 'Special  Dump #12837192837 (before fixind *&^*&^ photos)')).to eq('Special Dump #12837192837 (before fixind _ photos)')
+      expect(described_class.new('').send(:clean_description, "To#{'o' * 100} long description")).to eq("T#{'o' * 49}")
     end
 
     it 'accepts non string' do
-      expect(Dump::Snapshot.new('').send(:clean_description, nil)).to eq('')
+      expect(described_class.new('').send(:clean_description, nil)).to eq('')
     end
   end
 
   describe 'clean_tag' do
     it "shortens string to 20 chars and replace special symblos with '-'" do
-      expect(Dump::Snapshot.new('').send(:clean_tag, 'Very special  tag #12837192837 (fixind *&^*&^)')).to eq('very special tag _12')
-      expect(Dump::Snapshot.new('').send(:clean_tag, "To#{'o' * 100} long tag")).to eq("t#{'o' * 19}")
+      expect(described_class.new('').send(:clean_tag, 'Very special  tag #12837192837 (fixind *&^*&^)')).to eq('very special tag _12')
+      expect(described_class.new('').send(:clean_tag, "To#{'o' * 100} long tag")).to eq("t#{'o' * 19}")
     end
 
     it "does not allow '-' or '+' to be first symbol" do
-      expect(Dump::Snapshot.new('').send(:clean_tag, ' Very special tag')).to eq('very special tag')
-      expect(Dump::Snapshot.new('').send(:clean_tag, '-Very special tag')).to eq('very special tag')
-      expect(Dump::Snapshot.new('').send(:clean_tag, '-----------')).to eq('')
-      expect(Dump::Snapshot.new('').send(:clean_tag, '+Very special tag')).to eq('_very special tag')
-      expect(Dump::Snapshot.new('').send(:clean_tag, '+++++++++++')).to eq('_')
+      expect(described_class.new('').send(:clean_tag, ' Very special tag')).to eq('very special tag')
+      expect(described_class.new('').send(:clean_tag, '-Very special tag')).to eq('very special tag')
+      expect(described_class.new('').send(:clean_tag, '-----------')).to eq('')
+      expect(described_class.new('').send(:clean_tag, '+Very special tag')).to eq('_very special tag')
+      expect(described_class.new('').send(:clean_tag, '+++++++++++')).to eq('_')
     end
 
     it 'accepts non string' do
-      expect(Dump::Snapshot.new('').send(:clean_tag, nil)).to eq('')
+      expect(described_class.new('').send(:clean_tag, nil)).to eq('')
     end
   end
 
   describe 'clean_tags' do
     it 'splits string and returns uniq non blank sorted tags' do
-      expect(Dump::Snapshot.new('').send(:clean_tags, ' perfect  tag , hello,Hello,this  is (*^(*&')).to eq(['hello', 'perfect tag', 'this is _'])
-      expect(Dump::Snapshot.new('').send(:clean_tags, "l#{'o' * 100}ng tag")).to eq(["l#{'o' * 19}"])
+      expect(described_class.new('').send(:clean_tags, ' perfect  tag , hello,Hello,this  is (*^(*&')).to eq(['hello', 'perfect tag', 'this is _'])
+      expect(described_class.new('').send(:clean_tags, "l#{'o' * 100}ng tag")).to eq(["l#{'o' * 19}"])
     end
 
     it 'accepts non string' do
-      expect(Dump::Snapshot.new('').send(:clean_tags, nil)).to eq([])
+      expect(described_class.new('').send(:clean_tags, nil)).to eq([])
     end
   end
 
   describe 'get_filter_tags' do
     it 'splits string and returns uniq non blank sorted tags' do
-      expect(Dump::Snapshot.new('').send(:get_filter_tags, 'a,+b,+c,-d')).to eq({:simple => %w[a], :mandatory => %w[b c], :forbidden => %w[d]})
-      expect(Dump::Snapshot.new('').send(:get_filter_tags, ' a , + b , + c , - d ')).to eq({:simple => %w[a], :mandatory => %w[b c], :forbidden => %w[d]})
-      expect(Dump::Snapshot.new('').send(:get_filter_tags, ' a , + c , + b , - d ')).to eq({:simple => %w[a], :mandatory => %w[b c], :forbidden => %w[d]})
-      expect(Dump::Snapshot.new('').send(:get_filter_tags, ' a , + b , + , - ')).to eq({:simple => %w[a], :mandatory => %w[b], :forbidden => []})
-      expect(Dump::Snapshot.new('').send(:get_filter_tags, ' a , a , + b , + b , - d , - d ')).to eq({:simple => %w[a], :mandatory => %w[b], :forbidden => %w[d]})
-      expect{ Dump::Snapshot.new('').send(:get_filter_tags, 'a,+a') }.not_to raise_error
-      expect{ Dump::Snapshot.new('').send(:get_filter_tags, 'a,-a') }.to raise_error
-      expect{ Dump::Snapshot.new('').send(:get_filter_tags, '+a,-a') }.to raise_error
+      expect(described_class.new('').send(:get_filter_tags, 'a,+b,+c,-d')).to eq({:simple => %w[a], :mandatory => %w[b c], :forbidden => %w[d]})
+      expect(described_class.new('').send(:get_filter_tags, ' a , + b , + c , - d ')).to eq({:simple => %w[a], :mandatory => %w[b c], :forbidden => %w[d]})
+      expect(described_class.new('').send(:get_filter_tags, ' a , + c , + b , - d ')).to eq({:simple => %w[a], :mandatory => %w[b c], :forbidden => %w[d]})
+      expect(described_class.new('').send(:get_filter_tags, ' a , + b , + , - ')).to eq({:simple => %w[a], :mandatory => %w[b], :forbidden => []})
+      expect(described_class.new('').send(:get_filter_tags, ' a , a , + b , + b , - d , - d ')).to eq({:simple => %w[a], :mandatory => %w[b], :forbidden => %w[d]})
+      expect{ described_class.new('').send(:get_filter_tags, 'a,+a') }.not_to raise_error
+      expect{ described_class.new('').send(:get_filter_tags, 'a,-a') }.to raise_error
+      expect{ described_class.new('').send(:get_filter_tags, '+a,-a') }.to raise_error
     end
 
     it 'accepts non string' do
-      expect(Dump::Snapshot.new('').send(:get_filter_tags, nil)).to eq({:simple => [], :mandatory => [], :forbidden => []})
+      expect(described_class.new('').send(:get_filter_tags, nil)).to eq({:simple => [], :mandatory => [], :forbidden => []})
     end
   end
 
@@ -277,7 +277,7 @@ describe Dump::Snapshot do
       expect(File).to receive(:symlink).with(Dump.rails_root, 'assets')
       expect(File).to receive(:unlink).with('assets')
       expect do
-        Dump::Snapshot.new('').send(:assets_root_link) do |dir, prefix|
+        described_class.new('').send(:assets_root_link) do |dir, prefix|
           expect(dir).to eq('/tmp/abc')
           expect(prefix).to eq('assets')
           @yielded = true

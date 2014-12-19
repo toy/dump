@@ -1,9 +1,8 @@
 require 'spec_helper'
 require 'dump/table_manipulation'
 
-TableManipulation = Dump::TableManipulation
-describe TableManipulation do
-  include TableManipulation
+describe Dump::TableManipulation do
+  include described_class
 
   describe 'schema_tables' do
     it 'returns schema_tables' do
@@ -144,20 +143,20 @@ describe TableManipulation do
         [double(:column, :type => :string, :limit => nil)] * 3 +
         [double(:column, :type => :text, :limit => nil)])
       expect(table_chunk_size('first')).to satisfy{ |n|
-        (TableManipulation::CHUNK_SIZE_MIN..TableManipulation::CHUNK_SIZE_MAX).include?(n)
+        (described_class::CHUNK_SIZE_MIN..described_class::CHUNK_SIZE_MAX).include?(n)
       }
     end
 
     it 'does not return value less than CHUNK_SIZE_MIN' do
       expect(self).to receive(:table_columns).with('first').and_return(
         [double(:column, :type => :text, :limit => nil)] * 100)
-      expect(table_chunk_size('first')).to eq(TableManipulation::CHUNK_SIZE_MIN)
+      expect(table_chunk_size('first')).to eq(described_class::CHUNK_SIZE_MIN)
     end
 
     it 'does not return value more than CHUNK_SIZE_MAX' do
       expect(self).to receive(:table_columns).with('first').and_return(
         [double(:column, :type => :boolean, :limit => 1)] * 10)
-      expect(table_chunk_size('first')).to eq(TableManipulation::CHUNK_SIZE_MAX)
+      expect(table_chunk_size('first')).to eq(described_class::CHUNK_SIZE_MAX)
     end
   end
 

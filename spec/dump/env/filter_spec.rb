@@ -1,10 +1,9 @@
 require 'spec_helper'
 require 'dump/env/filter'
 
-Filter = Dump::Env::Filter
-describe Filter do
+describe Dump::Env::Filter do
   it 'passes everything if initialized with nil' do
-    filter = Filter.new(nil)
+    filter = described_class.new(nil)
     expect(filter.pass?('a')).to be_truthy
     expect(filter.pass?('b')).to be_truthy
     expect(filter.pass?('c')).to be_truthy
@@ -12,7 +11,7 @@ describe Filter do
   end
 
   it 'passes only specified values' do
-    filter = Filter.new('a,c')
+    filter = described_class.new('a,c')
     expect(filter.pass?('a')).to be_truthy
     expect(filter.pass?('b')).to be_falsey
     expect(filter.pass?('c')).to be_truthy
@@ -20,7 +19,7 @@ describe Filter do
   end
 
   it 'does not pass anything if initialized empty' do
-    filter = Filter.new('')
+    filter = described_class.new('')
     expect(filter.pass?('a')).to be_falsey
     expect(filter.pass?('b')).to be_falsey
     expect(filter.pass?('c')).to be_falsey
@@ -29,7 +28,7 @@ describe Filter do
 
   describe 'when initialized with -' do
     it 'passes everything except specified values' do
-      filter = Filter.new('-a,c')
+      filter = described_class.new('-a,c')
       expect(filter.pass?('a')).to be_falsey
       expect(filter.pass?('b')).to be_truthy
       expect(filter.pass?('c')).to be_falsey
@@ -37,7 +36,7 @@ describe Filter do
     end
 
     it 'passes everything if initialized empty' do
-      filter = Filter.new('-')
+      filter = described_class.new('-')
       expect(filter.pass?('a')).to be_truthy
       expect(filter.pass?('b')).to be_truthy
       expect(filter.pass?('c')).to be_truthy
@@ -47,7 +46,7 @@ describe Filter do
 
   describe 'custom_pass?' do
     it 'passes only when any call to block returns true' do
-      filter = Filter.new('a,c')
+      filter = described_class.new('a,c')
       expect(filter.custom_pass?{ |value| value == 'a' }).to be_truthy
       expect(filter.custom_pass?{ |value| value == 'b' }).to be_falsey
       expect(filter.custom_pass?{ |value| value == 'c' }).to be_truthy

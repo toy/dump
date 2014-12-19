@@ -8,15 +8,15 @@ describe Reader do
     it 'creates instance and opens' do
       @dump = double('dump')
       expect(@dump).to receive(:open)
-      expect(Reader).to receive(:new).with('/abc/123.tmp').and_return(@dump)
-      Reader.restore('/abc/123.tmp')
+      expect(described_class).to receive(:new).with('/abc/123.tmp').and_return(@dump)
+      described_class.restore('/abc/123.tmp')
     end
 
     it 'calls dump subroutines' do
       @dump = double('dump')
       allow(@dump).to receive(:open).and_yield(@dump)
       allow(@dump).to receive(:silence).and_yield
-      allow(Reader).to receive(:new).and_return(@dump)
+      allow(described_class).to receive(:new).and_return(@dump)
 
       expect(@dump).to receive(:read_config).ordered
       expect(@dump).to receive(:migrate_down).ordered
@@ -24,7 +24,7 @@ describe Reader do
       expect(@dump).to receive(:read_tables).ordered
       expect(@dump).to receive(:read_assets).ordered
 
-      Reader.restore('/abc/123.tmp')
+      described_class.restore('/abc/123.tmp')
     end
   end
 
@@ -67,8 +67,8 @@ describe Reader do
     it 'creates instance and opens' do
       @dump = double('dump')
       expect(@dump).to receive(:open)
-      expect(Reader).to receive(:new).with('/abc/123.tmp').and_return(@dump)
-      Reader.summary('/abc/123.tmp')
+      expect(described_class).to receive(:new).with('/abc/123.tmp').and_return(@dump)
+      described_class.summary('/abc/123.tmp')
     end
 
     {
@@ -83,7 +83,7 @@ describe Reader do
         @dump = double('dump')
         allow(@dump).to receive(:config).and_return(:tables => tables, :assets => assets)
         allow(@dump).to receive(:open).and_yield(@dump)
-        allow(Reader).to receive(:new).and_return(@dump)
+        allow(described_class).to receive(:new).and_return(@dump)
         expect(@dump).to receive(:read_config)
 
         @summary = double('summary')
@@ -93,7 +93,7 @@ describe Reader do
         expect(@summary).to receive(:data).with(formatted_assets)
         allow(Summary).to receive(:new).and_return(@summary)
 
-        expect(Reader.summary('/abc/123.tmp')).to eq(@summary)
+        expect(described_class.summary('/abc/123.tmp')).to eq(@summary)
       end
     end
 
@@ -110,7 +110,7 @@ describe Reader do
       allow(@dump).to receive(:config).and_return(:tables => tables, :assets => assets)
       allow(@dump).to receive(:open).and_yield(@dump)
       allow(@dump).to receive(:schema).and_return(schema)
-      allow(Reader).to receive(:new).and_return(@dump)
+      allow(described_class).to receive(:new).and_return(@dump)
       expect(@dump).to receive(:read_config)
 
       @summary = double('summary')
@@ -122,7 +122,7 @@ describe Reader do
       expect(@summary).to receive(:data).with(schema_lines)
       allow(Summary).to receive(:new).and_return(@summary)
 
-      expect(Reader.summary('/abc/123.tmp', :schema => true)).to eq(@summary)
+      expect(described_class.summary('/abc/123.tmp', :schema => true)).to eq(@summary)
     end
   end
 
@@ -133,7 +133,7 @@ describe Reader do
       expect(Zlib::GzipReader).to receive(:open).with(Pathname('123.tgz')).and_yield(@gzip)
       expect(Archive::Tar::Minitar::Input).to receive(:open).with(@gzip).and_yield(@stream)
 
-      @dump = Reader.new('123.tgz')
+      @dump = described_class.new('123.tgz')
       @dump.open do |dump|
         expect(dump).to eq(@dump)
         expect(dump.stream).to eq(@stream)
@@ -147,7 +147,7 @@ describe Reader do
       @e2 = double('e2', :full_name => 'first.dump', :read => 'first.dump_data')
       @e3 = double('e3', :full_name => 'second.dump', :read => 'second.dump_data')
       @stream = [@e1, @e2, @e3]
-      @dump = Reader.new('123.tgz')
+      @dump = described_class.new('123.tgz')
       allow(@dump).to receive(:stream).and_return(@stream)
     end
 
@@ -210,7 +210,7 @@ describe Reader do
   describe 'subroutines' do
     before do
       @stream = double('stream')
-      @dump = Reader.new('123.tgz')
+      @dump = described_class.new('123.tgz')
       allow(@dump).to receive(:stream).and_return(@stream)
       allow(Progress).to receive(:io).and_return(StringIO.new)
     end

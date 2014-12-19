@@ -15,8 +15,8 @@ def temp_remove_const(where, which)
   end
 end
 
-describe 'RailsRoot' do
-  include Dump::RailsRoot
+describe Dump::RailsRoot do
+  include described_class
 
   before do
     @root = double('root')

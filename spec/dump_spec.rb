@@ -5,18 +5,18 @@ describe Dump do
   describe 'versions' do
     it 'calls Snapshot.list if called without version' do
       expect(Dump::Snapshot).to receive(:list).and_return([])
-      Dump.versions
+      described_class.versions
     end
 
     it 'calls Snapshot.list with options if called with version' do
       expect(Dump::Snapshot).to receive(:list).with(:like => '123').and_return([])
-      Dump.versions(:like => '123')
+      described_class.versions(:like => '123')
     end
 
     it 'prints versions' do
       expect(Dump::Snapshot).to receive(:list).and_return(%w[123.tgz 456.tgz])
       expect(grab_output do
-        Dump.versions
+        described_class.versions
       end[:stdout]).to eq("123.tgz\n456.tgz\n")
     end
 
@@ -30,7 +30,7 @@ describe Dump do
       expect(Dump::Snapshot).to receive(:list).and_return(dumps)
       grab_output do
         expect($stderr).not_to receive(:puts)
-        Dump.versions
+        described_class.versions
       end
     end
 
@@ -44,7 +44,7 @@ describe Dump do
       expect(Dump::Snapshot).to receive(:list).and_return(dumps)
       grab_output do
         expect($stderr).not_to receive(:puts)
-        Dump.versions(:summary => '1')
+        described_class.versions(:summary => '1')
       end
     end
 
@@ -58,7 +58,7 @@ describe Dump do
       expect(Dump::Snapshot).to receive(:list).and_return(dumps)
       grab_output do
         expect($stderr).not_to receive(:puts)
-        Dump.versions(:summary => '2')
+        described_class.versions(:summary => '2')
       end
     end
 
@@ -75,7 +75,7 @@ describe Dump do
         expect($stderr).to receive(:puts) do |s|
           expect(s['terrible error']).not_to be_nil
         end
-        Dump.versions(:summary => 'true')
+        described_class.versions(:summary => 'true')
       end
     end
   end
@@ -85,10 +85,10 @@ describe Dump do
       it "creates file in 'rails app root'/dump" do
         allow(File).to receive(:rename)
         expect(Dump::Writer).to receive(:create) do |path|
-          expect(File.dirname(path)).to eq(File.join(Dump.rails_root, 'dump'))
+          expect(File.dirname(path)).to eq(File.join(described_class.rails_root, 'dump'))
         end
         grab_output do
-          Dump.create
+          described_class.create
         end
       end
 
@@ -98,7 +98,7 @@ describe Dump do
           expect(File.basename(path)).to match(/^\d{14}\.tmp$/)
         end
         grab_output do
-          Dump.create
+          described_class.create
         end
       end
 
@@ -108,7 +108,7 @@ describe Dump do
           expect(File.basename(path)).to match(/^\d{14}-Some text and _\.tmp$/)
         end
         grab_output do
-          Dump.create(:desc => 'Some text and !@')
+          described_class.create(:desc => 'Some text and !@')
         end
       end
 
@@ -118,7 +118,7 @@ describe Dump do
           expect(File.basename(path)).to match(/^\d{14}-Some text and _\.tmp$/)
         end
         grab_output do
-          Dump.create(:desc => 'Some text and !@')
+          described_class.create(:desc => 'Some text and !@')
         end
       end
 
@@ -129,7 +129,7 @@ describe Dump do
         end
         allow(Dump::Writer).to receive(:create)
         grab_output do
-          Dump.create(:desc => 'Some text and !@')
+          described_class.create(:desc => 'Some text and !@')
         end
       end
 
@@ -137,7 +137,7 @@ describe Dump do
         allow(File).to receive(:rename)
         allow(Dump::Writer).to receive(:create)
         expect(grab_output do
-          Dump.create(:desc => 'Some text and !@')
+          described_class.create(:desc => 'Some text and !@')
         end[:stdout]).to match(/^\d{14}-Some text and _\.tgz$/)
       end
     end
@@ -149,7 +149,7 @@ describe Dump do
         expect(Dump::Writer).to receive(:create)
 
         grab_output do
-          Dump.create
+          described_class.create
         end
       end
     end
@@ -161,7 +161,7 @@ describe Dump do
         allow(Dump::Snapshot).to receive(:list)
         expect(Dump::Snapshot).to receive(:list).and_return([])
         grab_output do
-          Dump.restore
+          described_class.restore
         end
       end
 
@@ -173,7 +173,7 @@ describe Dump do
         grab_output do
           expect($stderr).to receive(:puts).with(kind_of(String))
           expect($stderr).to receive(:puts).with(all_dumps)
-          Dump.restore
+          described_class.restore
         end
       end
 
@@ -185,7 +185,7 @@ describe Dump do
         grab_output do
           expect($stderr).to receive(:puts).with(kind_of(String))
           expect($stderr).to receive(:puts).with(all_dumps)
-          Dump.restore('213')
+          described_class.restore('213')
         end
       end
 
@@ -195,7 +195,7 @@ describe Dump do
         expect(Dump::Reader).to receive(:restore).with('dump/213.tgz')
         grab_output do
           expect($stderr).not_to receive(:puts)
-          Dump.restore
+          described_class.restore
         end
       end
     end
@@ -205,7 +205,7 @@ describe Dump do
         allow(Dump::Snapshot).to receive(:list)
         expect(Dump::Snapshot).to receive(:list).with(:like => '213').and_return([])
         grab_output do
-          Dump.restore(:like => '213')
+          described_class.restore(:like => '213')
         end
       end
 
@@ -217,7 +217,7 @@ describe Dump do
         grab_output do
           expect($stderr).to receive(:puts).with(kind_of(String))
           expect($stderr).to receive(:puts).with(all_dumps)
-          Dump.restore('213')
+          described_class.restore('213')
         end
       end
 
@@ -225,10 +225,10 @@ describe Dump do
         @dump = double('dump', :path => 'dump/213.tgz')
         expect(Dump::Snapshot).to receive(:list).once.and_return([@dump])
         expect(Dump::Reader).to receive(:restore).with('dump/213.tgz')
-        expect(Dump).not_to receive(:versions)
+        expect(described_class).not_to receive(:versions)
         grab_output do
           expect($stderr).not_to receive(:puts)
-          Dump.restore(:like => '213')
+          described_class.restore(:like => '213')
         end
       end
 
@@ -239,7 +239,7 @@ describe Dump do
         expect(Dump::Reader).to receive(:restore).with('dump/213-b.tgz')
         grab_output do
           expect($stderr).not_to receive(:puts)
-          Dump.restore(:like => '213')
+          described_class.restore(:like => '213')
         end
       end
     end
@@ -249,13 +249,13 @@ describe Dump do
     it 'calls ask for all files in dump dir and for dumps' do
       expect(Dump::Snapshot).to receive(:list).with(:all => true).and_return([])
       expect(Dump::Snapshot).to receive(:list).with({}).and_return([])
-      Dump.cleanup
+      described_class.cleanup
     end
 
     it 'calls Snapshot.list with options if called with version and tags' do
       expect(Dump::Snapshot).to receive(:list).with(:like => '123', :tags => 'a,b,c', :all => true).and_return([])
       expect(Dump::Snapshot).to receive(:list).with(:like => '123', :tags => 'a,b,c').and_return([])
-      Dump.cleanup(:like => '123', :tags => 'a,b,c')
+      described_class.cleanup(:like => '123', :tags => 'a,b,c')
     end
 
     {
@@ -292,7 +292,7 @@ describe Dump do
         expect(Dump::Snapshot).to receive(:list).with(hash_including(:all => true)).and_return(all_dumps)
         expect(Dump::Snapshot).to receive(:list).with(hash_not_including(:all => true)).and_return(dumps)
         grab_output do
-          Dump.cleanup({:like => '123', :tags => 'a,b,c'}.merge(options))
+          described_class.cleanup({:like => '123', :tags => 'a,b,c'}.merge(options))
         end
       end
     end
@@ -314,13 +314,13 @@ describe Dump do
           expect(s[dumps[3].path.to_s]).not_to be_nil
           expect(s['Horrible error']).not_to be_nil
         end
-        Dump.cleanup
+        described_class.cleanup
       end
     end
 
     it "raises if called with :leave which is not a number or 'none'" do
       expect do
-        Dump.cleanup(:leave => 'nothing')
+        described_class.cleanup(:leave => 'nothing')
       end.to raise_error
     end
   end
