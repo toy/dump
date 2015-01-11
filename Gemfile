@@ -10,7 +10,11 @@ if defined?(JRUBY_VERSION)
 else
   gem 'sqlite3'
   gem 'mysql2'
-  gem 'pg'
+  if RUBY_VERSION == '1.8.7'
+    gem 'pg', '0.17.1'
+  else
+    gem 'pg'
+  end
   if rails_version =~ /(^|[^.\d])(2|3\.0)\.\d+/
     gem 'activerecord-mysql2-adapter'
   end
