@@ -30,8 +30,7 @@ module Dump
     end
 
     def with_disabled_indexes(table, &block)
-      all_indexes = ActiveRecord::Base.connection.indexes(table)
-      table_indexes = all_indexes.select {|index| index.table == table}
+      table_indexes = ActiveRecord::Base.connection.indexes(table)
 
       remove_indexes(table_indexes)
       block.call
