@@ -12,6 +12,7 @@ else
   gem 'mysql2'
   if RUBY_VERSION == '1.8.7'
     gem 'pg', '0.17.1'
+    gem 'i18n', '0.6.11'
   else
     gem 'pg'
   end
