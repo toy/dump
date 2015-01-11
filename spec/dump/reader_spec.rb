@@ -478,6 +478,14 @@ describe Reader do
           expect(@dump).to receive(:insert_into_table).with('`first`', '(`id`, `name`)', @rows.map(&:inspect))
           @dump.read_table('first', 100)
         end
+
+        it "should remove indexes around reading/writing table" do
+          create_entry(100)
+          allow(@dump).to receive(:clear_table)
+          allow(@dump).to receive(:insert_into_table)
+          expect(@dump).to receive(:with_disabled_indexes).with('first')
+          @dump.read_table('first', 100)
+        end
       end
     end
 
