@@ -46,8 +46,8 @@ module Dump
     VALID_INDEX_OPTIONS = [:unique, :order, :name, :where, :length, :internal, :using, :algorithm, :type].freeze
 
     def index_options(index)
-      options = VALID_INDEX_OPTIONS.map{|field| [field, index.members.include?(field) ? index.send(field) : nil]}
-      non_empty_options = options.select{|pair| !pair[1].nil?}
+      options = VALID_INDEX_OPTIONS.map{ |field| [field, index.members.include?(field) ? index.send(field) : nil] }
+      non_empty_options = options.select{ |pair| !pair[1].nil? }
 
       Hash[*non_empty_options.flatten]
     end

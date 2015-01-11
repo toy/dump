@@ -218,8 +218,7 @@ module Dump
     end
 
     def read_assets
-      return if Dump::Env[:restore_assets] && Dump::Env[:restore_assets].empty?
-      return if config[:assets].blank?
+      return if (Dump::Env[:restore_assets] && Dump::Env[:restore_assets].empty?) || config[:assets].blank?
 
       assets = config[:assets]
       if assets.is_a?(Hash)
@@ -260,8 +259,7 @@ module Dump
 
     def read_asset?(path, prefix)
       Dump::Env.filter(:restore_assets, Dump::Assets::SPLITTER).custom_pass? do |value|
-        File.fnmatch(File.join(prefix, value), path) ||
-          File.fnmatch(File.join(prefix, value, '**'), path)
+        File.fnmatch(File.join(prefix, value), path) || File.fnmatch(File.join(prefix, value, '**'), path)
       end
     end
 
