@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.require_paths = %w[lib]
 
   s.add_dependency 'archive-tar-minitar', '= 0.5.2'
-  s.add_dependency 'progress', '~> 2.4.0'
+  s.add_dependency 'progress', '~> 3.0', '>= 3.0.1'
   s.add_development_dependency 'rspec', '~> 3.0'
   if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('1.9.3')
     s.add_development_dependency 'rubocop', '~> 0.27'
