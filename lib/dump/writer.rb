@@ -75,9 +75,19 @@ module Dump
           Marshal.dump(column_names, f)
           Progress.step
 
+          type_cast = if columns.first.respond_to?(:type_cast_from_database)
+            proc do |column_name, value|
+              columns_by_name[column_name].type_cast_from_database(value)
+            end
+          else
+            proc do |column_name, value|
+              columns_by_name[column_name].type_cast(value)
+            end
+          end
+
           each_table_row(table, row_count) do |row|
-            values = column_names.map do |column|
-              columns_by_name[column].type_cast(row[column])
+            values = column_names.map do |column_name|
+              type_cast.call(column_name, row[column_name])
             end
             Marshal.dump(values, f)
             Progress.step
