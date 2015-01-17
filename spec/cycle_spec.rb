@@ -60,16 +60,17 @@ end
 
 def create_chickens!(options = {})
   time = Time.local(2000, 'jan', 1, 20, 15, 1)
+  times = [time - 1_000_000, time, time + 1_000_000]
   data = {
     :string => ['', 'lala'],
     :text => ['', 'lala', 'lala' * 100],
     :integer => [-1000, 0, 1000],
     :float => [-1000.0, 0.0, 1000.0],
     :decimal => [-1000.0, 0.0, 1000.0],
-    :datetime => [time, time - 5.years],
-    :timestamp => [time, time - 5.years],
-    :time => [time, time - 5.years],
-    :date => [time, time - 5.years],
+    :datetime => times.map(&:to_datetime),
+    :timestamp => times,
+    :time => times,
+    :date => times.map(&:to_date),
     :boolean => [true, false],
   }
   Chicken.create!
