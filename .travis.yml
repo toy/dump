@@ -1,9 +1,6 @@
 language: ruby
 rvm:
-  - 1.8.7
   - 1.9.3
-  - '2.0'
-  - '2.1'
   - '2.2'
   - jruby-19mode
 env:
@@ -29,14 +26,17 @@ before_install:
 matrix:
   fast_finish: true
   include:
-    - env: RUBOCOP=true
-      rvm: default
-  exclude:
-    - rvm: 1.8.7 # not supported by rails 4
-      env: RAILS_VERSION='~> 4.0.0'
-    - rvm: 1.8.7 # not supported by rails 4
-      env: RAILS_VERSION='~> 4.1.0'
-    - rvm: 1.8.7 # not supported by rails 4
-      env: RAILS_VERSION='~> 4.2.0'
+    - {rvm: 1.8.7, env: RAILS_VERSION='~> 2.3.0'}
+    - {rvm: 1.8.7, env: RAILS_VERSION='~> 3.2.0'}
+
+    - {rvm: '2.0', env: RAILS_VERSION='~> 2.3.0'}
+    - {rvm: '2.0', env: RAILS_VERSION='~> 3.2.0'}
+    - {rvm: '2.0', env: RAILS_VERSION='~> 4.2.0'}
+
+    - {rvm: '2.1', env: RAILS_VERSION='~> 2.3.0'}
+    - {rvm: '2.1', env: RAILS_VERSION='~> 3.2.0'}
+    - {rvm: '2.1', env: RAILS_VERSION='~> 4.2.0'}
+
+    - {env: RUBOCOP=true, rvm: default}
   allow_failures:
     - rvm: jruby-19mode
