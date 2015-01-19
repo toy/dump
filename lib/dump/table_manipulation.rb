@@ -31,7 +31,6 @@ module Dump
 
     def with_disabled_indexes(table, &block)
       table_indexes = ActiveRecord::Base.connection.indexes(table)
-
       remove_indexes(table_indexes)
       block.call
       add_indexes(table_indexes)
@@ -48,6 +47,7 @@ module Dump
     def index_options(index)
       options = VALID_INDEX_OPTIONS.map{ |field| [field, index.members.include?(field) ? index.send(field) : nil] }
       non_empty_options = options.select{ |pair| !pair[1].nil? }
+      non_empty_options << [:length, index.lengths] if index.try(:lengths).present?
 
       Hash[*non_empty_options.flatten]
     end
