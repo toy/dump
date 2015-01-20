@@ -45,6 +45,71 @@ describe Dump::TableManipulation do
     end
   end
 
+  describe 'with_disabled_indexes' do
+    it 'calls indexes, remove_indexes, block, add_indexes in order' do
+      block = Proc.new {}
+
+      expect(ActiveRecord::Base.connection).to receive(:indexes).with('table').and_return([]).ordered
+      expect(self).to receive(:remove_indexes).with([]).ordered
+      expect(block).to receive(:call).ordered
+      expect(self).to receive(:add_indexes).with([]).ordered
+
+      with_disabled_indexes 'table' do
+        block.call
+      end
+    end
+  end
+
+  describe 'remove_indexes' do
+    it 'calls remove_index for each passed index' do
+      indexes = [
+        OpenStruct.new(table: 'table', name: 'table_index_1'),
+        OpenStruct.new(table: 'table', name: 'table_index_2')
+      ]
+
+      expect(ActiveRecord::Base.connection).to receive(:remove_index).with('table', name: 'table_index_1').ordered
+      expect(ActiveRecord::Base.connection).to receive(:remove_index).with('table', name: 'table_index_2').ordered
+
+      remove_indexes indexes
+    end
+  end
+
+  describe 'add_indexes' do
+    it 'calls add_index for each passed index' do
+      indexes = [
+        OpenStruct.new(table: 'table', name: 'table_index_1', columns: [:col1], members: [:unique, :length], unique: true, test: 1),
+        OpenStruct.new(table: 'table', name: 'table_index_2', columns: [:col2], members: [], lengths: 1)
+      ]
+
+      expect(ActiveRecord::Base.connection).to receive(:add_index).with('table', [:col1], unique: true).ordered
+      expect(ActiveRecord::Base.connection).to receive(:add_index).with('table', [:col2], length: 1).ordered
+
+      add_indexes indexes
+    end
+  end
+
+  describe 'index_options' do
+    it 'returns only valid index options' do
+      index = OpenStruct.new(
+        members: [:unique, :order, :name, :where, :length, :internal, :using, :algorithm, :type, :test],
+        unique: 1, order: 2, name: 3, where: 4, length: 5, internal: 6, using: 7, algorithm: 8, type: 9,
+        test: 10
+      )
+      expect(index_options(index)).to eq(unique: 1, order: 2, name: 3, where: 4, length: 5, internal: 6, using: 7, algorithm: 8, type: 9)
+    end
+
+    it 'returns only non nil index options' do
+      index = OpenStruct.new(members: [:unique, :where], unique: nil, where: '(a=1)')
+      expect(index_options(index)).to eq(where: '(a=1)')
+    end
+
+    # mysql adapter implementation detail
+    it 'returns length for lengths index options' do
+      index = OpenStruct.new(members: [], lengths: 1)
+      expect(index_options(index)).to eq(length: 1)
+    end
+  end
+
   describe 'insert_into_table' do
     it 'calls connection.insert with sql for insert if values is string' do
       expect(connection).to receive(:insert).with('INSERT INTO `table` (`c1`,`c2`) VALUES (`v1`,`v2`)', anything)
