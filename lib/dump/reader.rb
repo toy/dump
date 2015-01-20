@@ -5,6 +5,7 @@ require 'progress'
 require 'rake'
 require 'zlib'
 require 'tempfile'
+require 'dump/reader/summary'
 
 module Dump
   # Reading dump
@@ -21,30 +22,6 @@ module Dump
           dump.read_tables
           dump.read_assets
         end
-      end
-    end
-
-    # Helper class for building summary of dump
-    class Summary
-      attr_reader :text
-      alias_method :to_s, :text
-      def initialize
-        @text = ''
-      end
-
-      def header(header)
-        @text << "  #{header}:\n"
-      end
-
-      def data(entries)
-        entries.each do |entry|
-          @text << "    #{entry}\n"
-        end
-      end
-
-      # from ActionView::Helpers::TextHelper
-      def self.pluralize(count, singular)
-        "#{count} #{count == 1 ? singular : singular.pluralize}"
       end
     end
 
@@ -98,7 +75,8 @@ module Dump
     def find_entry(matcher)
       stream.each do |entry|
         if entry.full_name.match(matcher)
-          # we can not return entry - after exiting stream.each the entry will be invalid and will read from tar start
+          # we can not return entry - after exiting stream.each
+          # the entry will be invalid and will read from tar start
           return yield(entry)
         end
       end
@@ -191,8 +169,7 @@ module Dump
         table_sql = quote_table_name(table)
         clear_table(table_sql)
 
-        columns = Marshal.load(entry)
-        columns_sql = columns_insert_sql(columns)
+        columns_sql = columns_insert_sql(Marshal.load(entry))
         with_disabled_indexes table do
           Progress.start(table, rows_count) do
             until entry.eof?
@@ -218,7 +195,8 @@ module Dump
     end
 
     def read_assets
-      return if (Dump::Env[:restore_assets] && Dump::Env[:restore_assets].empty?) || config[:assets].blank?
+      return if Dump::Env[:restore_assets] && Dump::Env[:restore_assets].empty?
+      return if config[:assets].blank?
 
       assets = config[:assets]
       if assets.is_a?(Hash)
@@ -259,7 +237,8 @@ module Dump
 
     def read_asset?(path, prefix)
       Dump::Env.filter(:restore_assets, Dump::Assets::SPLITTER).custom_pass? do |value|
-        File.fnmatch(File.join(prefix, value), path) || File.fnmatch(File.join(prefix, value, '**'), path)
+        File.fnmatch(File.join(prefix, value), path) ||
+          File.fnmatch(File.join(prefix, value, '**'), path)
       end
     end
 
