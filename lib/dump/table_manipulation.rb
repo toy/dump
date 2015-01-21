@@ -29,6 +29,35 @@ module Dump
       connection.delete("DELETE FROM #{table_sql}", 'Clearing table')
     end
 
+    def with_disabled_indexes(table, &block)
+      table_indexes = ActiveRecord::Base.connection.indexes(table)
+      remove_indexes(table_indexes)
+      block.call
+      add_indexes(table_indexes)
+    end
+
+    def remove_indexes(indexes)
+      indexes.each do |index|
+        ActiveRecord::Base.connection.remove_index index.table, :name => index.name
+      end
+    end
+
+    VALID_INDEX_OPTIONS = [:unique, :order, :name, :where, :length, :internal, :using, :algorithm, :type].freeze
+
+    def index_options(index)
+      options = VALID_INDEX_OPTIONS.map{ |field| [field, index.members.include?(field) ? index.send(field) : nil] }
+      non_empty_options = options.select{ |pair| !pair[1].nil? }
+      non_empty_options << [:length, index.lengths] if index.try(:lengths).present?
+
+      Hash[*non_empty_options.flatten]
+    end
+
+    def add_indexes(indexes)
+      indexes.each do |index|
+        ActiveRecord::Base.connection.add_index index.table, index.columns, index_options(index)
+      end
+    end
+
     def insert_into_table(table_sql, columns_sql, values_sql)
       values_sql = values_sql.join(',') if values_sql.is_a?(Array)
       sql = "INSERT INTO #{table_sql} #{columns_sql} VALUES #{values_sql}"

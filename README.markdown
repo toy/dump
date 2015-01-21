@@ -145,6 +145,8 @@ reset database:
 
     rake dump:restore MIGRATE_DOWN=reset
 
+`REBUILD_INDEXES` — remove indexes for each table before restore, and create them after restore if you pass "1", "true" or "yes". `REBUILD_INDEXES` is useful to speed up restoring for large tables (see https://github.com/toy/dump/pull/12#issuecomment-69462275), but may affect index structure because of database adapters implementations.
+
 `RESTORE_SCHEMA` — don't read/change schema if you pass "0", "no" or "false" (useful to just restore data for table; note that schema info tables are also not restored)
 
 don't restore schema:
