@@ -164,33 +164,45 @@ module Dump
       end
     end
 
+    def rebuild_indexes?
+      Dump::Env.yes?(:rebuild_indexes)
+    end
+
     def read_table(table, rows_count)
       find_entry("#{table}.dump") do |entry|
         table_sql = quote_table_name(table)
         clear_table(table_sql)
 
         columns_sql = columns_insert_sql(Marshal.load(entry))
-        with_disabled_indexes table do
-          Progress.start(table, rows_count) do
-            until entry.eof?
-              rows_sql = []
-              1000.times do
-                rows_sql << values_insert_sql(Marshal.load(entry)) unless entry.eof?
-              end
+        if rebuild_indexes?
+          with_disabled_indexes table do
+            bulk_insert_into_table(table, rows_count, entry, table_sql, columns_sql)
+          end
+        else
+          bulk_insert_into_table(table, rows_count, entry, table_sql, columns_sql)
+        end
+        fix_sequence!(table)
+      end
+    end
 
-              begin
-                insert_into_table(table_sql, columns_sql, rows_sql)
-                Progress.step(rows_sql.length)
-              rescue
-                rows_sql.each do |row_sql|
-                  insert_into_table(table_sql, columns_sql, row_sql)
-                  Progress.step
-                end
-              end
+    def bulk_insert_into_table(table, rows_count, entry, table_sql, columns_sql)
+      Progress.start(table, rows_count) do
+        until entry.eof?
+          rows_sql = []
+          1000.times do
+            rows_sql << values_insert_sql(Marshal.load(entry)) unless entry.eof?
+          end
+
+          begin
+            insert_into_table(table_sql, columns_sql, rows_sql)
+            Progress.step(rows_sql.length)
+          rescue
+            rows_sql.each do |row_sql|
+              insert_into_table(table_sql, columns_sql, row_sql)
+              Progress.step
             end
           end
         end
-        fix_sequence!(table)
       end
     end
 

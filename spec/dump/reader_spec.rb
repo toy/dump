@@ -479,11 +479,21 @@ describe Reader do
           @dump.read_table('first', 100)
         end
 
-        it 'should remove indexes around reading/writing table' do
+        it 'should remove indexes around reading/writing table in case of rebuild indexes' do
           create_entry(100)
           allow(@dump).to receive(:clear_table)
           allow(@dump).to receive(:insert_into_table)
+          expect(@dump).to receive(:rebuild_indexes?).and_return(true)
           expect(@dump).to receive(:with_disabled_indexes).with('first')
+          @dump.read_table('first', 100)
+        end
+
+        it 'should not remove indexes around reading/writing table in case of not rebuild indexes' do
+          create_entry(100)
+          allow(@dump).to receive(:clear_table)
+          allow(@dump).to receive(:insert_into_table)
+          expect(@dump).to receive(:rebuild_indexes?).and_return(false)
+          expect(@dump).not_to receive(:with_disabled_indexes)
           @dump.read_table('first', 100)
         end
       end
