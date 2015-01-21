@@ -92,9 +92,7 @@ describe Dump::TableManipulation do
     it 'returns only valid index options' do
       index = OpenStruct.new(
         :members => [:unique, :order, :name, :where, :length, :internal, :using, :algorithm, :test],
-        :unique => 1, :order => 2, :name => 3, :where => 4, :length => 5, :internal => 6, :using => 7, :algorithm => 8,
-        :test => 10
-      )
+        :unique => 1, :order => 2, :name => 3, :where => 4, :length => 5, :internal => 6, :using => 7, :algorithm => 8, :test => 10)
       expect(index_options(index)).to eq(:unique => 1, :order => 2, :name => 3, :where => 4, :length => 5, :internal => 6, :using => 7, :algorithm => 8)
     end
 
