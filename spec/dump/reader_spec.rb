@@ -22,7 +22,10 @@ describe Reader do
       expect(@dump).to receive(:migrate_down).ordered
       expect(@dump).to receive(:read_schema).ordered
       expect(@dump).to receive(:read_tables).ordered
-      expect(@dump).to receive(:read_assets).ordered
+
+      @assets = double('assets')
+      expect(Dump::Reader::Assets).to receive(:new).with(@dump).and_return(@assets).ordered
+      expect(@assets).to receive(:read).ordered
 
       described_class.restore('/abc/123.tmp')
     end
@@ -499,187 +502,203 @@ describe Reader do
       end
     end
 
-    describe 'read_assets' do
-      before do
-        @task = double('task')
-        allow(Rake::Task).to receive(:[]).with('assets:delete').and_return(@task)
-        allow(@task).to receive(:invoke)
-        allow(@dump).to receive(:assets_root_link).and_yield('/tmp', 'assets')
-      end
-
-      it 'does not read assets if config[:assets] is nil' do
-        allow(@dump).to receive(:config).and_return({})
-        expect(@dump).not_to receive(:find_entry)
-        @dump.read_assets
-      end
-
-      it 'does not read assets if config[:assets] is blank' do
-        allow(@dump).to receive(:config).and_return({:assets => []})
-        expect(@dump).not_to receive(:find_entry)
-        @dump.read_assets
-      end
-
-      describe 'deleting existing assets' do
+    describe 'assets' do
+      Assets = Reader::Assets
+      describe Assets do
         before do
-          allow(@stream).to receive(:each)
+          @dump = Dump::Reader.new('123.tgz')
+          @assets_reader = described_class.new(@dump)
+
+          @e1 = double('e1', :full_name => 'config', :read => 'config_data')
+          @e2 = double('e2', :full_name => 'first.dump', :read => 'first.dump_data')
+          @e3 = double('e3', :full_name => 'second.dump', :read => 'second.dump_data')
+          @stream = [@e1, @e2, @e3]
+          allow(@dump).to receive(:stream).and_return(@stream)
         end
 
-        it 'calls assets:delete' do
-          @assets = %w[images videos]
-          allow(@dump).to receive(:config).and_return({:assets => @assets})
-          allow(@dump).to receive(:find_entry)
-
-          expect(@task).to receive(:invoke)
-
-          @dump.read_assets
-        end
-
-        it 'calls assets:delete with ASSETS set to config[:assets] joined with :' do
-          @assets = %w[images videos]
-          allow(@dump).to receive(:config).and_return({:assets => @assets})
-          allow(@dump).to receive(:find_entry)
-
-          expect(@task).to receive(:invoke) do
-            expect(Dump::Env[:assets]).to eq('images:videos')
+        describe 'read_assets' do
+          before do
+            @task = double('task')
+            allow(Rake::Task).to receive(:[]).with('assets:delete').and_return(@task)
+            allow(@task).to receive(:invoke)
+            allow(@dump).to receive(:assets_root_link).and_yield('/tmp', 'assets')
           end
 
-          @dump.read_assets
-        end
+          it 'does not read assets if config[:assets] is nil' do
+            allow(@dump).to receive(:config).and_return({})
+            expect(@dump).not_to receive(:find_entry)
+            @assets_reader.read
+          end
 
-        describe 'when called with restore_assets' do
-          it 'deletes files and dirs only in requested paths' do
-            @assets = %w[images videos]
-            allow(@dump).to receive(:config).and_return({:assets => @assets})
+          it 'does not read assets if config[:assets] is blank' do
+            allow(@dump).to receive(:config).and_return({:assets => []})
+            expect(@dump).not_to receive(:find_entry)
+            @assets_reader.read
+          end
 
-            expect(Dump::Assets).to receive('glob_asset_children').with('images', '**/*').and_return(%w[images images/a.jpg images/b.jpg])
-            expect(Dump::Assets).to receive('glob_asset_children').with('videos', '**/*').and_return(%w[videos videos/a.mov])
+          describe 'deleting existing assets' do
+            before do
+              allow(@stream).to receive(:each)
+            end
 
-            expect(@dump).to receive('read_asset?').with('images/b.jpg', Dump.rails_root).ordered.and_return(false)
-            expect(@dump).to receive('read_asset?').with('images/a.jpg', Dump.rails_root).ordered.and_return(true)
-            expect(@dump).to receive('read_asset?').with('images', Dump.rails_root).ordered.and_return(true)
-            expect(@dump).to receive('read_asset?').with('videos/a.mov', Dump.rails_root).ordered.and_return(false)
-            expect(@dump).to receive('read_asset?').with('videos', Dump.rails_root).ordered.and_return(false)
+            it 'calls assets:delete' do
+              @assets = %w[images videos]
+              allow(@dump).to receive(:config).and_return({:assets => @assets})
+              allow(@dump).to receive(:find_entry)
 
-            expect(File).to receive('file?').with('images/a.jpg').and_return(true)
-            expect(File).to receive('unlink').with('images/a.jpg')
-            expect(File).not_to receive('file?').with('images/b.jpg')
-            expect(File).to receive('file?').with('images').and_return(false)
-            expect(File).to receive('directory?').with('images').and_return(true)
-            expect(Dir).to receive('unlink').with('images').and_raise(Errno::ENOTEMPTY)
+              expect(@task).to receive(:invoke)
 
-            Dump::Env.with_env(:restore_assets => 'images/a.*:stylesheets') do
-              @dump.read_assets
+              @assets_reader.read
+            end
+
+            it 'calls assets:delete with ASSETS set to config[:assets] joined with :' do
+              @assets = %w[images videos]
+              allow(@dump).to receive(:config).and_return({:assets => @assets})
+              allow(@dump).to receive(:find_entry)
+
+              expect(@task).to receive(:invoke) do
+                expect(Dump::Env[:assets]).to eq('images:videos')
+              end
+
+              @assets_reader.read
+            end
+
+            describe 'when called with restore_assets' do
+              it 'deletes files and dirs only in requested paths' do
+                @assets = %w[images videos]
+                allow(@dump).to receive(:config).and_return({:assets => @assets})
+
+                expect(Dump::Assets).to receive('glob_asset_children').with('images', '**/*').and_return(%w[images images/a.jpg images/b.jpg])
+                expect(Dump::Assets).to receive('glob_asset_children').with('videos', '**/*').and_return(%w[videos videos/a.mov])
+
+                expect(@assets_reader).to receive('read_asset?').with('images/b.jpg', Dump.rails_root).ordered.and_return(false)
+                expect(@assets_reader).to receive('read_asset?').with('images/a.jpg', Dump.rails_root).ordered.and_return(true)
+                expect(@assets_reader).to receive('read_asset?').with('images', Dump.rails_root).ordered.and_return(true)
+                expect(@assets_reader).to receive('read_asset?').with('videos/a.mov', Dump.rails_root).ordered.and_return(false)
+                expect(@assets_reader).to receive('read_asset?').with('videos', Dump.rails_root).ordered.and_return(false)
+
+                expect(File).to receive('file?').with('images/a.jpg').and_return(true)
+                expect(File).to receive('unlink').with('images/a.jpg')
+                expect(File).not_to receive('file?').with('images/b.jpg')
+                expect(File).to receive('file?').with('images').and_return(false)
+                expect(File).to receive('directory?').with('images').and_return(true)
+                expect(Dir).to receive('unlink').with('images').and_raise(Errno::ENOTEMPTY)
+
+                Dump::Env.with_env(:restore_assets => 'images/a.*:stylesheets') do
+                  @assets_reader.read
+                end
+              end
+
+              it 'does not delete any files and dirs for empty list' do
+                @assets = %w[images videos]
+                allow(@dump).to receive(:config).and_return({:assets => @assets})
+
+                expect(Dump::Assets).not_to receive('glob_asset_children')
+
+                expect(@dump).not_to receive('read_asset?')
+
+                expect(File).not_to receive('directory?')
+                expect(File).not_to receive('file?')
+                expect(File).not_to receive('unlink')
+
+                Dump::Env.with_env(:restore_assets => '') do
+                  @assets_reader.read
+                end
+              end
             end
           end
 
-          it 'does not delete any files and dirs for empty list' do
-            @assets = %w[images videos]
-            allow(@dump).to receive(:config).and_return({:assets => @assets})
+          describe 'old style' do
+            it 'finds assets.tar' do
+              @assets = %w[images videos]
+              allow(@dump).to receive(:config).and_return({:assets => @assets})
+              allow(Dir).to receive(:glob).and_return([])
+              allow(FileUtils).to receive(:remove_entry)
+              allow(@stream).to receive(:each)
 
-            expect(Dump::Assets).not_to receive('glob_asset_children')
+              expect(@dump).to receive(:find_entry).with('assets.tar')
+              @assets_reader.read
+            end
 
-            expect(@dump).not_to receive('read_asset?')
+            [
+              %w[images videos],
+              {'images' => 0, 'videos' => 0},
+              {'images' => {:files => 0, :total => 0}, 'videos' => {:files => 0, :total => 0}},
+            ].each do |assets|
+              it 'rewrites rewind method to empty method - to not raise exception, opens tar and extracts each entry' do
+                allow(@dump).to receive(:config).and_return({:assets => assets})
+                allow(Dir).to receive(:glob).and_return([])
+                allow(FileUtils).to receive(:remove_entry)
 
-            expect(File).not_to receive('directory?')
-            expect(File).not_to receive('file?')
-            expect(File).not_to receive('unlink')
+                @assets_tar = double('assets_tar')
+                allow(@assets_tar).to receive(:rewind).and_raise('hehe - we want to rewind to center of gzip')
+                allow(@dump).to receive(:find_entry).and_yield(@assets_tar)
 
-            Dump::Env.with_env(:restore_assets => '') do
-              @dump.read_assets
+                @inp = double('inp')
+                each_excpectation = expect(@inp).to receive(:each)
+                @entries = %w[a b c d].map do |s|
+                  file = double("file_#{s}")
+                  each_excpectation.and_yield(file)
+                  expect(@inp).to receive(:extract_entry).with(Dump.rails_root, file)
+                  file
+                end
+                expect(Archive::Tar::Minitar).to receive(:open).with(@assets_tar).and_yield(@inp)
+
+                @assets_reader.read
+              end
+            end
+          end
+
+          describe 'new style' do
+            before do
+              expect(@dump).to receive(:find_entry).with('assets.tar')
+            end
+
+            [
+              %w[images videos],
+              {'images' => 0, 'videos' => 0},
+              {'images' => {:files => 0, :total => 0}, 'videos' => {:files => 0, :total => 0}},
+            ].each do |assets|
+              it 'extracts each entry' do
+                allow(@dump).to receive(:config).and_return({:assets => assets})
+                allow(Dir).to receive(:glob).and_return([])
+                allow(FileUtils).to receive(:remove_entry)
+
+                expect(@dump).to receive(:assets_root_link).and_yield('/tmp/abc', 'assets')
+                each_excpectation = expect(@stream).to receive(:each)
+                @entries = %w[a b c d].map do |s|
+                  file = double("file_#{s}", :full_name => "assets/#{s}")
+                  each_excpectation.and_yield(file)
+                  expect(@stream).to receive(:extract_entry).with('/tmp/abc', file)
+                  file
+                end
+                other_file = double('other_file', :full_name => 'other_file')
+                each_excpectation.and_yield(other_file)
+                expect(@stream).not_to receive(:extract_entry).with('/tmp/abc', other_file)
+
+                @assets_reader.read
+              end
             end
           end
         end
-      end
 
-      describe 'old style' do
-        it 'finds assets.tar' do
-          @assets = %w[images videos]
-          allow(@dump).to receive(:config).and_return({:assets => @assets})
-          allow(Dir).to receive(:glob).and_return([])
-          allow(FileUtils).to receive(:remove_entry)
-          allow(@stream).to receive(:each)
+        describe 'read_asset?' do
+          it 'creates filter and call custom_pass? on it' do
+            @filter = double('filter')
+            allow(@filter).to receive('custom_pass?')
 
-          expect(@dump).to receive(:find_entry).with('assets.tar')
-          @dump.read_assets
-        end
+            expect(Dump::Env).to receive('filter').with(:restore_assets, Dump::Assets::SPLITTER).and_return(@filter)
 
-        [
-          %w[images videos],
-          {'images' => 0, 'videos' => 0},
-          {'images' => {:files => 0, :total => 0}, 'videos' => {:files => 0, :total => 0}},
-        ].each do |assets|
-          it 'rewrites rewind method to empty method - to not raise exception, opens tar and extracts each entry' do
-            allow(@dump).to receive(:config).and_return({:assets => assets})
-            allow(Dir).to receive(:glob).and_return([])
-            allow(FileUtils).to receive(:remove_entry)
-
-            @assets_tar = double('assets_tar')
-            allow(@assets_tar).to receive(:rewind).and_raise('hehe - we want to rewind to center of gzip')
-            allow(@dump).to receive(:find_entry).and_yield(@assets_tar)
-
-            @inp = double('inp')
-            each_excpectation = expect(@inp).to receive(:each)
-            @entries = %w[a b c d].map do |s|
-              file = double("file_#{s}")
-              each_excpectation.and_yield(file)
-              expect(@inp).to receive(:extract_entry).with(Dump.rails_root, file)
-              file
-            end
-            expect(Archive::Tar::Minitar).to receive(:open).with(@assets_tar).and_yield(@inp)
-
-            @dump.read_assets
+            @assets_reader.read_asset?('a', 'b')
           end
-        end
-      end
 
-      describe 'new style' do
-        before do
-          expect(@dump).to receive(:find_entry).with('assets.tar')
-        end
-
-        [
-          %w[images videos],
-          {'images' => 0, 'videos' => 0},
-          {'images' => {:files => 0, :total => 0}, 'videos' => {:files => 0, :total => 0}},
-        ].each do |assets|
-          it 'extracts each entry' do
-            allow(@dump).to receive(:config).and_return({:assets => assets})
-            allow(Dir).to receive(:glob).and_return([])
-            allow(FileUtils).to receive(:remove_entry)
-
-            expect(@dump).to receive(:assets_root_link).and_yield('/tmp/abc', 'assets')
-            each_excpectation = expect(@stream).to receive(:each)
-            @entries = %w[a b c d].map do |s|
-              file = double("file_#{s}", :full_name => "assets/#{s}")
-              each_excpectation.and_yield(file)
-              expect(@stream).to receive(:extract_entry).with('/tmp/abc', file)
-              file
+          it 'tests path usint fnmatch' do
+            Dump::Env.with_env(:restore_assets => '[a-b]') do
+              expect(@assets_reader.read_asset?('x/a', 'x')).to be_truthy
+              expect(@assets_reader.read_asset?('x/b/file', 'x')).to be_truthy
+              expect(@assets_reader.read_asset?('x/c', 'x')).to be_falsey
             end
-            other_file = double('other_file', :full_name => 'other_file')
-            each_excpectation.and_yield(other_file)
-            expect(@stream).not_to receive(:extract_entry).with('/tmp/abc', other_file)
-
-            @dump.read_assets
           end
-        end
-      end
-    end
-
-    describe 'read_asset?' do
-      it 'creates filter and call custom_pass? on it' do
-        @filter = double('filter')
-        allow(@filter).to receive('custom_pass?')
-
-        expect(Dump::Env).to receive('filter').with(:restore_assets, Dump::Assets::SPLITTER).and_return(@filter)
-
-        @dump.read_asset?('a', 'b')
-      end
-
-      it 'tests path usint fnmatch' do
-        Dump::Env.with_env(:restore_assets => '[a-b]') do
-          expect(@dump.read_asset?('x/a', 'x')).to be_truthy
-          expect(@dump.read_asset?('x/b/file', 'x')).to be_truthy
-          expect(@dump.read_asset?('x/c', 'x')).to be_falsey
         end
       end
     end
