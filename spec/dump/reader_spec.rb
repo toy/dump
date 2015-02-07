@@ -143,29 +143,30 @@ describe Reader do
 
   describe 'low level' do
     before do
+      @e0 = double('e0', :full_name => 'another_first.dump', :read => 'another_first.dump_data')
       @e1 = double('e1', :full_name => 'config', :read => 'config_data')
       @e2 = double('e2', :full_name => 'first.dump', :read => 'first.dump_data')
       @e3 = double('e3', :full_name => 'second.dump', :read => 'second.dump_data')
-      @stream = [@e1, @e2, @e3]
+      @stream = [@e0, @e1, @e2, @e3]
       @dump = described_class.new('123.tgz')
       allow(@dump).to receive(:stream).and_return(@stream)
     end
 
     describe 'find_entry' do
-      it 'finds first entry in stream equal string' do
+      it 'finds entry in stream equal string' do
         @dump.find_entry('config') do |entry|
           expect(entry).to eq(@e1)
         end
       end
 
-      it 'finds first entry in stream matching regexp' do
-        @dump.find_entry(/\.dump$/) do |entry|
+      it 'finds exact entry in stream without confusion' do
+        @dump.find_entry('first.dump') do |entry|
           expect(entry).to eq(@e2)
         end
       end
 
       it 'returns result of block' do
-        expect(@dump.find_entry(/\.dump$/) do |_entry|
+        expect(@dump.find_entry('first.dump') do |_entry|
           'hello'
         end).to eq('hello')
       end
