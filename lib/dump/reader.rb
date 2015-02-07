@@ -97,7 +97,7 @@ module Dump
 
     def find_entry(matcher)
       stream.each do |entry|
-        if entry.full_name.match(matcher)
+        if entry.full_name == matcher
           # we can not return entry - after exiting stream.each the entry will be invalid and will read from tar start
           return yield(entry)
         end
