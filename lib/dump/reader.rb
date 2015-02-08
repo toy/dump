@@ -95,23 +95,23 @@ module Dump
       end
     end
 
-    def find_entry(matcher)
+    def find_entry(name)
       stream.each do |entry|
-        if entry.full_name == matcher
+        if entry.full_name == name
           # we can not return entry - after exiting stream.each the entry will be invalid and will read from tar start
           return yield(entry)
         end
       end
     end
 
-    def read_entry(matcher)
-      find_entry(matcher) do |entry|
+    def read_entry(name)
+      find_entry(name) do |entry|
         return entry.read
       end
     end
 
-    def read_entry_to_file(matcher)
-      find_entry(matcher) do |entry|
+    def read_entry_to_file(name)
+      find_entry(name) do |entry|
         Tempfile.open('dumper') do |temp|
           temp.write(entry.read(4096)) until entry.eof?
           temp.rewind
