@@ -112,13 +112,8 @@ module Dump
       if table_has_primary_column?(table) && row_count > chunk_size
         # adapted from ActiveRecord::Batches
         primary_key = table_primary_key(table)
-        quoted_primary_key =
-          "#{quote_table_name(table)}.#{quote_column_name(primary_key)}"
         select_where_primary_key =
-          "SELECT * FROM #{quote_table_name(table)}" \
-            " WHERE #{quoted_primary_key} %s" \
-            " ORDER BY #{quoted_primary_key} ASC" \
-            " LIMIT #{chunk_size}"
+          sql_select_where_primary_key_by_adapter(table, primary_key, chunk_size)
         rows = select_all_by_sql(select_where_primary_key % '>= 0')
         until rows.blank?
           rows.each(&block)
@@ -143,6 +138,22 @@ module Dump
 
     def connection
       ActiveRecord::Base.connection
+    end
+
+    def sql_select_where_primary_key_by_adapter(table, primary_key, chunk_size)
+      quoted_primary_key =
+        "#{quote_table_name(table)}.#{quote_column_name(primary_key)}"
+      case connection.adapter_name.downcase
+      when 'sqlserver'
+        "SELECT TOP #{chunk_size} * FROM #{quote_table_name(table)}" \
+          " WHERE #{quoted_primary_key} %s" \
+          " ORDER BY #{quoted_primary_key} ASC"
+      else
+        "SELECT * FROM #{quote_table_name(table)}" \
+          " WHERE #{quoted_primary_key} %s" \
+          " ORDER BY #{quoted_primary_key} ASC" \
+          " LIMIT #{chunk_size}"
+      end
     end
   end
 end

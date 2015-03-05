@@ -205,20 +205,30 @@ describe Dump::TableManipulation do
       expect(i).to eq(@row_count)
     end
 
-    it 'gets rows in chunks if table has primary column and chunk size is less than row count' do
-      expect(self).to receive(:table_has_primary_column?).with('first').and_return(true)
-      expect(self).to receive(:table_chunk_size).with('first').and_return(100)
-      quoted_table_name = quote_table_name('first')
-      quoted_primary_key = "#{quoted_table_name}.#{quote_column_name(table_primary_key('first'))}"
-      sql = "SELECT * FROM #{quoted_table_name} WHERE #{quoted_primary_key} %s ORDER BY #{quoted_primary_key} ASC LIMIT 100"
+    {
+      'whatever' =>
+        'SELECT * FROM [TN] WHERE [PK] %s ORDER BY [PK] ASC LIMIT 100',
+      'SQLServer' =>
+        'SELECT TOP 100 * FROM [TN] WHERE [PK] %s ORDER BY [PK] ASC',
+    }.each do |adapter_name, sql_template|
+      it 'gets rows in chunks if table has primary column and chunk size is less than row count' do
+        allow(connection).to receive(:adapter_name).and_return(adapter_name)
+        expect(self).to receive(:table_has_primary_column?).with('first').and_return(true)
+        expect(self).to receive(:table_chunk_size).with('first').and_return(100)
+        replacements = {
+          '[TN]' => quote_table_name('first'),
+          '[PK]' => "#{quote_table_name('first')}.#{quote_column_name(table_primary_key('first'))}",
+        }
+        sql = sql_template.gsub(/\[[A-Z]+\]/){ |m| replacements[m] }
 
-      expect(self).to receive(:select_all_by_sql).with(sql % '>= 0').and_return(@rows[0, 100])
-      5.times do |i|
-        last_primary_key = 100 + i * 100
-        expect(self).to receive(:select_all_by_sql).with(sql % "> #{last_primary_key}").and_return(@rows[last_primary_key, 100])
+        expect(self).to receive(:select_all_by_sql).with(sql % '>= 0').and_return(@rows[0, 100])
+        5.times do |i|
+          last_primary_key = 100 + i * 100
+          expect(self).to receive(:select_all_by_sql).with(sql % "> #{last_primary_key}").and_return(@rows[last_primary_key, 100])
+        end
+
+        verify_getting_rows
       end
-
-      verify_getting_rows
     end
 
     def verify_getting_rows_in_one_pass
