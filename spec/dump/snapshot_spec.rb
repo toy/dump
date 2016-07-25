@@ -261,8 +261,8 @@ describe Dump::Snapshot do
       expect(described_class.new('').send(:get_filter_tags, ' a , + b , + , - ')).to eq({:simple => %w[a], :mandatory => %w[b], :forbidden => []})
       expect(described_class.new('').send(:get_filter_tags, ' a , a , + b , + b , - d , - d ')).to eq({:simple => %w[a], :mandatory => %w[b], :forbidden => %w[d]})
       expect{ described_class.new('').send(:get_filter_tags, 'a,+a') }.not_to raise_error
-      expect{ described_class.new('').send(:get_filter_tags, 'a,-a') }.to raise_error
-      expect{ described_class.new('').send(:get_filter_tags, '+a,-a') }.to raise_error
+      expect{ described_class.new('').send(:get_filter_tags, 'a,-a') }.to raise_error ArgumentError, /clashes/
+      expect{ described_class.new('').send(:get_filter_tags, '+a,-a') }.to raise_error ArgumentError, /clashes/
     end
 
     it 'accepts non string' do

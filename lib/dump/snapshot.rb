@@ -176,7 +176,7 @@ module Dump
         end
         [:simple, :mandatory].each do |type|
           if (clashing = (groups[type] & groups[:forbidden])).present?
-            fail "#{type} tags clashes with forbidden ones: #{clashing}"
+            fail ArgumentError, "#{type} tags clashes with forbidden ones: #{clashing}"
           end
         end
         groups.each_with_object({}){ |(key, value), hsh| hsh[key] = value.to_a }

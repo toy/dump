@@ -321,7 +321,7 @@ describe Dump do
     it "raises if called with :leave which is not a number or 'none'" do
       expect do
         described_class.cleanup(:leave => 'nothing')
-      end.to raise_error
+      end.to raise_error ArgumentError, /number or "none"/
     end
   end
 end

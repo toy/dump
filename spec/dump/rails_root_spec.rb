@@ -38,6 +38,6 @@ describe Dump::RailsRoot do
   end
 
   it 'fails otherwaise' do
-    expect{ rails_root }.to raise_error
+    expect{ rails_root }.to raise_error 'Unknown rails app root'
   end
 end
