@@ -6,7 +6,7 @@ ActiveRecord::Schema.define(:version => 0) do
   end
 
   create_table :another_chickens, :force => true do |t|
-    %w[string text decimal datetime timestamp date ].each do |type|
+    %w[string text decimal datetime timestamp date].each do |type|
       t.column "#{type}_col", type
     end
   end

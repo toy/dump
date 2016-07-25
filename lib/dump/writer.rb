@@ -42,7 +42,7 @@ module Dump
       Tempfile.open('dump') do |temp|
         yield(temp)
         temp.open
-        stream.tar.add_file_simple(name, :mode => 0100444, :size => temp.length) do |f|
+        stream.tar.add_file_simple(name, :mode => 0o100444, :size => temp.length) do |f|
           f.write(temp.read(4096)) until temp.eof?
         end
       end

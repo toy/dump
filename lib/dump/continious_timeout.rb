@@ -3,9 +3,9 @@
 module Dump
   # Timeout if does not finish or defer in requested time
   module ContiniousTimeout
-    class TimeoutException < ::Exception; end
+    class TimeoutException < RuntimeError; end
 
-    class RestartException < ::Exception; end
+    class RestartException < RuntimeError; end
 
     # Object with defer method
     class Deferer

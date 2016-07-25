@@ -71,7 +71,7 @@ describe Writer do
         @file = double('file')
         expect(@file).to receive(:write).with('qwfpgj')
 
-        expect(@stream.tar).to receive(:add_file_simple).with('abc/def.txt', :mode => 0100444, :size => 6).and_yield(@file)
+        expect(@stream.tar).to receive(:add_file_simple).with('abc/def.txt', :mode => 0o100444, :size => 6).and_yield(@file)
 
         @dump.create_file('abc/def.txt') do |file|
           expect(file).to eq(@temp)

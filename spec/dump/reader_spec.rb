@@ -54,7 +54,7 @@ describe Reader do
             qqq: 123
             www: 345
         TEXT
-        expect("#{@summary}").to eq(output.gsub(/#{output[/^\s+/]}/, '  '))
+        expect(@summary.to_s).to eq(output.gsub(/#{output[/^\s+/]}/, '  '))
       end
 
       it 'pluralizes' do
@@ -473,7 +473,7 @@ describe Reader do
           expect(@dump).to receive(:quote_table_name).with('first').and_return('`first`')
           expect(@dump).to receive(:columns_insert_sql).with(@columns).and_return('(`id`, `name`)')
           @rows.each do |row|
-            expect(@dump).to receive(:values_insert_sql).with(row){ |vs| vs.inspect }
+            expect(@dump).to receive(:values_insert_sql).with(row, &:inspect)
           end
 
           expect(@dump).to receive(:insert_into_table).with('`first`', '(`id`, `name`)', @rows.map(&:inspect))

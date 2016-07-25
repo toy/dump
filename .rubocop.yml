@@ -11,6 +11,9 @@ Lint/EndAlignment:
 Style/AccessModifierIndentation:
   EnforcedStyle: outdent
 
+Style/Alias:
+  EnforcedStyle: prefer_alias_method
+
 Style/BracesAroundHashParameters:
   Enabled: false
 
@@ -21,6 +24,9 @@ Style/DotPosition:
   EnforcedStyle: trailing
 
 Style/DoubleNegation:
+  Enabled: false
+
+Style/EmptyCaseCondition:
   Enabled: false
 
 Style/Encoding:
@@ -35,6 +41,9 @@ Style/IfUnlessModifier:
 Style/IndentHash:
   EnforcedStyle: consistent
 
+Style/ParallelAssignment:
+  Enabled: false
+
 Style/PercentLiteralDelimiters:
   PreferredDelimiters:
     '%w': '[]'
@@ -43,11 +52,17 @@ Style/PercentLiteralDelimiters:
 Style/Semicolon:
   AllowAsExpressionSeparator: true
 
+Style/SignalException:
+  EnforcedStyle: semantic
+
 Style/SpaceBeforeBlockBraces:
   EnforcedStyle: no_space
 
 Style/SpaceInsideHashLiteralBraces:
   EnforcedStyle: no_space
 
-Style/TrailingComma:
+Style/TrailingCommaInArguments:
+  EnforcedStyleForMultiline: no_comma
+
+Style/TrailingCommaInLiteral:
   EnforcedStyleForMultiline: comma

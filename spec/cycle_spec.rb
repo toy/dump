@@ -23,15 +23,12 @@ def use_adapter(adapter)
       ActiveRecord::Base.establish_connection(config.merge('database' => nil))
       ActiveRecord::Base.connection.drop_database config['database']
       ActiveRecord::Base.connection.create_database(config['database'])
-      ActiveRecord::Base.establish_connection(config)
     when /^postgresql/
       ActiveRecord::Base.establish_connection(config.merge('database' => 'postgres', 'schema_search_path' => 'public'))
       ActiveRecord::Base.connection.drop_database config['database']
       ActiveRecord::Base.connection.create_database(config['database'])
-      ActiveRecord::Base.establish_connection(config)
-    else
-      ActiveRecord::Base.establish_connection(config)
     end
+    ActiveRecord::Base.establish_connection(config)
     load_schema
     yield
   ensure

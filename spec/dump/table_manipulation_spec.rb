@@ -141,7 +141,8 @@ describe Dump::TableManipulation do
       expect(self).to receive(:table_columns).with('first').and_return(
         [double(:column, :type => :integer, :limit => nil)] * 3 +
         [double(:column, :type => :string, :limit => nil)] * 3 +
-        [double(:column, :type => :text, :limit => nil)])
+        [double(:column, :type => :text, :limit => nil)]
+      )
       expect(table_chunk_size('first')).to satisfy{ |n|
         (described_class::CHUNK_SIZE_MIN..described_class::CHUNK_SIZE_MAX).include?(n)
       }
@@ -149,13 +150,15 @@ describe Dump::TableManipulation do
 
     it 'does not return value less than CHUNK_SIZE_MIN' do
       expect(self).to receive(:table_columns).with('first').and_return(
-        [double(:column, :type => :text, :limit => nil)] * 100)
+        [double(:column, :type => :text, :limit => nil)] * 100
+      )
       expect(table_chunk_size('first')).to eq(described_class::CHUNK_SIZE_MIN)
     end
 
     it 'does not return value more than CHUNK_SIZE_MAX' do
       expect(self).to receive(:table_columns).with('first').and_return(
-        [double(:column, :type => :boolean, :limit => 1)] * 10)
+        [double(:column, :type => :boolean, :limit => 1)] * 10
+      )
       expect(table_chunk_size('first')).to eq(described_class::CHUNK_SIZE_MAX)
     end
   end
@@ -193,13 +196,13 @@ describe Dump::TableManipulation do
   describe 'each_table_row' do
     before do
       @row_count = 550
-      @rows = Array.new(@row_count){ |i| {'id' => "#{i + 1}"} }
+      @rows = Array.new(@row_count){ |i| {'id' => i.succ.to_s} }
     end
 
     def verify_getting_rows
       i = 0
       each_table_row('first', @row_count) do |row|
-        expect(row).to eq({'id' => "#{i + 1}"})
+        expect(row).to eq({'id' => i.succ.to_s})
         i += 1
       end
       expect(i).to eq(@row_count)
