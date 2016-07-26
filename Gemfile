@@ -9,8 +9,8 @@ if defined?(JRUBY_VERSION)
   gem 'activerecord-jdbcpostgresql-adapter'
 else
   gem 'sqlite3'
-  gem 'mysql2'
-  if RUBY_VERSION == '1.8.7'
+  gem 'mysql2', '~> 0.3.10'
+  if RUBY_VERSION < '1.9'
     gem 'pg', '0.17.1'
     gem 'i18n', '0.6.11'
     gem 'highline', '~> 1.6.21'
@@ -26,5 +26,10 @@ else
 end
 
 gem 'capistrano', '~> 2.0'
+
+gem 'net-ssh', '< 3' if RUBY_VERSION < '2.0'
+gem 'rake', '< 11' if RUBY_VERSION < '1.9'
+gem 'mime-types', '< 3' if RUBY_VERSION < '2.0' && RUBY_VERSION >= '1.9'
+gem 'rack-cache', '< 1.3' if RUBY_VERSION < '1.9'
 
 gemspec
