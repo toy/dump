@@ -7,12 +7,7 @@ env:
   - RAILS_VERSION='~> 2.3.0'
   - RAILS_VERSION='~> 3.2.0'
   - RAILS_VERSION='~> 4.2.0'
-script:
-  if [ -n "$RUBOCOP" ]; then
-    bundle exec rubocop
-  ; else
-    bundle exec rspec
-  ; fi
+script: bundle exec rspec
 before_install:
   - gem update bundler
   - sudo /etc/init.d/postgresql stop
@@ -21,9 +16,12 @@ before_install:
   - psql -c 'create database myapp_test;' -U postgres
   - cp .travis.database.yml spec/db/database.yml
 matrix:
-  fast_finish: true
   include:
-    - {rvm: '1.8', env: RAILS_VERSION='~> 2.3.0'}
-    - {env: RUBOCOP=true, rvm: '2'}
+    - env: RAILS_VERSION='~> 2.3.0'
+      rvm: '1.8'
+    - env: RUBOCOP=✓
+      rvm: '2'
+      script: bundle exec rubocop
+      before_install:
   allow_failures:
     - rvm: jruby-19mode
