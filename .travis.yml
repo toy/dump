@@ -1,12 +1,4 @@
 language: ruby
-rvm:
-  - '1.9'
-  - '2.2'
-  - jruby-19mode
-env:
-  - RAILS_VERSION='~> 2.3.0'
-  - RAILS_VERSION='~> 3.2.0'
-  - RAILS_VERSION='~> 4.2.0'
 script: bundle exec rspec
 before_install:
   - gem update bundler
@@ -17,11 +9,21 @@ before_install:
   - cp .travis.database.yml spec/db/database.yml
 matrix:
   include:
-    - env: RAILS_VERSION='~> 2.3.0'
-      rvm: '1.8'
+    - env: RAILS_VERSION='~> 2.3'
+      rvm: '1.8.7-p371'
+    - env: RAILS_VERSION='~> 2.3'
+      rvm: '1.9.3-p551'
+    - env: RAILS_VERSION='~> 3.2'
+      rvm: '1.9.3-p551'
+    - env: RAILS_VERSION='~> 4.0'
+      rvm: '2.0.0-p648'
+    - env: RAILS_VERSION='~> 5.0'
+      rvm: '2.2.6'
     - env: RUBOCOP=✓
-      rvm: '2'
+      rvm: '2.4.0'
       script: bundle exec rubocop
       before_install:
-  allow_failures:
-    - rvm: jruby-19mode
+    - env: CHECK_RUBIES=✓
+      rvm: '2.4.0'
+      script: bundle exec travis_check_rubies
+      before_install:
