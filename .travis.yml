@@ -18,12 +18,12 @@ matrix:
     - env: RAILS_VERSION='~> 4.0'
       rvm: '2.0.0-p648'
     - env: RAILS_VERSION='~> 5.0'
-      rvm: '2.2.6'
+      rvm: '2.2.9'
     - env: RUBOCOP=✓
-      rvm: '2.4.0'
+      rvm: '2.4.3'
       script: bundle exec rubocop
       before_install:
     - env: CHECK_RUBIES=✓
-      rvm: '2.4.0'
+      rvm: '2.4.3'
       script: bundle exec travis_check_rubies
       before_install:
