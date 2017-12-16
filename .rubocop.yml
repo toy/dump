@@ -5,23 +5,42 @@ AllCops:
     - '*.gemspec'
     - 'spec/dummy-*/**/*'
 
-Lint/EndAlignment:
-  AlignWith: variable
+Bundler/DuplicatedGem:
+  Enabled: false
 
-Style/AccessModifierIndentation:
+Bundler/OrderedGems:
+  Enabled: false
+
+Layout/AccessModifierIndentation:
   EnforcedStyle: outdent
+
+Layout/CaseIndentation:
+  EnforcedStyle: end
+
+Layout/DotPosition:
+  EnforcedStyle: trailing
+
+Layout/IndentHash:
+  EnforcedStyle: consistent
+
+Layout/SpaceBeforeBlockBraces:
+  EnforcedStyle: no_space
+
+Layout/SpaceInsideHashLiteralBraces:
+  EnforcedStyle: no_space
+
+Lint/EndAlignment:
+  EnforcedStyleAlignWith: variable
+
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*.rb'
 
 Style/Alias:
   EnforcedStyle: prefer_alias_method
 
 Style/BracesAroundHashParameters:
   Enabled: false
-
-Style/CaseIndentation:
-  IndentWhenRelativeTo: end
-
-Style/DotPosition:
-  EnforcedStyle: trailing
 
 Style/DoubleNegation:
   Enabled: false
@@ -30,16 +49,16 @@ Style/EmptyCaseCondition:
   Enabled: false
 
 Style/Encoding:
-  EnforcedStyle: when_needed
+  Enabled: false
+
+Style/FormatStringToken:
+  Enabled: false
 
 Style/HashSyntax:
   EnforcedStyle: hash_rockets
 
 Style/IfUnlessModifier:
-  MaxLineLength: 40
-
-Style/IndentHash:
-  EnforcedStyle: consistent
+  Enabled: false
 
 Style/ParallelAssignment:
   Enabled: false
@@ -55,11 +74,8 @@ Style/Semicolon:
 Style/SignalException:
   EnforcedStyle: semantic
 
-Style/SpaceBeforeBlockBraces:
-  EnforcedStyle: no_space
-
-Style/SpaceInsideHashLiteralBraces:
-  EnforcedStyle: no_space
+Style/SymbolArray:
+  Enabled: false
 
 Style/TrailingCommaInArguments:
   EnforcedStyleForMultiline: no_comma
