@@ -19,6 +19,10 @@ matrix:
       rvm: '2.0.0-p648'
     - env: RAILS_VERSION='~> 5.0'
       rvm: '2.2.9'
+    - env: RAILS_VERSION='~> 5.0'
+      rvm: '2.3.6'
+    - env: RAILS_VERSION='~> 5.0'
+      rvm: '2.4.3'
     - env: RUBOCOP=✓
       rvm: '2.4.3'
       script: bundle exec rubocop
