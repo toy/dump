@@ -4,6 +4,7 @@ AllCops:
   Exclude:
     - '*.gemspec'
     - 'spec/dummy-*/**/*'
+    - 'gemfiles/*.gemfile'
 
 Bundler/OrderedGems:
   Enabled: false

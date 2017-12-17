@@ -6,8 +6,10 @@
 /.yardoc/
 /coverage/
 
-Gemfile.lock
 Makefile
 *.o
 *.bundle
 /tmp/
+
+/Gemfile.lock
+/gemfiles/
