@@ -5,9 +5,6 @@ AllCops:
     - '*.gemspec'
     - 'spec/dummy-*/**/*'
 
-Bundler/DuplicatedGem:
-  Enabled: false
-
 Bundler/OrderedGems:
   Enabled: false
 
@@ -20,6 +17,9 @@ Layout/CaseIndentation:
 Layout/DotPosition:
   EnforcedStyle: trailing
 
+Layout/EndAlignment:
+  EnforcedStyleAlignWith: variable
+
 Layout/IndentHash:
   EnforcedStyle: consistent
 
@@ -29,18 +29,12 @@ Layout/SpaceBeforeBlockBraces:
 Layout/SpaceInsideHashLiteralBraces:
   EnforcedStyle: no_space
 
-Lint/EndAlignment:
-  EnforcedStyleAlignWith: variable
-
 Metrics/BlockLength:
   Exclude:
     - 'spec/**/*.rb'
 
 Style/Alias:
   EnforcedStyle: prefer_alias_method
-
-Style/BracesAroundHashParameters:
-  Enabled: false
 
 Style/DoubleNegation:
   Enabled: false
@@ -63,11 +57,6 @@ Style/IfUnlessModifier:
 Style/ParallelAssignment:
   Enabled: false
 
-Style/PercentLiteralDelimiters:
-  PreferredDelimiters:
-    '%w': '[]'
-    '%W': '[]'
-
 Style/Semicolon:
   AllowAsExpressionSeparator: true
 
@@ -80,5 +69,8 @@ Style/SymbolArray:
 Style/TrailingCommaInArguments:
   EnforcedStyleForMultiline: no_comma
 
-Style/TrailingCommaInLiteral:
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: comma
+
+Style/TrailingCommaInHashLiteral:
   EnforcedStyleForMultiline: comma

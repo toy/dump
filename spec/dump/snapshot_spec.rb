@@ -135,15 +135,22 @@ describe Dump::Snapshot do
       end
 
       {
-        'x'           => [],
-        '+x'          => [],
-        'z'           => [16],
-        'a,d,s,o'     => [1..15],
+        'x' => [],
+
+        '+x' => [],
+
+        'z' => [16],
+
+        'a,d,s,o' => [1..15],
+
         '+a,+d,+s,+o' => [5],
-        '-o'          => [0, 1, 2, 4, 7, 9, 11, 14, 16],
+
+        '-o' => [0, 1, 2, 4, 7, 9, 11, 14, 16],
+
         'a,b,c,+s,-o' => [4, 7],
-        '+a,+d'          => [2, 3, 4, 5],
-        '+d,+a'          => [2, 3, 4, 5],
+
+        '+a,+d' => [2, 3, 4, 5],
+        '+d,+a' => [2, 3, 4, 5],
       }.each do |tags, ids|
         it "returns dumps filtered by #{tags}" do
           expect(described_class.list(:tags => tags)).to eq(described_class.list.values_at(*ids))
@@ -255,18 +262,18 @@ describe Dump::Snapshot do
 
   describe 'get_filter_tags' do
     it 'splits string and returns uniq non blank sorted tags' do
-      expect(described_class.new('').send(:get_filter_tags, 'a,+b,+c,-d')).to eq({:simple => %w[a], :mandatory => %w[b c], :forbidden => %w[d]})
-      expect(described_class.new('').send(:get_filter_tags, ' a , + b , + c , - d ')).to eq({:simple => %w[a], :mandatory => %w[b c], :forbidden => %w[d]})
-      expect(described_class.new('').send(:get_filter_tags, ' a , + c , + b , - d ')).to eq({:simple => %w[a], :mandatory => %w[b c], :forbidden => %w[d]})
-      expect(described_class.new('').send(:get_filter_tags, ' a , + b , + , - ')).to eq({:simple => %w[a], :mandatory => %w[b], :forbidden => []})
-      expect(described_class.new('').send(:get_filter_tags, ' a , a , + b , + b , - d , - d ')).to eq({:simple => %w[a], :mandatory => %w[b], :forbidden => %w[d]})
+      expect(described_class.new('').send(:get_filter_tags, 'a,+b,+c,-d')).to eq(:simple => %w[a], :mandatory => %w[b c], :forbidden => %w[d])
+      expect(described_class.new('').send(:get_filter_tags, ' a , + b , + c , - d ')).to eq(:simple => %w[a], :mandatory => %w[b c], :forbidden => %w[d])
+      expect(described_class.new('').send(:get_filter_tags, ' a , + c , + b , - d ')).to eq(:simple => %w[a], :mandatory => %w[b c], :forbidden => %w[d])
+      expect(described_class.new('').send(:get_filter_tags, ' a , + b , + , - ')).to eq(:simple => %w[a], :mandatory => %w[b], :forbidden => [])
+      expect(described_class.new('').send(:get_filter_tags, ' a , a , + b , + b , - d , - d ')).to eq(:simple => %w[a], :mandatory => %w[b], :forbidden => %w[d])
       expect{ described_class.new('').send(:get_filter_tags, 'a,+a') }.not_to raise_error
       expect{ described_class.new('').send(:get_filter_tags, 'a,-a') }.to raise_error ArgumentError, /clashes/
       expect{ described_class.new('').send(:get_filter_tags, '+a,-a') }.to raise_error ArgumentError, /clashes/
     end
 
     it 'accepts non string' do
-      expect(described_class.new('').send(:get_filter_tags, nil)).to eq({:simple => [], :mandatory => [], :forbidden => []})
+      expect(described_class.new('').send(:get_filter_tags, nil)).to eq(:simple => [], :mandatory => [], :forbidden => [])
     end
   end
 

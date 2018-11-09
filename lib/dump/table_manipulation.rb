@@ -37,6 +37,7 @@ module Dump
 
     def fix_sequence!(table)
       return unless connection.respond_to?(:reset_pk_sequence!)
+
       connection.reset_pk_sequence!(table)
     end
 
@@ -118,6 +119,7 @@ module Dump
         until rows.blank?
           rows.each(&block)
           break if rows.count < chunk_size
+
           sql = select_where_primary_key % "> #{rows.last[primary_key].to_i}"
           rows = select_all_by_sql(sql)
         end

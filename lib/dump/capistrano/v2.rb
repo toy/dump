@@ -122,6 +122,7 @@ Capistrano::Configuration.instance(:i_need_this!).load do
     def print_and_return_or_fail
       out = yield
       fail 'Failed creating dump' if out.blank?
+
       print out
       out.strip
     end

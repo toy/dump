@@ -197,7 +197,7 @@ describe Writer do
 
         @dump.write_assets
         counts = {:files => 0, :total => 0}
-        expect(@config[:assets]).to eq({'images/a' => counts, 'images/b' => counts, 'videos' => counts})
+        expect(@config[:assets]).to eq('images/a' => counts, 'images/b' => counts, 'videos' => counts)
       end
 
       it 'uses glob to find files' do
@@ -283,7 +283,7 @@ describe Writer do
       it 'dumps column names and values of each row' do
         @file = double('file')
         allow(@dump).to receive(:create_file).and_yield(@file)
-        @config.replace({:tables => {'first' => 1, 'second' => 2}, :assets => %w[images videos]})
+        @config.replace(:tables => {'first' => 1, 'second' => 2}, :assets => %w[images videos])
 
         expect(Marshal).to receive(:dump).with(@config, @file)
         @dump.write_config

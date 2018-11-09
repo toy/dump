@@ -131,6 +131,7 @@ module Dump
         Rake::Task['db:create'].invoke
       when !Dump::Env.no?(:migrate_down)
         return unless avaliable_tables.include?('schema_migrations')
+
         find_entry('schema_migrations.dump') do |entry|
           migrated = table_rows('schema_migrations').map{ |row| row['version'] }
 
@@ -164,6 +165,7 @@ module Dump
 
     def read_schema
       return unless restore_schema?
+
       read_entry_to_file('schema.rb') do |f|
         Dump::Env.with_env('SCHEMA' => f.path) do
           Rake::Task['db:schema:load'].invoke
@@ -178,6 +180,7 @@ module Dump
 
     def read_tables
       return if Dump::Env[:restore_tables] && Dump::Env[:restore_tables].empty?
+
       verify_connection
       config[:tables].with_progress('Tables') do |table, rows|
         if (restore_schema? && schema_tables.include?(table)) || Dump::Env.filter(:restore_tables).pass?(table)
@@ -229,8 +232,9 @@ module Dump
 
       if Dump::Env[:restore_assets]
         assets_paths.each do |asset|
-          Dump::Assets.glob_asset_children(asset, '**/*').reverse.each do |child|
+          Dump::Assets.glob_asset_children(asset, '**/*').reverse_each do |child|
             next unless read_asset?(child, Dump.rails_root)
+
             case
             when File.file?(child)
               File.unlink(child)

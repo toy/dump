@@ -114,16 +114,16 @@ describe Dump::Env do
       end
 
       it 'returns hash with symbol keys for every command' do
-        expect(described_class.for_command(:create)).to eq({:desc => 'Description'})
-        expect(described_class.for_command(:restore)).to eq({:like => 'Version'})
-        expect(described_class.for_command(:versions)).to eq({:like => 'Version'})
+        expect(described_class.for_command(:create)).to eq(:desc => 'Description')
+        expect(described_class.for_command(:restore)).to eq(:like => 'Version')
+        expect(described_class.for_command(:versions)).to eq(:like => 'Version')
         expect(described_class.for_command(:bad)).to eq({})
       end
 
       it 'returns hash with symbol keys for every command when asking for string keys' do
-        expect(described_class.for_command(:create, true)).to eq({'DESC' => 'Description'})
-        expect(described_class.for_command(:restore, true)).to eq({'LIKE' => 'Version'})
-        expect(described_class.for_command(:versions, true)).to eq({'LIKE' => 'Version'})
+        expect(described_class.for_command(:create, true)).to eq('DESC' => 'Description')
+        expect(described_class.for_command(:restore, true)).to eq('LIKE' => 'Version')
+        expect(described_class.for_command(:versions, true)).to eq('LIKE' => 'Version')
         expect(described_class.for_command(:bad, true)).to eq({})
       end
     end
@@ -133,7 +133,7 @@ describe Dump::Env do
     it 'converts keys to strings' do
       @env = {:desc => 'text', :tags => 'a b c', 'LEAVE' => 'none', 'OTHER' => 'data'}
       described_class.stringify!(@env)
-      expect(@env).to eq({'DESC' => 'text', 'TAGS' => 'a b c', 'LEAVE' => 'none', 'OTHER' => 'data'})
+      expect(@env).to eq('DESC' => 'text', 'TAGS' => 'a b c', 'LEAVE' => 'none', 'OTHER' => 'data')
     end
   end
 end

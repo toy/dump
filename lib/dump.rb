@@ -67,7 +67,7 @@ module Dump
       to_delete = []
 
       all_dumps = Snapshot.list(options.merge(:all => true))
-      to_delete.concat(all_dumps.select{ |dump| dump.ext != 'tgz' })
+      to_delete.concat(all_dumps.reject{ |dump| dump.ext == 'tgz' })
 
       dumps = Snapshot.list(options)
       leave = (options[:leave] || 5).to_i

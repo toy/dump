@@ -5,7 +5,7 @@ require 'dump'
 module Dump
   # Helper for listing assets for dump
   module Assets
-    SPLITTER = /[:,]/
+    SPLITTER = /[:,]/.freeze
 
     class << self
       def assets

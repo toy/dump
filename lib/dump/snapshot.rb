@@ -98,6 +98,7 @@ module Dump
     def human_size
       number = size
       return nil if number.nil?
+
       degree = 0
       symbols = %w[B K M G T]
       while number >= 1000 && degree < symbols.length - 1
@@ -171,8 +172,10 @@ module Dump
         groups = Hash.new{ |hash, key| hash[key] = SortedSet.new }
         tags.to_s.split(',').each do |tag|
           next unless (m = tag.strip.match(/^(\-|\+)?(.*)$/))
+
           type = {'+' => :mandatory, '-' => :forbidden}[m[1]] || :simple
           next unless (cleaned_tag = clean_tag(m[2])).present?
+
           groups[type] << cleaned_tag
         end
         [:simple, :mandatory].each do |type|

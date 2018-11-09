@@ -7,11 +7,11 @@ module Dump
     #   '-a,b,c' will pass everything except 'a', 'b' and 'c'
     class Filter
       attr_reader :invert, :values, :transparent
-      def initialize(s, splitter = nil)
-        if s
-          s = s.dup
-          @invert = !!s.sub!(/^-/, '')
-          @values = s.split(splitter || ',').map(&:strip).map(&:downcase).uniq.select(&:present?)
+      def initialize(string, splitter = nil)
+        if string
+          string = string.dup
+          @invert = !!string.sub!(/^-/, '')
+          @values = string.split(splitter || ',').map(&:strip).map(&:downcase).uniq.select(&:present?)
         else
           @transparent = true
         end

@@ -202,7 +202,7 @@ describe Dump::TableManipulation do
     def verify_getting_rows
       i = 0
       each_table_row('first', @row_count) do |row|
-        expect(row).to eq({'id' => i.succ.to_s})
+        expect(row).to eq('id' => i.succ.to_s)
         i += 1
       end
       expect(i).to eq(@row_count)

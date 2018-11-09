@@ -356,14 +356,14 @@ describe Reader do
 
     describe 'read_tables' do
       it 'verifies connection' do
-        allow(@dump).to receive(:config).and_return({:tables => []})
+        allow(@dump).to receive(:config).and_return(:tables => [])
         expect(@dump).to receive(:verify_connection)
         @dump.read_tables
       end
 
       it 'calls read_table for each table in config' do
         allow(@dump).to receive(:verify_connection)
-        allow(@dump).to receive(:config).and_return({:tables => {'first' => 1, 'second' => 3}})
+        allow(@dump).to receive(:config).and_return(:tables => {'first' => 1, 'second' => 3})
 
         expect(@dump).to receive(:read_table).with('first', 1)
         expect(@dump).to receive(:read_table).with('second', 3)
@@ -373,7 +373,7 @@ describe Reader do
 
       describe 'when called with restore_tables' do
         it 'verifies connection and calls read_table for each table in restore_tables' do
-          allow(@dump).to receive(:config).and_return({:tables => {'first' => 1, 'second' => 3}})
+          allow(@dump).to receive(:config).and_return(:tables => {'first' => 1, 'second' => 3})
 
           expect(@dump).to receive(:verify_connection)
           expect(@dump).to receive(:read_table).with('first', 1)
@@ -385,7 +385,7 @@ describe Reader do
         end
 
         it 'does not verfiy connection or call read_table for empty restore_tables' do
-          allow(@dump).to receive(:config).and_return({:tables => {'first' => 1, 'second' => 3}})
+          allow(@dump).to receive(:config).and_return(:tables => {'first' => 1, 'second' => 3})
 
           expect(@dump).not_to receive(:verify_connection)
           expect(@dump).not_to receive(:read_table)
@@ -497,7 +497,7 @@ describe Reader do
       end
 
       it 'does not read assets if config[:assets] is blank' do
-        allow(@dump).to receive(:config).and_return({:assets => []})
+        allow(@dump).to receive(:config).and_return(:assets => [])
         expect(@dump).not_to receive(:find_entry)
         @dump.read_assets
       end
@@ -509,7 +509,7 @@ describe Reader do
 
         it 'calls assets:delete' do
           @assets = %w[images videos]
-          allow(@dump).to receive(:config).and_return({:assets => @assets})
+          allow(@dump).to receive(:config).and_return(:assets => @assets)
           allow(@dump).to receive(:find_entry)
 
           expect(@task).to receive(:invoke)
@@ -519,7 +519,7 @@ describe Reader do
 
         it 'calls assets:delete with ASSETS set to config[:assets] joined with :' do
           @assets = %w[images videos]
-          allow(@dump).to receive(:config).and_return({:assets => @assets})
+          allow(@dump).to receive(:config).and_return(:assets => @assets)
           allow(@dump).to receive(:find_entry)
 
           expect(@task).to receive(:invoke) do
@@ -532,7 +532,7 @@ describe Reader do
         describe 'when called with restore_assets' do
           it 'deletes files and dirs only in requested paths' do
             @assets = %w[images videos]
-            allow(@dump).to receive(:config).and_return({:assets => @assets})
+            allow(@dump).to receive(:config).and_return(:assets => @assets)
 
             expect(Dump::Assets).to receive('glob_asset_children').with('images', '**/*').and_return(%w[images images/a.jpg images/b.jpg])
             expect(Dump::Assets).to receive('glob_asset_children').with('videos', '**/*').and_return(%w[videos videos/a.mov])
@@ -557,7 +557,7 @@ describe Reader do
 
           it 'does not delete any files and dirs for empty list' do
             @assets = %w[images videos]
-            allow(@dump).to receive(:config).and_return({:assets => @assets})
+            allow(@dump).to receive(:config).and_return(:assets => @assets)
 
             expect(Dump::Assets).not_to receive('glob_asset_children')
 
@@ -577,7 +577,7 @@ describe Reader do
       describe 'old style' do
         it 'finds assets.tar' do
           @assets = %w[images videos]
-          allow(@dump).to receive(:config).and_return({:assets => @assets})
+          allow(@dump).to receive(:config).and_return(:assets => @assets)
           allow(Dir).to receive(:glob).and_return([])
           allow(FileUtils).to receive(:remove_entry)
           allow(@stream).to receive(:each)
@@ -592,7 +592,7 @@ describe Reader do
           {'images' => {:files => 0, :total => 0}, 'videos' => {:files => 0, :total => 0}},
         ].each do |assets|
           it 'rewrites rewind method to empty method - to not raise exception, opens tar and extracts each entry' do
-            allow(@dump).to receive(:config).and_return({:assets => assets})
+            allow(@dump).to receive(:config).and_return(:assets => assets)
             allow(Dir).to receive(:glob).and_return([])
             allow(FileUtils).to receive(:remove_entry)
 
@@ -626,7 +626,7 @@ describe Reader do
           {'images' => {:files => 0, :total => 0}, 'videos' => {:files => 0, :total => 0}},
         ].each do |assets|
           it 'extracts each entry' do
-            allow(@dump).to receive(:config).and_return({:assets => assets})
+            allow(@dump).to receive(:config).and_return(:assets => assets)
             allow(Dir).to receive(:glob).and_return([])
             allow(FileUtils).to receive(:remove_entry)
 
