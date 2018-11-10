@@ -75,14 +75,21 @@ module Dump
           Marshal.dump(column_names, f)
           Progress.step
 
-          type_cast = if columns.first.respond_to?(:type_cast_from_database)
+          type_cast = case
+          when columns.first.respond_to?(:type_cast_from_database)
             proc do |column_name, value|
               columns_by_name[column_name].type_cast_from_database(value)
             end
-          else
+          when columns.first.respond_to?(:type_cast)
             proc do |column_name, value|
               columns_by_name[column_name].type_cast(value)
             end
+          when connection.respond_to?(:lookup_cast_type_from_column)
+            proc do |column_name, value|
+              connection.lookup_cast_type_from_column(columns_by_name[column_name]).deserialize(value)
+            end
+          else
+            fail 'Failed to determine the way to convert values from database input to the appropriate ruby type'
           end
 
           each_table_row(table, row_count) do |row|
