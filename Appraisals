@@ -15,6 +15,12 @@ def appgen(gems)
       gem 'activerecord-jdbcsqlite3-adapter'
       gem 'activerecord-jdbcmysql-adapter'
       gem 'activerecord-jdbcpostgresql-adapter'
+
+      if rails_version[/\d+/].to_i < 5
+        gem 'activerecord-jdbc-adapter', '~> 1.3.0'
+      else
+        gem 'activerecord-jdbc-adapter', "~> #{rails_version.scan(/\d+/).take(2).join('')}.0"
+      end
     else
       gem 'sqlite3'
 
