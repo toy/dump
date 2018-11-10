@@ -26,13 +26,11 @@ if (environment_path = environment_paths.find(&File.method(:exist?)))
 else
   app_path = "spec/dummy-#{version_parts.take(2).join('.')}"
 
-  rails_command = if version < '3'
-    "rails #{app_path}"
+  command = if version < '3'
+    "rails _#{version}_ #{app_path}"
   else
-    "rails new #{app_path} -TSJ --skip-bundle"
+    "rails _#{version}_ new #{app_path} -TSJ --skip-bundle"
   end
-
-  command = "RAILS_VERSION=#{version} bundle exec #{rails_command}"
 
   abort [
     "No dummy app for rails #{version}",
