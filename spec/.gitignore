@@ -1,6 +1,8 @@
 /db/database.yml
 
 /dummy-*/.bundle/
+/dummy-*/.ruby-version
+/dummy-*/config/credentials.yml.enc
 /dummy-*/db/*.sqlite3
 /dummy-*/db/*.sqlite3-journal
 /dummy-*/log/*.log
