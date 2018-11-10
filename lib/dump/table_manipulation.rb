@@ -10,7 +10,11 @@ module Dump
     end
 
     def verify_connection
-      connection.verify!(0)
+      if connection.method(:verify!).arity == 1
+        connection.verify!(0)
+      else
+        connection.verify!
+      end
     end
 
     def quote_table_name(table)
