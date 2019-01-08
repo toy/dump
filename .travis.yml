@@ -13,7 +13,7 @@ rvm:
 script:
   - bundle exec appraisal rspec
 before_install:
-  - gem install bundler || gem install bundler --version '< 2'
+  - gem install bundler --version '< 2'
   - sudo /etc/init.d/postgresql stop
   - sudo /etc/init.d/postgresql start
   - mysql -e 'create database myapp_test;'
