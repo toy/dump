@@ -22,7 +22,7 @@ def appgen(gems)
         gem 'activerecord-jdbc-adapter', "~> #{rails_version.scan(/\d+/).take(2).join('')}.0"
       end
     else
-      gem 'sqlite3'
+      gem 'sqlite3', '~> 1.3.5'
 
       case
       when rails_version =~ /^2\./
