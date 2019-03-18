@@ -11,26 +11,26 @@ rvm:
   - '2.6.2'
   - 'jruby-head'
 script:
-  - bundle exec appraisal rspec
+  - ./bundle exec appraisal rspec
 before_install:
   - gem install bundler --version '< 2'
+  - ruby -rrubygems -e 'puts "#!/bin/sh", %{bundle _#{Gem::Dependency.new("bundler", "< 2.0").to_spec.version}_ "$@"}' > bundle
+  - chmod +x bundle
   - sudo /etc/init.d/postgresql stop
   - sudo /etc/init.d/postgresql start
   - mysql -e 'create database myapp_test;'
   - psql -c 'create database myapp_test;' -U postgres
   - cp .travis.database.yml spec/db/database.yml
 install:
-  - bundle install --jobs=3 --retry=3
-  - bundle exec appraisal install --jobs=3 --retry=3
+  - ./bundle install --jobs=3 --retry=3
+  - ./bundle exec appraisal install --jobs=3 --retry=3
 matrix:
   include:
     - env: RUBOCOP=✓
       rvm: '2.6.2'
       script: bundle exec rubocop
-      before_install:
     - env: CHECK_RUBIES=✓
       rvm: '2.6.2'
       script: bundle exec travis_check_rubies
-      before_install:
   allow_failures:
     - rvm: 'jruby-head'
