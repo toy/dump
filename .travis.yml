@@ -28,6 +28,6 @@ matrix:
       script: bundle exec rubocop
     - env: CHECK_RUBIES=✓
       rvm: '2.6.2'
-      script: bundle exec travis_check_rubies
+      script: bundle exec travis_check_rubies --no-intermediary
   allow_failures:
     - rvm: 'jruby-head'
