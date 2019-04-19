@@ -3,7 +3,7 @@ require 'dump/env'
 module Dump
   # Methods to work with db using ActiveRecord
   module TableManipulation
-  protected
+  protected # rubocop:disable Layout/IndentationWidth
 
     def schema_tables
       %w[schema_info schema_migrations]
