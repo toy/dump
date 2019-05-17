@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 case
 when defined?(Rails::Generator::Base)
   # Generator for rails < 3

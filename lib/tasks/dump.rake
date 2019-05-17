@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'dump'
 
 desc 'Short for dump:create' << Dump::Env.explain_variables_for_command(:create)

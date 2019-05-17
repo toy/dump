@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'dump/snapshot'
 require 'dump/archive_tar_minitar'
 require 'dump/assets'

@@ -1,4 +1,5 @@
 # encoding: UTF-8
+# frozen_string_literal: true
 
 require 'dump/rails_root'
 require 'dump/table_manipulation'

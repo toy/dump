@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'archive/tar/minitar'
 
 Archive::Tar::Minitar::Reader::EntryStream.class_eval do

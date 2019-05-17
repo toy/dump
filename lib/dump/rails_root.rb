@@ -1,4 +1,5 @@
 # encoding: UTF-8
+# frozen_string_literal: true
 
 module Dump
   # Get rails app root (Rails.root or RAILS_ROOT or fail)

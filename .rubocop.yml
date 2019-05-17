@@ -58,6 +58,9 @@ Style/IfUnlessModifier:
 Style/ParallelAssignment:
   Enabled: false
 
+Style/SafeNavigation:
+  Enabled: false
+
 Style/Semicolon:
   AllowAsExpressionSeparator: true
 

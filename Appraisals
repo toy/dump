@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 def appgen(gems)
   description = gems.map{ |name, version| "#{name} #{version}" }.join(', ')
   appraise description do

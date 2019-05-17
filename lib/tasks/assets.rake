@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'dump'
 
 task :assets do

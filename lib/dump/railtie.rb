@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Dump
   # Add rake tasks to rails app
   class Railtie < Rails::Railtie
