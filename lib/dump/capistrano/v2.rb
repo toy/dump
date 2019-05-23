@@ -159,12 +159,12 @@ Capistrano::Configuration.instance(:i_need_this!).load do
     end
 
     namespace :local do
-      desc 'Shorthand for dump:local:create' << Dump::Env.explain_variables_for_command(:create)
+      desc 'Shorthand for dump:local:create' + Dump::Env.explain_variables_for_command(:create)
       task :default, :roles => :db, :only => {:primary => true} do
         local.create
       end
 
-      desc 'Create local dump' << Dump::Env.explain_variables_for_command(:create)
+      desc 'Create local dump' + Dump::Env.explain_variables_for_command(:create)
       task :create, :roles => :db, :only => {:primary => true} do
         print_and_return_or_fail do
           with_additional_tags('local') do
@@ -173,22 +173,22 @@ Capistrano::Configuration.instance(:i_need_this!).load do
         end
       end
 
-      desc 'Restore local dump' << Dump::Env.explain_variables_for_command(:restore)
+      desc 'Restore local dump' + Dump::Env.explain_variables_for_command(:restore)
       task :restore, :roles => :db, :only => {:primary => true} do
         run_local(dump_command(:restore))
       end
 
-      desc 'Versions of local dumps' << Dump::Env.explain_variables_for_command(:versions)
+      desc 'Versions of local dumps' + Dump::Env.explain_variables_for_command(:versions)
       task :versions, :roles => :db, :only => {:primary => true} do
         print run_local(dump_command(:versions, :show_size => true))
       end
 
-      desc 'Cleanup local dumps' << Dump::Env.explain_variables_for_command(:cleanup)
+      desc 'Cleanup local dumps' + Dump::Env.explain_variables_for_command(:cleanup)
       task :cleanup, :roles => :db, :only => {:primary => true} do
         print run_local(dump_command(:cleanup))
       end
 
-      desc 'Upload dump' << Dump::Env.explain_variables_for_command(:transfer)
+      desc 'Upload dump' + Dump::Env.explain_variables_for_command(:transfer)
       task :upload, :roles => :db, :only => {:primary => true} do
         file = Dump::Env.with_env(:summary => nil) do
           last_part_of_last_line(run_local(dump_command(:versions)))
@@ -200,12 +200,12 @@ Capistrano::Configuration.instance(:i_need_this!).load do
     end
 
     namespace :remote do
-      desc 'Shorthand for dump:remote:create' << Dump::Env.explain_variables_for_command(:create)
+      desc 'Shorthand for dump:remote:create' + Dump::Env.explain_variables_for_command(:create)
       task :default, :roles => :db, :only => {:primary => true} do
         remote.create
       end
 
-      desc 'Create remote dump' << Dump::Env.explain_variables_for_command(:create)
+      desc 'Create remote dump' + Dump::Env.explain_variables_for_command(:create)
       task :create, :roles => :db, :only => {:primary => true} do
         print_and_return_or_fail do
           with_additional_tags('remote') do
@@ -214,22 +214,22 @@ Capistrano::Configuration.instance(:i_need_this!).load do
         end
       end
 
-      desc 'Restore remote dump' << Dump::Env.explain_variables_for_command(:restore)
+      desc 'Restore remote dump' + Dump::Env.explain_variables_for_command(:restore)
       task :restore, :roles => :db, :only => {:primary => true} do
         run_remote("cd #{current_path}; #{dump_command(:restore, :rake => fetch_rake, :RAILS_ENV => fetch_rails_env, :PROGRESS_TTY => '+')}")
       end
 
-      desc 'Versions of remote dumps' << Dump::Env.explain_variables_for_command(:versions)
+      desc 'Versions of remote dumps' + Dump::Env.explain_variables_for_command(:versions)
       task :versions, :roles => :db, :only => {:primary => true} do
         print run_remote("cd #{current_path}; #{dump_command(:versions, :rake => fetch_rake, :RAILS_ENV => fetch_rails_env, :PROGRESS_TTY => '+', :show_size => true)}")
       end
 
-      desc 'Cleanup of remote dumps' << Dump::Env.explain_variables_for_command(:cleanup)
+      desc 'Cleanup of remote dumps' + Dump::Env.explain_variables_for_command(:cleanup)
       task :cleanup, :roles => :db, :only => {:primary => true} do
         print run_remote("cd #{current_path}; #{dump_command(:cleanup, :rake => fetch_rake, :RAILS_ENV => fetch_rails_env, :PROGRESS_TTY => '+')}")
       end
 
-      desc 'Download dump' << Dump::Env.explain_variables_for_command(:transfer)
+      desc 'Download dump' + Dump::Env.explain_variables_for_command(:transfer)
       task :download, :roles => :db, :only => {:primary => true} do
         file = Dump::Env.with_env(:summary => nil) do
           last_part_of_last_line(run_remote("cd #{current_path}; #{dump_command(:versions, :rake => fetch_rake, :RAILS_ENV => fetch_rails_env, :PROGRESS_TTY => '+')}"))
@@ -241,18 +241,18 @@ Capistrano::Configuration.instance(:i_need_this!).load do
       end
     end
 
-    desc 'Shorthand for dump:local:upload' << Dump::Env.explain_variables_for_command(:transfer)
+    desc 'Shorthand for dump:local:upload' + Dump::Env.explain_variables_for_command(:transfer)
     task :upload, :roles => :db, :only => {:primary => true} do
       local.upload
     end
 
-    desc 'Shorthand for dump:remote:download' << Dump::Env.explain_variables_for_command(:transfer)
+    desc 'Shorthand for dump:remote:download' + Dump::Env.explain_variables_for_command(:transfer)
     task :download, :roles => :db, :only => {:primary => true} do
       remote.download
     end
 
     namespace :mirror do
-      desc 'Creates local dump, uploads and restores on remote' << Dump::Env.explain_variables_for_command(:mirror)
+      desc 'Creates local dump, uploads and restores on remote' + Dump::Env.explain_variables_for_command(:mirror)
       task :up, :roles => :db, :only => {:primary => true} do
         auto_backup = if auto_backup?
           with_additional_tags('auto-backup') do
@@ -272,7 +272,7 @@ Capistrano::Configuration.instance(:i_need_this!).load do
         end
       end
 
-      desc 'Creates remote dump, downloads and restores on local' << Dump::Env.explain_variables_for_command(:mirror)
+      desc 'Creates remote dump, downloads and restores on local' + Dump::Env.explain_variables_for_command(:mirror)
       task :down, :roles => :db, :only => {:primary => true} do
         auto_backup = if auto_backup?
           with_additional_tags('auto-backup') do
@@ -294,12 +294,12 @@ Capistrano::Configuration.instance(:i_need_this!).load do
     end
 
     namespace :backup do
-      desc 'Shorthand for dump:backup:create' << Dump::Env.explain_variables_for_command(:backup)
+      desc 'Shorthand for dump:backup:create' + Dump::Env.explain_variables_for_command(:backup)
       task :default, :roles => :db, :only => {:primary => true} do
         backup.create
       end
 
-      desc "Creates remote dump and downloads to local (desc defaults to 'backup')" << Dump::Env.explain_variables_for_command(:backup)
+      desc "Creates remote dump and downloads to local (desc defaults to 'backup')" + Dump::Env.explain_variables_for_command(:backup)
       task :create, :roles => :db, :only => {:primary => true} do
         file = with_additional_tags('backup') do
           remote.create
@@ -311,7 +311,7 @@ Capistrano::Configuration.instance(:i_need_this!).load do
         end
       end
 
-      desc 'Uploads dump with backup tag and restores it on remote' << Dump::Env.explain_variables_for_command(:backup_restore)
+      desc 'Uploads dump with backup tag and restores it on remote' + Dump::Env.explain_variables_for_command(:backup_restore)
       task :restore, :roles => :db, :only => {:primary => true} do
         file = with_additional_tags('backup') do
           last_part_of_last_line(run_local(dump_command(:versions)))

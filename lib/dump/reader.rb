@@ -31,7 +31,7 @@ module Dump
       attr_reader :text
       alias_method :to_s, :text
       def initialize
-        @text = ''
+        @text = ''.dup
       end
 
       def header(header)
