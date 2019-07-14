@@ -259,4 +259,4 @@ where myappserver.com is application server carrying assets with database access
 
 ## Copyright
 
-Copyright (c) 2008-2018 Ivan Kuchin. See LICENSE.txt for details.
+Copyright (c) 2008-2019 Ivan Kuchin. See LICENSE.txt for details.
