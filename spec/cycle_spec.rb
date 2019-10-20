@@ -24,7 +24,7 @@ def use_adapter(adapter)
     when /^mysql/
       ActiveRecord::Base.establish_connection(config.merge('database' => nil))
       ActiveRecord::Base.connection.drop_database config['database']
-      ActiveRecord::Base.connection.create_database(config['database'])
+      ActiveRecord::Base.connection.create_database(config['database'], :charset => 'utf8')
     when /^postgresql/
       ActiveRecord::Base.establish_connection(config.merge('database' => 'postgres', 'schema_search_path' => 'public'))
       ActiveRecord::Base.connection.drop_database config['database']

@@ -4,11 +4,11 @@ sqlite3:
 
 mysql:
   adapter: mysql2
-  database: myapp_test
+  database: dump_test
   username: travis
   encoding: utf8
 
 postgresql:
   adapter: postgresql
-  database: myapp_test
+  database: dump_test
   username: postgres
