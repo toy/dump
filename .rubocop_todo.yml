@@ -14,7 +14,7 @@ Lint/AmbiguousBlockAssociation:
 
 # Offense count: 7
 # Cop supports --auto-correct.
-Lint/UnneededSplatExpansion:
+Lint/RedundantSplatExpansion:
   Exclude:
     - 'lib/dump.rb'
     - 'spec/dump/writer_spec.rb'
