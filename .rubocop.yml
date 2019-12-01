@@ -21,7 +21,7 @@ Layout/DotPosition:
 Layout/EndAlignment:
   EnforcedStyleAlignWith: variable
 
-Layout/IndentFirstHashElement:
+Layout/FirstHashElementIndentation:
   EnforcedStyle: consistent
 
 Layout/SpaceBeforeBlockBraces:
