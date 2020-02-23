@@ -58,7 +58,7 @@ module Dump
 
       def with_clean_env(hash = {}, &block)
         empty_env = {}
-        DICTIONARY.keys.each{ |key| empty_env[key] = nil }
+        DICTIONARY.each_key{ |key| empty_env[key] = nil }
         with_env(empty_env.merge(hash), &block)
       end
 
@@ -120,7 +120,7 @@ module Dump
       end
 
       def stringify!(hash)
-        hash.keys.each do |key|
+        hash.keys.each do |key| # rubocop:disable Style/HashEachMethods
           hash[DICTIONARY[key] ? DICTIONARY[key].first : key.to_s] = hash.delete(key)
         end
       end
