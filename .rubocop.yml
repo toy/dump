@@ -5,6 +5,7 @@ AllCops:
     - '*.gemspec'
     - 'spec/dummy-*/**/*'
     - 'gemfiles/*.gemfile'
+  NewCops: enable
 
 Bundler/OrderedGems:
   Enabled: false

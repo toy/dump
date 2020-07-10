@@ -162,7 +162,7 @@ module Dump
       end
 
       def clean_tag(tag)
-        clean_str(tag).downcase.sub(/^\-+/, '')[0, 20].strip
+        clean_str(tag).downcase.sub(/^-+/, '')[0, 20].strip
       end
 
       def clean_tags(tags)
@@ -172,7 +172,7 @@ module Dump
       def get_filter_tags(tags)
         groups = Hash.new{ |hash, key| hash[key] = SortedSet.new }
         tags.to_s.split(',').each do |tag|
-          next unless (m = tag.strip.match(/^(\-|\+)?(.*)$/))
+          next unless (m = tag.strip.match(/^(-|\+)?(.*)$/))
 
           type = {'+' => :mandatory, '-' => :forbidden}[m[1]] || :simple
           next unless (cleaned_tag = clean_tag(m[2])).present?

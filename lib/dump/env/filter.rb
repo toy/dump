@@ -8,6 +8,7 @@ module Dump
     #   '-a,b,c' will pass everything except 'a', 'b' and 'c'
     class Filter
       attr_reader :invert, :values, :transparent
+
       def initialize(string, splitter = nil)
         if string
           string = string.dup
