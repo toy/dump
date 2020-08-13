@@ -65,6 +65,9 @@ Style/HashTransformValues:
 Style/IfUnlessModifier:
   Enabled: false
 
+Style/OptionalBooleanParameter:
+  Enabled: false
+
 Style/ParallelAssignment:
   Enabled: false
 

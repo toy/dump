@@ -113,11 +113,9 @@ def reset_rake!
   end
 end
 
-def call_rake
+def call_rake(&block)
   reset_rake!
-  grab_output do
-    yield
-  end
+  grab_output(&block)
 end
 
 def call_rake_create(*args)

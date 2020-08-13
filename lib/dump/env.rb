@@ -126,10 +126,10 @@ module Dump
       end
 
       def explain_variables_for_command(command)
-        ".\n" +
-          variable_names_for_command(command).map do |variable_name|
-            "  #{DICTIONARY[variable_name].join(', ')} — #{EXPLANATIONS[variable_name]}\n"
-          end.join('')
+        lines = variable_names_for_command(command).map do |variable_name|
+          "  #{DICTIONARY[variable_name].join(', ')} — #{EXPLANATIONS[variable_name]}\n"
+        end
+        ".\n#{lines.join('')}"
       end
 
     private
