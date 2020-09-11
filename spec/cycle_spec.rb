@@ -169,9 +169,7 @@ describe 'full cycle' do
           expect(chicken_data).to eq(saved_chicken_data)
         end
       end
-    end
 
-    adapters.each do |adapter|
       it "does not break id incrementing using #{adapter}" do
         use_adapter(adapter) do
           create_chickens!(:random => 100)
