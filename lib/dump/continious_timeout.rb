@@ -23,12 +23,10 @@ module Dump
     def self.timeout(sec)
       x = Thread.current
       y = Thread.start do
-        1.times do
-          begin
-            sleep sec
-          rescue RestartException
-            retry
-          end
+        begin
+          sleep sec
+        rescue RestartException
+          retry
         end
         x.raise TimeoutException, 'execution expired' if x.alive?
       end

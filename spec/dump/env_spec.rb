@@ -4,23 +4,8 @@ require 'spec_helper'
 require 'dump/env'
 
 describe Dump::Env do
-  def silence_warnings
-    old_verbose, $VERBOSE = $VERBOSE, nil
-    yield
-  ensure
-    $VERBOSE = old_verbose
-  end
-
   before do
-    silence_warnings do
-      @old_env, ENV = ENV, {}
-    end
-  end
-
-  after do
-    silence_warnings do
-      ENV = @old_env
-    end
+    stub_const('ENV', {})
   end
 
   describe 'with_env' do

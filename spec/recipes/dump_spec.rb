@@ -5,7 +5,7 @@ require 'dump'
 require 'capistrano'
 
 describe 'cap dump' do
-  PLUS = '+'.shellescape
+  plus = '+'.shellescape
 
   before do
     @cap = Capistrano::Configuration.new
@@ -255,14 +255,14 @@ describe 'cap dump' do
 
     describe 'versions' do
       it 'calls remote rake task' do
-        expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=production SHOW_SIZE\\=true").and_return('')
+        expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions PROGRESS_TTY\\=#{plus} RAILS_ENV\\=production SHOW_SIZE\\=true").and_return('')
         @cap.find_and_execute_task('dump:remote:versions')
       end
 
       test_passing_environment_variables(:remote, :versions, {
-        :like => "rake -s dump:versions LIKE\\=some\\ data PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=production SHOW_SIZE\\=true",
-        :tags => "rake -s dump:versions PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=production SHOW_SIZE\\=true TAGS\\=some\\ data",
-        :summary => "rake -s dump:versions PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=production SHOW_SIZE\\=true SUMMARY\\=some\\ data",
+        :like => "rake -s dump:versions LIKE\\=some\\ data PROGRESS_TTY\\=#{plus} RAILS_ENV\\=production SHOW_SIZE\\=true",
+        :tags => "rake -s dump:versions PROGRESS_TTY\\=#{plus} RAILS_ENV\\=production SHOW_SIZE\\=true TAGS\\=some\\ data",
+        :summary => "rake -s dump:versions PROGRESS_TTY\\=#{plus} RAILS_ENV\\=production SHOW_SIZE\\=true SUMMARY\\=some\\ data",
       })
 
       it 'prints result of rake task' do
@@ -274,21 +274,21 @@ describe 'cap dump' do
 
       it 'uses custom rake binary' do
         expect(@cap.dump).to receive(:fetch_rake).and_return('/custom/rake')
-        expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; /custom/rake -s dump:versions PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=production SHOW_SIZE\\=true").and_return('')
+        expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; /custom/rake -s dump:versions PROGRESS_TTY\\=#{plus} RAILS_ENV\\=production SHOW_SIZE\\=true").and_return('')
         @cap.find_and_execute_task('dump:remote:versions')
       end
     end
 
     describe 'cleanup' do
       it 'calls remote rake task' do
-        expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; rake -s dump:cleanup PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=production").and_return('')
+        expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; rake -s dump:cleanup PROGRESS_TTY\\=#{plus} RAILS_ENV\\=production").and_return('')
         @cap.find_and_execute_task('dump:remote:cleanup')
       end
 
       test_passing_environment_variables(:remote, :cleanup, {
-        :like => "rake -s dump:cleanup LIKE\\=some\\ data PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=production",
-        :tags => "rake -s dump:cleanup PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=production TAGS\\=some\\ data",
-        :leave => "rake -s dump:cleanup LEAVE\\=some\\ data PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=production",
+        :like => "rake -s dump:cleanup LIKE\\=some\\ data PROGRESS_TTY\\=#{plus} RAILS_ENV\\=production",
+        :tags => "rake -s dump:cleanup PROGRESS_TTY\\=#{plus} RAILS_ENV\\=production TAGS\\=some\\ data",
+        :leave => "rake -s dump:cleanup LEAVE\\=some\\ data PROGRESS_TTY\\=#{plus} RAILS_ENV\\=production",
       })
 
       it 'prints result of rake task' do
@@ -300,28 +300,28 @@ describe 'cap dump' do
 
       it 'uses custom rake binary' do
         expect(@cap.dump).to receive(:fetch_rake).and_return('/custom/rake')
-        expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; /custom/rake -s dump:cleanup PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=production").and_return('')
+        expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; /custom/rake -s dump:cleanup PROGRESS_TTY\\=#{plus} RAILS_ENV\\=production").and_return('')
         @cap.find_and_execute_task('dump:remote:cleanup')
       end
     end
 
     describe 'create' do
       it 'raises if dump creation fails' do
-        expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; rake -s dump:create PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=production TAGS\\=remote").and_return('')
+        expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; rake -s dump:create PROGRESS_TTY\\=#{plus} RAILS_ENV\\=production TAGS\\=remote").and_return('')
         expect do
           @cap.find_and_execute_task('dump:remote:create')
         end.to raise_error('Failed creating dump')
       end
 
       it 'calls remote rake task with default rails_env and tag remote' do
-        expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; rake -s dump:create PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=production TAGS\\=remote").and_return('123.tgz')
+        expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; rake -s dump:create PROGRESS_TTY\\=#{plus} RAILS_ENV\\=production TAGS\\=remote").and_return('123.tgz')
         grab_output do
           @cap.find_and_execute_task('dump:remote:create')
         end
       end
 
       it 'calls remote rake task with default rails_env and additional tag remote' do
-        expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; rake -s dump:create PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=production TAGS\\=remote,photos").and_return('123.tgz')
+        expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; rake -s dump:create PROGRESS_TTY\\=#{plus} RAILS_ENV\\=production TAGS\\=remote,photos").and_return('123.tgz')
         grab_output do
           Dump::Env.with_env :tags => 'photos' do
             @cap.find_and_execute_task('dump:remote:create')
@@ -331,17 +331,17 @@ describe 'cap dump' do
 
       it 'calls remote rake task with fetched rails_env and default DESC remote' do
         expect(@cap.dump).to receive(:fetch_rails_env).and_return('dev')
-        expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; rake -s dump:create PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=dev TAGS\\=remote").and_return('123.tgz')
+        expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; rake -s dump:create PROGRESS_TTY\\=#{plus} RAILS_ENV\\=dev TAGS\\=remote").and_return('123.tgz')
         grab_output do
           @cap.find_and_execute_task('dump:remote:create')
         end
       end
 
       test_passing_environment_variables(:remote, :create, {
-        :desc => "rake -s dump:create DESC\\=some\\ data PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=production TAGS\\=remote",
-        :tags => "rake -s dump:create PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=production TAGS\\=remote,some\\ data",
-        :assets => "rake -s dump:create ASSETS\\=some\\ data PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=production TAGS\\=remote",
-        :tables => "rake -s dump:create PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=production TABLES\\=some\\ data TAGS\\=remote",
+        :desc => "rake -s dump:create DESC\\=some\\ data PROGRESS_TTY\\=#{plus} RAILS_ENV\\=production TAGS\\=remote",
+        :tags => "rake -s dump:create PROGRESS_TTY\\=#{plus} RAILS_ENV\\=production TAGS\\=remote,some\\ data",
+        :assets => "rake -s dump:create ASSETS\\=some\\ data PROGRESS_TTY\\=#{plus} RAILS_ENV\\=production TAGS\\=remote",
+        :tables => "rake -s dump:create PROGRESS_TTY\\=#{plus} RAILS_ENV\\=production TABLES\\=some\\ data TAGS\\=remote",
       }, :return_value => '123.tgz')
 
       it 'prints result of rake task' do
@@ -360,7 +360,7 @@ describe 'cap dump' do
 
       it 'uses custom rake binary' do
         expect(@cap.dump).to receive(:fetch_rake).and_return('/custom/rake')
-        expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; /custom/rake -s dump:create PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=production TAGS\\=remote").and_return('123.tgz')
+        expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; /custom/rake -s dump:create PROGRESS_TTY\\=#{plus} RAILS_ENV\\=production TAGS\\=remote").and_return('123.tgz')
         grab_output do
           @cap.find_and_execute_task('dump:remote:create')
         end
@@ -369,40 +369,40 @@ describe 'cap dump' do
 
     describe 'restore' do
       it 'calls remote rake task with default rails_env' do
-        expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; rake -s dump:restore PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=production")
+        expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; rake -s dump:restore PROGRESS_TTY\\=#{plus} RAILS_ENV\\=production")
         @cap.find_and_execute_task('dump:remote:restore')
       end
 
       it 'calls remote rake task with fetched rails_env' do
         expect(@cap.dump).to receive(:fetch_rails_env).and_return('dev')
-        expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; rake -s dump:restore PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=dev")
+        expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; rake -s dump:restore PROGRESS_TTY\\=#{plus} RAILS_ENV\\=dev")
         @cap.find_and_execute_task('dump:remote:restore')
       end
 
       test_passing_environment_variables(:remote, :restore, {
-        :like => "rake -s dump:restore LIKE\\=some\\ data PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=production",
-        :tags => "rake -s dump:restore PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=production TAGS\\=some\\ data",
-        :migrate_down => "rake -s dump:restore MIGRATE_DOWN\\=some\\ data PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=production",
-        :restore_schema => "rake -s dump:restore PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=production RESTORE_SCHEMA\\=some\\ data",
-        :restore_tables => "rake -s dump:restore PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=production RESTORE_TABLES\\=some\\ data",
-        :restore_assets => "rake -s dump:restore PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=production RESTORE_ASSETS\\=some\\ data",
+        :like => "rake -s dump:restore LIKE\\=some\\ data PROGRESS_TTY\\=#{plus} RAILS_ENV\\=production",
+        :tags => "rake -s dump:restore PROGRESS_TTY\\=#{plus} RAILS_ENV\\=production TAGS\\=some\\ data",
+        :migrate_down => "rake -s dump:restore MIGRATE_DOWN\\=some\\ data PROGRESS_TTY\\=#{plus} RAILS_ENV\\=production",
+        :restore_schema => "rake -s dump:restore PROGRESS_TTY\\=#{plus} RAILS_ENV\\=production RESTORE_SCHEMA\\=some\\ data",
+        :restore_tables => "rake -s dump:restore PROGRESS_TTY\\=#{plus} RAILS_ENV\\=production RESTORE_TABLES\\=some\\ data",
+        :restore_assets => "rake -s dump:restore PROGRESS_TTY\\=#{plus} RAILS_ENV\\=production RESTORE_ASSETS\\=some\\ data",
       })
 
       it 'uses custom rake binary' do
         expect(@cap.dump).to receive(:fetch_rake).and_return('/custom/rake')
-        expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; /custom/rake -s dump:restore PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=production")
+        expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; /custom/rake -s dump:restore PROGRESS_TTY\\=#{plus} RAILS_ENV\\=production")
         @cap.find_and_execute_task('dump:remote:restore')
       end
     end
 
     describe 'download' do
       it 'runs rake versions to get avaliable versions' do
-        expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=production").and_return('')
+        expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions PROGRESS_TTY\\=#{plus} RAILS_ENV\\=production").and_return('')
         @cap.find_and_execute_task('dump:remote:download')
       end
 
       it 'blocks sending summary to versions' do
-        expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=production").and_return('')
+        expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; rake -s dump:versions PROGRESS_TTY\\=#{plus} RAILS_ENV\\=production").and_return('')
         Dump::Env::DICTIONARY[:summary].each do |name|
           Dump::Env.with_env name => 'true' do
             @cap.find_and_execute_task('dump:remote:download')
@@ -411,10 +411,10 @@ describe 'cap dump' do
       end
 
       test_passing_environment_variables(:remote, :transfer, {
-        :like => "rake -s dump:versions LIKE\\=some\\ data PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=production",
-        :tags => "rake -s dump:versions PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=production TAGS\\=some\\ data",
-        :summary => "rake -s dump:versions PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=production", # block sending summary to versions
-        :transfer_via => "rake -s dump:versions PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=production", # tranfer_via is used internally
+        :like => "rake -s dump:versions LIKE\\=some\\ data PROGRESS_TTY\\=#{plus} RAILS_ENV\\=production",
+        :tags => "rake -s dump:versions PROGRESS_TTY\\=#{plus} RAILS_ENV\\=production TAGS\\=some\\ data",
+        :summary => "rake -s dump:versions PROGRESS_TTY\\=#{plus} RAILS_ENV\\=production", # block sending summary to versions
+        :transfer_via => "rake -s dump:versions PROGRESS_TTY\\=#{plus} RAILS_ENV\\=production", # tranfer_via is used internally
       }, :cap_task => 'dump:remote:download')
 
       it 'does not download anything if there are no versions avaliable' do
@@ -446,7 +446,7 @@ describe 'cap dump' do
 
       it 'runs rake versions use custom rake binary' do
         expect(@cap.dump).to receive(:fetch_rake).and_return('/custom/rake')
-        expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; /custom/rake -s dump:versions PROGRESS_TTY\\=#{PLUS} RAILS_ENV\\=production").and_return('')
+        expect(@cap.dump).to receive(:run_remote).with("cd #{@remote_path}; /custom/rake -s dump:versions PROGRESS_TTY\\=#{plus} RAILS_ENV\\=production").and_return('')
         @cap.find_and_execute_task('dump:remote:download')
       end
     end

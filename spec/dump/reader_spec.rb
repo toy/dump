@@ -31,14 +31,12 @@ describe Reader do
   end
 
   describe 'summary' do
-    Summary = Reader::Summary
-    describe Summary do
+    describe Reader::Summary do
       it 'formats text' do
-        @summary = Summary.new
-        @summary.header 'One'
-        @summary.data(%w[fff ggg jjj ppp qqq www])
-        @summary.header 'Two'
-        @summary.data([['fff', 234], ['ggg', 321], ['jjj', 666], ['ppp', 678], ['qqq', 123], ['www', 345]].map{ |entry| entry.join(': ') })
+        subject.header 'One'
+        subject.data(%w[fff ggg jjj ppp qqq www])
+        subject.header 'Two'
+        subject.data([['fff', 234], ['ggg', 321], ['jjj', 666], ['ppp', 678], ['qqq', 123], ['www', 345]].map{ |entry| entry.join(': ') })
 
         output = <<-TEXT
           One:
@@ -56,13 +54,13 @@ describe Reader do
             qqq: 123
             www: 345
         TEXT
-        expect(@summary.to_s).to eq(output.gsub(/#{output[/^\s+/]}/, '  '))
+        expect(subject.to_s).to eq(output.gsub(/#{output[/^\s+/]}/, '  '))
       end
 
       it 'pluralizes' do
-        expect(Summary.pluralize(0, 'file')).to eq('0 files')
-        expect(Summary.pluralize(1, 'file')).to eq('1 file')
-        expect(Summary.pluralize(10, 'file')).to eq('10 files')
+        expect(described_class.pluralize(0, 'file')).to eq('0 files')
+        expect(described_class.pluralize(1, 'file')).to eq('1 file')
+        expect(described_class.pluralize(10, 'file')).to eq('10 files')
       end
     end
 
@@ -93,7 +91,7 @@ describe Reader do
         expect(@summary).to receive(:data).with(formatted_tables)
         expect(@summary).to receive(:header).with('Assets')
         expect(@summary).to receive(:data).with(formatted_assets)
-        allow(Summary).to receive(:new).and_return(@summary)
+        allow(Reader::Summary).to receive(:new).and_return(@summary)
 
         expect(described_class.summary('/abc/123.tmp')).to eq(@summary)
       end
@@ -122,7 +120,7 @@ describe Reader do
       expect(@summary).to receive(:data).with(formatted_assets)
       expect(@summary).to receive(:header).with('Schema')
       expect(@summary).to receive(:data).with(schema_lines)
-      allow(Summary).to receive(:new).and_return(@summary)
+      allow(Reader::Summary).to receive(:new).and_return(@summary)
 
       expect(described_class.summary('/abc/123.tmp', :schema => true)).to eq(@summary)
     end
