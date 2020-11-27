@@ -71,6 +71,9 @@ Style/OptionalBooleanParameter:
 Style/ParallelAssignment:
   Enabled: false
 
+Style/RedundantArgument:
+  Enabled: false
+
 Style/SafeNavigation:
   Enabled: false
 
