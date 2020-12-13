@@ -85,5 +85,6 @@ if RUBY_VERSION >= '2.3'
 end
 
 if RUBY_VERSION >= '2.5'
-  appgen 'rails' => '~> 6.0'
+  appgen 'rails' => '~> 6.0.0'
+  appgen 'rails' => '~> 6.1'
 end
