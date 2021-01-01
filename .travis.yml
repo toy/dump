@@ -3,7 +3,7 @@ language: ruby
 services:
   - mysql
 addons:
-  postgresql: '9.3'
+  postgresql: '9.4'
 rvm:
   - '1.9.3-p551'
   - '2.2.10'
@@ -23,8 +23,6 @@ before_install:
   - mysql -e 'create database myapp_test;'
   - psql -c 'create database myapp_test;' -U postgres
   - cp .travis.database.yml spec/db/database.yml
-  - psql --version
-  - psql -c 'SELECT version();' -U postgres
 install:
   - ./bundle install --jobs=3 --retry=3
   - ./bundle exec appraisal install --jobs=3 --retry=3
