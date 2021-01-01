@@ -181,7 +181,7 @@ describe 'full cycle' do
       end
     end
 
-    adapters.combination(2) do |adapter_src, adapter_dst|
+    adapters.permutation(2) do |adapter_src, adapter_dst|
       it "dumps using #{adapter_src} and restores using #{adapter_dst}" do
         saved_chicken_data = nil
         use_adapter(adapter_src) do
