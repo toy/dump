@@ -1,5 +1,7 @@
 dist: xenial
 language: ruby
+services:
+  - mysql
 addons:
   postgresql: '9.3'
 rvm:
