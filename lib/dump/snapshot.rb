@@ -57,17 +57,15 @@ module Dump
     end
 
     def parts
-      @parts ||= begin
-        if (m = name.match(/^(\d{#{4 + 2 + 2 + 2 + 2 + 2}})(-[^@]+)?((?:@[^@]+)+)?\.(tmp|tgz)$/))
-          {
-            :time => m[1],
-            :desc => m[2] && m[2][1, m[2].length],
-            :tags => m[3] && m[3][1, m[3].length],
-            :ext => m[4],
-          }
-        else
-          {}
-        end
+      @parts ||= if (m = name.match(/^(\d{#{4 + 2 + 2 + 2 + 2 + 2}})(-[^@]+)?((?:@[^@]+)+)?\.(tmp|tgz)$/))
+        {
+          :time => m[1],
+          :desc => m[2] && m[2][1, m[2].length],
+          :tags => m[3] && m[3][1, m[3].length],
+          :ext => m[4],
+        }
+      else
+        {}
       end
     end
 
