@@ -1,0 +1,92 @@
+name: check
+on:
+  push:
+  pull_request:
+  schedule:
+  - cron: 45 4 * * 4
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    container: "${{ matrix.container }}"
+    strategy:
+      matrix:
+        container:
+        - ruby:1.9
+        - ruby:2.0
+        - ruby:2.1
+        - ruby:2.2
+        - ruby:2.3
+        - ruby:2.4
+        - ruby:2.5
+        - ruby:2.6
+        - ruby:2.7
+        - ruby:3.0
+        - jruby:9.2
+      fail-fast: false
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_USER: mysql
+          MYSQL_PASSWORD: mysql
+          MYSQL_DATABASE: dump_test
+          MYSQL_ROOT_PASSWORD: password
+        options: --health-cmd "mysqladmin ping" --health-interval 10s --health-timeout 5s --health-retries 3
+      postgres:
+        image: postgres:9.4
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: dump_test
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+    - uses: actions/checkout@v2
+    - run: which git || (apt update && apt -y install git)
+    - run: git init
+    - run: |
+        echo "gem: --no-ri --no-rdoc --no-document" > ~/.gemrc
+        gem install rubygems-update || gem install rubygems-update --version '< 3'
+        update_rubygems
+    - run: |
+        gem install bundler --version '< 2'
+        ruby -rrubygems -e 'puts <<-RUBY
+        #!/usr/bin/env ruby
+        require "rubygems"
+        version = "#{Gem::Dependency.new("bundler", "< 2.0").to_spec.version}"
+        gem "bundler", version
+        load Gem.bin_path("bundler", "bundle", version)
+        RUBY' | tee bundle
+        chmod +x bundle
+    - run: |
+        tee spec/db/database.yml << YAML
+        sqlite3:
+          adapter: sqlite3
+          database: ':memory:'
+
+        mysql:
+          adapter: mysql2
+          host: mysql
+          database: dump_test
+          username: mysql
+          password: mysql
+          encoding: utf8
+
+        postgresql:
+          adapter: postgresql
+          host: postgres
+          database: dump_test
+          username: postgres
+          password: postgres
+        YAML
+    - run: ./bundle install --jobs=3 --retry=3
+    - run: RUBYOPT=-rset ./bundle exec appraisal install --jobs=3 --retry=3
+    - run: ./bundle exec appraisal rspec
+  rubocop:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.0'
+        bundler-cache: true
+    - run: bundle exec rubocop

@@ -58,6 +58,11 @@ def appgen(gems)
       when RUBY_VERSION < '2.0'
         gem 'rake', '< 12.3'
       end
+
+      case
+      when RUBY_VERSION >= '3.0'
+        gem 'sorted_set'
+      end
     end
   end
 end
@@ -81,7 +86,7 @@ end
 if RUBY_VERSION >= '2.3'
   appgen 'rails' => '~> 5.0.0' if RUBY_VERSION < '2.5'
   appgen 'rails' => '~> 5.1.0' if RUBY_VERSION < '2.6'
-  appgen 'rails' => '~> 5.2'
+  appgen 'rails' => '~> 5.2'   if RUBY_VERSION < '3.0'
 end
 
 if RUBY_VERSION >= '2.5'

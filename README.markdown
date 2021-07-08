@@ -1,5 +1,5 @@
 [![Gem Version](https://img.shields.io/gem/v/dump.svg?style=flat)](https://rubygems.org/gems/dump)
-[![Build Status](https://img.shields.io/travis/toy/dump/master.svg?style=flat)](https://travis-ci.org/toy/dump)
+[![Build Status](https://img.shields.io/github/workflow/status/toy/dump/check/master?logo=github)](https://github.com/toy/dump/actions/workflows/check.yml)
 [![Code Climate](https://img.shields.io/codeclimate/maintainability/toy/dump.svg?style=flat)](https://codeclimate.com/github/toy/dump)
 
 # Dump
