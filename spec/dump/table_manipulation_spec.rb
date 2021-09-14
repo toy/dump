@@ -141,8 +141,8 @@ describe Dump::TableManipulation do
   describe 'table_chunk_size' do
     it 'returns chunk_size based on estimated average for row size' do
       expect(self).to receive(:table_columns).with('first').and_return(
-        [double(:column, :type => :integer, :limit => nil)] * 3 +
-        [double(:column, :type => :string, :limit => nil)] * 3 +
+        ([double(:column, :type => :integer, :limit => nil)] * 3) +
+        ([double(:column, :type => :string, :limit => nil)] * 3) +
         [double(:column, :type => :text, :limit => nil)]
       )
       expect(table_chunk_size('first')).to satisfy{ |n|
@@ -228,7 +228,7 @@ describe Dump::TableManipulation do
 
         expect(self).to receive(:select_all_by_sql).with(sql % '>= 0').and_return(@rows[0, 100])
         5.times do |i|
-          last_primary_key = 100 + i * 100
+          last_primary_key = 100 + (i * 100)
           expect(self).to receive(:select_all_by_sql).with(sql % "> #{last_primary_key}").and_return(@rows[last_primary_key, 100])
         end
 
