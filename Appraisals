@@ -62,6 +62,7 @@ def appgen(gems)
       case
       when RUBY_VERSION >= '3.0'
         gem 'sorted_set'
+        gem 'net-smtp'
       end
     end
   end
@@ -90,6 +91,6 @@ if RUBY_VERSION >= '2.3'
 end
 
 if RUBY_VERSION >= '2.5'
-  appgen 'rails' => '~> 6.0.0'
+  appgen 'rails' => '~> 6.0.0' if RUBY_VERSION < '3.1'
   appgen 'rails' => '~> 6.1'
 end

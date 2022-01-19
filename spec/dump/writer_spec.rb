@@ -31,7 +31,7 @@ describe Writer do
   describe 'open' do
     it 'creates dir for dump' do
       allow(Zlib::GzipWriter).to receive(:open)
-      expect(FileUtils).to receive(:mkpath).with('/abc/def/ghi')
+      expect(FileUtils).to receive(:mkpath).with('/abc/def/ghi', any_args)
       described_class.new('/abc/def/ghi/123.tgz').open
     end
 
