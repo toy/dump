@@ -11,7 +11,7 @@ describe Dump do
     end
 
     it 'calls Snapshot.list with options if called with version' do
-      expect(Dump::Snapshot).to receive(:list).with(:like => '123').and_return([])
+      expect(Dump::Snapshot).to receive(:list).with({:like => '123'}).and_return([])
       described_class.versions(:like => '123')
     end
 
@@ -205,7 +205,7 @@ describe Dump do
     describe 'with version' do
       it 'calls Snapshot.list with options' do
         allow(Dump::Snapshot).to receive(:list)
-        expect(Dump::Snapshot).to receive(:list).with(:like => '213').and_return([])
+        expect(Dump::Snapshot).to receive(:list).with({:like => '213'}).and_return([])
         grab_output do
           described_class.restore(:like => '213')
         end
@@ -249,14 +249,14 @@ describe Dump do
 
   describe 'cleanup' do
     it 'calls ask for all files in dump dir and for dumps' do
-      expect(Dump::Snapshot).to receive(:list).with(:all => true).and_return([])
+      expect(Dump::Snapshot).to receive(:list).with({:all => true}).and_return([])
       expect(Dump::Snapshot).to receive(:list).with({}).and_return([])
       described_class.cleanup
     end
 
     it 'calls Snapshot.list with options if called with version and tags' do
-      expect(Dump::Snapshot).to receive(:list).with(:like => '123', :tags => 'a,b,c', :all => true).and_return([])
-      expect(Dump::Snapshot).to receive(:list).with(:like => '123', :tags => 'a,b,c').and_return([])
+      expect(Dump::Snapshot).to receive(:list).with({:like => '123', :tags => 'a,b,c', :all => true}).and_return([])
+      expect(Dump::Snapshot).to receive(:list).with({:like => '123', :tags => 'a,b,c'}).and_return([])
       described_class.cleanup(:like => '123', :tags => 'a,b,c')
     end
 
