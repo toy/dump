@@ -102,12 +102,12 @@ def reset_rake!
   Rake::Task.define_task('db:schema:dump') do
     File.open(schema_path, 'r') do |r|
       if ENV['SCHEMA']
-        File.write(ENV['SCHEMA'], r.read)
+        File.write(ENV.fetch('SCHEMA', nil), r.read)
       end
     end
   end
   Rake::Task.define_task('db:schema:load') do
-    load(ENV['SCHEMA'])
+    load(ENV.fetch('SCHEMA', nil))
   end
 end
 

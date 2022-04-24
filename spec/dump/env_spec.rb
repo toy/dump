@@ -12,28 +12,28 @@ describe Dump::Env do
     it 'sets env to new_value for duration of block' do
       ENV['LIKE'] = 'old_value'
 
-      expect(ENV['LIKE']).to eq('old_value')
+      expect(ENV.fetch('LIKE', nil)).to eq('old_value')
       described_class.with_env('LIKE' => 'new_value') do
-        expect(ENV['LIKE']).to eq('new_value')
+        expect(ENV.fetch('LIKE', nil)).to eq('new_value')
       end
-      expect(ENV['LIKE']).to eq('old_value')
+      expect(ENV.fetch('LIKE', nil)).to eq('old_value')
     end
 
     it 'uses dictionary' do
       ENV['LIKE'] = 'old_value'
 
-      expect(ENV['LIKE']).to eq('old_value')
+      expect(ENV.fetch('LIKE', nil)).to eq('old_value')
       described_class.with_env(:like => 'new_value') do
-        expect(ENV['LIKE']).to eq('new_value')
+        expect(ENV.fetch('LIKE', nil)).to eq('new_value')
       end
-      expect(ENV['LIKE']).to eq('old_value')
+      expect(ENV.fetch('LIKE', nil)).to eq('old_value')
     end
   end
 
   describe '[]' do
     it 'mimics ENV' do
       ENV['VERSION'] = 'VERSION_value'
-      expect(described_class['VERSION']).to eq(ENV['VERSION'])
+      expect(described_class['VERSION']).to eq(ENV.fetch('VERSION', nil))
     end
 
     it 'returns nil on non existing env variable' do

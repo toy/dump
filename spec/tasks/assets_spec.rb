@@ -19,7 +19,7 @@ describe 'rake assets' do
     end_src
     expect(File).to receive(:readlines).with(File.join(Dump.rails_root, 'config/assets')).and_return(StringIO.new(data).readlines)
     @rake['assets'].invoke
-    expect(ENV['ASSETS']).to eq('public/images/a:public/images/b')
+    expect(ENV.fetch('ASSETS', nil)).to eq('public/images/a:public/images/b')
   end
 
   it 'ignores comments in config/assets' do
@@ -31,7 +31,7 @@ describe 'rake assets' do
     end_src
     allow(File).to receive(:readlines).and_return(StringIO.new(data).readlines)
     @rake['assets'].invoke
-    expect(ENV['ASSETS']).to eq('public/images/a:public/images/b')
+    expect(ENV.fetch('ASSETS', nil)).to eq('public/images/a:public/images/b')
   end
 
   it "does not change ENV['ASSETS'] if it already exists" do
@@ -42,7 +42,7 @@ describe 'rake assets' do
     allow(File).to receive(:readlines).and_return(StringIO.new(data).readlines)
     Dump::Env.with_env :assets => 'public/images' do
       @rake['assets'].invoke
-      expect(ENV['ASSETS']).to eq('public/images')
+      expect(ENV.fetch('ASSETS', nil)).to eq('public/images')
     end
   end
 

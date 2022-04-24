@@ -44,7 +44,7 @@ module Dump
         old = {}
         hash.each do |key, value|
           key = DICTIONARY[key].first if DICTIONARY[key]
-          old[key] = ENV[key]
+          old[key] = ENV.fetch(key, nil)
           ENV[key] = value
         end
         begin
