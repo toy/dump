@@ -66,7 +66,7 @@ module Dump
         if DICTIONARY[key]
           ENV.values_at(*DICTIONARY[key]).compact.first
         else
-          ENV[key]
+          ENV.fetch(key, nil)
         end
       end
 
