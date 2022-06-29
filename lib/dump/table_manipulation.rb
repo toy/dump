@@ -153,14 +153,14 @@ module Dump
         "#{quote_table_name(table)}.#{quote_column_name(primary_key)}"
       case connection.adapter_name.downcase
       when 'sqlserver'
-        "SELECT TOP #{chunk_size} * FROM #{quote_table_name(table)}" \
-        " WHERE #{quoted_primary_key} %s" \
-        " ORDER BY #{quoted_primary_key} ASC"
+        "SELECT TOP #{chunk_size} * FROM #{quote_table_name(table)} " \
+        "WHERE #{quoted_primary_key} %s " \
+        "ORDER BY #{quoted_primary_key} ASC"
       else
-        "SELECT * FROM #{quote_table_name(table)}" \
-        " WHERE #{quoted_primary_key} %s" \
-        " ORDER BY #{quoted_primary_key} ASC" \
-        " LIMIT #{chunk_size}"
+        "SELECT * FROM #{quote_table_name(table)} " \
+        "WHERE #{quoted_primary_key} %s " \
+        "ORDER BY #{quoted_primary_key} ASC " \
+        "LIMIT #{chunk_size}"
       end
     end
   end
