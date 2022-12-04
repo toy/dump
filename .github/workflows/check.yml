@@ -45,20 +45,12 @@ jobs:
     - uses: actions/checkout@v2
     - run: which git || (apt update && apt -y install git)
     - run: git init
-    - run: |
+    - if: ${{ matrix.container >= 'ruby:1.9' && matrix.container < 'ruby:2.3' }}
+      run: |
         echo "gem: --no-ri --no-rdoc --no-document" > ~/.gemrc
-        gem install rubygems-update || gem install rubygems-update --version '< 3'
+        gem install rubygems-update --version '< 3'
         update_rubygems
-    - run: |
         gem install bundler --version '< 2'
-        ruby -rrubygems -e 'puts <<-RUBY
-        #!/usr/bin/env ruby
-        require "rubygems"
-        version = "#{Gem::Dependency.new("bundler", "< 2.0").to_spec.version}"
-        gem "bundler", version
-        load Gem.bin_path("bundler", "bundle", version)
-        RUBY' | tee bundle
-        chmod +x bundle
     - run: |
         tee spec/db/database.yml << YAML
         sqlite3:
@@ -80,6 +72,6 @@ jobs:
           username: postgres
           password: postgres
         YAML
-    - run: ./bundle install --jobs=3 --retry=3
-    - run: RUBYOPT=-rset ./bundle exec appraisal install --jobs=3 --retry=3
-    - run: ./bundle exec appraisal rspec
+    - run: bundle install --jobs=3 --retry=3
+    - run: RUBYOPT=-rset bundle exec appraisal install --jobs=3 --retry=3
+    - run: bundle exec appraisal rspec
