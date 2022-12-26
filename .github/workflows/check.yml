@@ -7,24 +7,23 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
-    container: "${{ matrix.container }}"
     strategy:
       matrix:
-        container:
-        - ruby:1.9
-        - ruby:2.0
-        - ruby:2.1
-        - ruby:2.2
-        - ruby:2.3
-        - ruby:2.4
-        - ruby:2.5
-        - ruby:2.6
-        - ruby:2.7
-        - ruby:3.0
-        - ruby:3.1
-        - ruby:3.2
-        - jruby:9.3
-        - jruby:9.4
+        ruby:
+        - '1.9'
+        - '2.0'
+        - '2.1'
+        - '2.2'
+        - '2.3'
+        - '2.4'
+        - '2.5'
+        - '2.6'
+        - '2.7'
+        - '3.0'
+        - '3.1'
+        - '3.2'
+        - jruby-9.3
+        - jruby-9.4
       fail-fast: false
     services:
       mysql:
@@ -35,6 +34,8 @@ jobs:
           MYSQL_DATABASE: dump_test
           MYSQL_ROOT_PASSWORD: password
         options: --health-cmd "mysqladmin ping" --health-interval 10s --health-timeout 5s --health-retries 3
+        ports:
+          - 3306:3306
       postgres:
         image: postgres:9.4
         env:
@@ -42,10 +43,14 @@ jobs:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: dump_test
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+        ports:
+          - 5432:5432
     steps:
     - uses: actions/checkout@v3
-    - run: which git || (apt update && apt -y install git)
-    - run: git init
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: "${{ matrix.ruby }}"
+        bundler-cache: true
     - if: ${{ matrix.container >= 'ruby:1.9' && matrix.container < 'ruby:2.3' }}
       run: |
         echo "gem: --no-ri --no-rdoc --no-document" > ~/.gemrc
@@ -60,7 +65,7 @@ jobs:
 
         mysql:
           adapter: mysql2
-          host: mysql
+          host: 127.0.0.1
           database: dump_test
           username: mysql
           password: mysql
@@ -68,7 +73,7 @@ jobs:
 
         postgresql:
           adapter: postgresql
-          host: postgres
+          host: localhost
           database: dump_test
           username: postgres
           password: postgres
