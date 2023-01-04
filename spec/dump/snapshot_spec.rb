@@ -125,7 +125,7 @@ describe Dump::Snapshot do
         #             0        1 2   3     4     5       6   7   8     9 10  11  12    131415  16
         dumps_tags = [''] + %w[a a,d a,d,o a,d,s a,d,s,o a,o a,s a,s,o d d,o d,s d,s,o o s s,o z]
         paths = dumps_tags.each_with_index.map do |dump_tags, i|
-          path = dump_path("196504140659#{10 + i}@#{dump_tags}.tgz")
+          path = dump_path("196504140659#{i + 10}@#{dump_tags}.tgz")
           expect(File).to receive(:file?).with(path).at_least(1).and_return(true)
           path
         end

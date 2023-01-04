@@ -68,7 +68,7 @@ module Dump
     def write_table(table)
       row_count = table_row_count(table)
       config[:tables][table] = row_count
-      Progress.start(table, 1 + row_count) do
+      Progress.start(table, row_count + 1) do
         create_file("#{table}.dump") do |f|
           columns = table_columns(table)
           column_names = columns.map(&:name).sort

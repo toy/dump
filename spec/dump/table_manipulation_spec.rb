@@ -228,7 +228,7 @@ describe Dump::TableManipulation do
 
         expect(self).to receive(:select_all_by_sql).with(sql % '>= 0').and_return(@rows[0, 100])
         5.times do |i|
-          last_primary_key = 100 + (i * 100)
+          last_primary_key = (i * 100) + 100
           expect(self).to receive(:select_all_by_sql).with(sql % "> #{last_primary_key}").and_return(@rows[last_primary_key, 100])
         end
 
