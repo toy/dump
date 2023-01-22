@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-def appgen(gems) # rubocop:disable Metrics/MethodLength
+def appgen(gems) # rubocop:disable Metrics/MethodLength, Metrics/AbcSize, Metrics/PerceivedComplexity
   description = gems.map{ |name, version| "#{name} #{version}" }.join(', ')
   appraise "ruby-#{RUBY_VERSION[/\d+\.\d+/]} #{description}" do
     rails_version = gems['rails'][/\d+(\.\d+)+/]
@@ -27,6 +27,8 @@ def appgen(gems) # rubocop:disable Metrics/MethodLength
       case
       when rails_version =~ /^[2345]\./
         gem 'sqlite3', '~> 1.3.5'
+      when RUBY_VERSION < '2.7'
+        gem 'sqlite3', '< 1.6'
       else
         gem 'sqlite3'
       end

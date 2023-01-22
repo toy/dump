@@ -54,7 +54,7 @@ Metrics/ModuleLength:
 # Offense count: 6
 # Configuration parameters: IgnoredMethods.
 Metrics/PerceivedComplexity:
-  Max: 20
+  Max: 18
 
 # Offense count: 3
 # Cop supports --auto-correct.
