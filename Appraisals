@@ -59,6 +59,7 @@ def appgen(gems) # rubocop:disable Metrics/MethodLength, Metrics/AbcSize, Metric
       case
       when RUBY_VERSION < '2.0'
         gem 'rake', '< 12.3'
+        gem 'rails-html-sanitizer', '< 1.5' if rails_version >= '4.2'
       end
 
       case
