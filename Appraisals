@@ -56,16 +56,18 @@ def appgen(gems) # rubocop:disable Metrics/MethodLength, Metrics/AbcSize, Metric
         gem 'pg'
       end
 
-      case
-      when RUBY_VERSION < '2.0'
+      if RUBY_VERSION < '2.0'
         gem 'rake', '< 12.3'
         gem 'rails-html-sanitizer', '< 1.5' if rails_version >= '4.2'
       end
 
-      case
-      when RUBY_VERSION >= '3.0'
+      if RUBY_VERSION >= '3.0'
         gem 'sorted_set'
         gem 'net-smtp'
+      end
+
+      if RUBY_VERSION < '2.5'
+        gem 'loofah', '< 2.21.0'
       end
     end
   end
