@@ -10,7 +10,7 @@ end
 ActiveRecord::Base.logger = Logger.new(File.join(Dump.rails_root, 'log/dump.log'))
 
 def database_configs
-  YAML.load(File.read(File.expand_path('../db/database.yml', __FILE__)))
+  YAML.load_file(File.expand_path('../db/database.yml', __FILE__))
 end
 
 def adapters
