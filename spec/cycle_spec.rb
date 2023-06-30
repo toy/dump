@@ -207,16 +207,14 @@ describe 'full cycle' do
           dump_path = File.join(Dump.rails_root, 'dump', dump_name)
 
           data = []
-          Zlib::GzipReader.open(dump_path) do |gzip|
-            Archive::Tar::Minitar.open(gzip, 'r') do |stream|
-              stream.each do |entry|
-                entry_data = if entry.full_name == 'schema.rb'
-                  entry.read
-                else
-                  Marshal.load(entry.read)
-                end
-                data << [entry.full_name, entry_data]
+          Archive::Tar::Minitar.open(Zlib::GzipReader.open(dump_path), 'r') do |stream|
+            stream.each do |entry|
+              entry_data = if entry.full_name == 'schema.rb'
+                entry.read
+              else
+                Marshal.load(entry.read)
               end
+              data << [entry.full_name, entry_data]
             end
           end
           dumps << {:path => dump_path, :data => data.sort}

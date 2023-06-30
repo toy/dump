@@ -89,11 +89,9 @@ module Dump
     end
 
     def open
-      Zlib::GzipReader.open(path) do |gzip|
-        Archive::Tar::Minitar.open(gzip, 'r') do |stream|
-          @stream = stream
-          yield(self)
-        end
+      Archive::Tar::Minitar.open(Zlib::GzipReader.open(path), 'r') do |stream|
+        @stream = stream
+        yield(self)
       end
     end
 

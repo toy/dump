@@ -130,7 +130,7 @@ describe Reader do
     it 'sets stream to gzipped tar reader' do
       @gzip = double('gzip')
       @stream = double('stream')
-      expect(Zlib::GzipReader).to receive(:open).with(Pathname('123.tgz')).and_yield(@gzip)
+      expect(Zlib::GzipReader).to receive(:open).with(Pathname('123.tgz')).and_return(@gzip)
       expect(Archive::Tar::Minitar::Input).to receive(:open).with(@gzip).and_yield(@stream)
 
       @dump = described_class.new('123.tgz')

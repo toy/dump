@@ -30,7 +30,8 @@ describe Writer do
 
   describe 'open' do
     it 'creates dir for dump' do
-      allow(Zlib::GzipWriter).to receive(:open)
+      @gzip = double('gzip', :mtime= => nil)
+      allow(Zlib::GzipWriter).to receive(:open).and_return(@gzip)
       expect(FileUtils).to receive(:mkpath).with('/abc/def/ghi', any_args)
       described_class.new('/abc/def/ghi/123.tgz').open
     end
@@ -39,7 +40,7 @@ describe Writer do
       allow(FileUtils).to receive(:mkpath)
       @gzip = double('gzip')
       @stream = double('stream')
-      expect(Zlib::GzipWriter).to receive(:open).with(Pathname('123.tgz')).and_yield(@gzip)
+      expect(Zlib::GzipWriter).to receive(:open).with(Pathname('123.tgz')).and_return(@gzip)
       expect(Archive::Tar::Minitar::Output).to receive(:open).with(@gzip).and_yield(@stream)
       expect(@gzip).to receive(:mtime=).with(Time.utc(2000))
 

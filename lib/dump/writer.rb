@@ -28,14 +28,13 @@ module Dump
 
     def open
       Pathname.new(path).dirname.mkpath
-      Zlib::GzipWriter.open(path) do |gzip|
-        gzip.mtime = Time.utc(2000)
-        lock do
-          Archive::Tar::Minitar.open(gzip, 'w') do |stream|
-            @stream = stream
-            @config = {:tables => {}}
-            yield(self)
-          end
+      gzip = Zlib::GzipWriter.open(path)
+      gzip.mtime = Time.utc(2000)
+      lock do
+        Archive::Tar::Minitar.open(gzip, 'w') do |stream|
+          @stream = stream
+          @config = {:tables => {}}
+          yield(self)
         end
       end
     end
