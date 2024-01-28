@@ -44,7 +44,7 @@ jobs:
           POSTGRES_DB: dump_test
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v3
     - run: which git || (apt update && apt -y install git)
     - run: git init
     - if: ${{ matrix.container >= 'ruby:1.9' && matrix.container < 'ruby:2.3' }}
