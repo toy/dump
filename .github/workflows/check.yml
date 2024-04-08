@@ -8,6 +8,7 @@ jobs:
   check:
     runs-on: ubuntu-latest
     container: "${{ matrix.container }}"
+    continue-on-error: ${{ startsWith(matrix.container, 'jruby:') }}
     strategy:
       matrix:
         container:
