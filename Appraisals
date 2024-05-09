@@ -31,6 +31,8 @@ def appgen(gems) # rubocop:disable Metrics/MethodLength, Metrics/AbcSize, Metric
         gem 'sqlite3', '< 1.6'
       when RUBY_VERSION < '3.0'
         gem 'sqlite3', '< 1.7'
+      when rails_version < '7.1'
+        gem 'sqlite3', '~> 1.4'
       else
         gem 'sqlite3'
       end
