@@ -120,7 +120,7 @@ module Dump
       end
 
       def stringify!(hash)
-        hash.keys.each do |key| # rubocop:disable Style/HashEachMethods
+        hash.keys.each do |key|
           hash[DICTIONARY[key] ? DICTIONARY[key].first : key.to_s] = hash.delete(key)
         end
       end

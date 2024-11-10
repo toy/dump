@@ -14,9 +14,9 @@ module Dump
       dumps = dumps.select{ |dump| dump.name[options[:like]] } if options[:like]
       if options[:tags]
         tags = get_filter_tags(options[:tags])
-        dumps = dumps.select{ |dump| (dump.tags & tags[:simple]).present? } if tags[:simple].present?
-        dumps = dumps.select{ |dump| (dump.tags & tags[:mandatory]) == tags[:mandatory] } if tags[:mandatory].present?
-        dumps = dumps.reject{ |dump| (dump.tags & tags[:forbidden]).present? } if tags[:forbidden].present?
+        dumps = dumps.select{ |dump| tags[:any].intersect?(dump.tags.to_set) } if tags[:any].present?
+        dumps = dumps.select{ |dump| tags[:all].subset?(dump.tags.to_set) } if tags[:all].present?
+        dumps = dumps.reject{ |dump| tags[:none].intersect?(dump.tags.to_set) } if tags[:none].present?
       end
       dumps
     end
@@ -172,17 +172,17 @@ module Dump
         tags.to_s.split(',').each do |tag|
           next unless (m = tag.strip.match(/^(-|\+)?(.*)$/))
 
-          type = {'+' => :mandatory, '-' => :forbidden}[m[1]] || :simple
+          type = {'+' => :all, '-' => :none}[m[1]] || :any
           next unless (cleaned_tag = clean_tag(m[2])).present?
 
           groups[type] << cleaned_tag
         end
-        [:simple, :mandatory].each do |type|
-          if (clashing = (groups[type] & groups[:forbidden])).present?
-            fail ArgumentError, "#{type} tags clashes with forbidden ones: #{clashing}"
+        [:any, :all].each do |type|
+          if (clashing = (groups[type] & groups[:none])).present?
+            fail ArgumentError, "#{type} tags clashes with none ones: #{clashing}"
           end
         end
-        groups.each_with_object({}){ |(key, value), hsh| hsh[key] = value.to_a }
+        groups
       end
     end
     include CleanNParse
