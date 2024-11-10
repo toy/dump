@@ -168,7 +168,7 @@ module Dump
       end
 
       def get_filter_tags(tags)
-        groups = Hash.new{ |hash, key| hash[key] = SortedSet.new }
+        groups = Hash.new{ |hash, key| hash[key] = Set.new }
         tags.to_s.split(',').each do |tag|
           next unless (m = tag.strip.match(/^(-|\+)?(.*)$/))
 
