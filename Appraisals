@@ -70,6 +70,12 @@ def appgen(gems) # rubocop:disable Metrics/MethodLength, Metrics/AbcSize, Metric
         gem 'net-smtp'
       end
 
+      if RUBY_VERSION >= '3.4'
+        gem 'base64'
+        gem 'bigdecimal'
+        gem 'mutex_m'
+      end
+
       if RUBY_VERSION < '2.5'
         gem 'loofah', '< 2.21.0'
       end
