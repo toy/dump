@@ -83,29 +83,18 @@ def appgen(gems) # rubocop:disable Metrics/MethodLength, Metrics/AbcSize, Metric
   end
 end
 
-if RUBY_VERSION < '2.0'
-  appgen 'rails' => '~> 2.3'
+appgen 'rails' => '~> 2.3.0' if RUBY_VERSION < '2.0'
 
-  appgen 'rails' => '~> 3.1.0'
-end
+appgen 'rails' => '~> 3.1.0' if RUBY_VERSION < '2.0'
+appgen 'rails' => '~> 3.2.0' if RUBY_VERSION < '2.4'
 
-if RUBY_VERSION < '2.4'
-  appgen 'rails' => '~> 3.2'
-end
+appgen 'rails' => '~> 4.0.0' if RUBY_VERSION >= '1.9' && RUBY_VERSION < '2.3'
+appgen 'rails' => '~> 4.1.0' if RUBY_VERSION >= '1.9' && RUBY_VERSION < '2.4'
+appgen 'rails' => '~> 4.2.0' if RUBY_VERSION >= '1.9' && RUBY_VERSION < '2.5'
 
-if RUBY_VERSION >= '1.9'
-  appgen 'rails' => '~> 4.0.0' if RUBY_VERSION < '2.3'
-  appgen 'rails' => '~> 4.1.0' if RUBY_VERSION < '2.4'
-  appgen 'rails' => '~> 4.2'   if RUBY_VERSION < '2.5'
-end
+appgen 'rails' => '~> 5.0.0' if RUBY_VERSION >= '2.3' && RUBY_VERSION < '2.5'
+appgen 'rails' => '~> 5.1.0' if RUBY_VERSION >= '2.3' && RUBY_VERSION < '2.6'
+appgen 'rails' => '~> 5.2.0' if RUBY_VERSION >= '2.3' && RUBY_VERSION < '3.0'
 
-if RUBY_VERSION >= '2.3'
-  appgen 'rails' => '~> 5.0.0' if RUBY_VERSION < '2.5'
-  appgen 'rails' => '~> 5.1.0' if RUBY_VERSION < '2.6'
-  appgen 'rails' => '~> 5.2'   if RUBY_VERSION < '3.0'
-end
-
-if RUBY_VERSION >= '2.5'
-  appgen 'rails' => '~> 6.0.0' if RUBY_VERSION < '3.1'
-  appgen 'rails' => '~> 6.1'
-end
+appgen 'rails' => '~> 6.0.0' if RUBY_VERSION >= '2.5' && RUBY_VERSION < '3.1'
+appgen 'rails' => '~> 6.1.0' if RUBY_VERSION >= '2.5'
