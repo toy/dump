@@ -90,7 +90,7 @@ module Dump
     end
     alias_method :to_s, :name
 
-    def size
+    def size # rubocop:disable Naming/PredicateMethod
       File.size?(path)
     end
 
