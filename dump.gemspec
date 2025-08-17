@@ -23,7 +23,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'progress', '~> 3.0', '>= 3.0.1', '!= 3.2.0', '!= 3.2.1'
 
   s.add_development_dependency 'rspec', '~> 3.0'
-  if RUBY_VERSION >= '2.5'
+  if RUBY_VERSION >= '2.5' && !defined?(JRUBY_VERSION)
     s.add_development_dependency 'rubocop', '~> 1.22', '!= 1.22.2'
     s.add_development_dependency 'rubocop-rspec', '~> 2.0'
   end
