@@ -9,6 +9,7 @@ module Dump
   # Base class for dump
   class Snapshot
     include TableManipulation
+
     def self.list(options = {})
       dumps = Dir[File.join(Dump.rails_root, 'dump', options[:all] ? '*.*' : '*.tgz')].sort.select{ |path| File.file?(path) }.map{ |path| new(path) }
       dumps = dumps.select{ |dump| dump.name[options[:like]] } if options[:like]
