@@ -56,8 +56,10 @@ def appgen(gems) # rubocop:disable Metrics/MethodLength, Metrics/AbcSize, Metric
         gem 'pg', '~> 0.11'
       when rails_version =~ /^4\./
         gem 'pg', '~> 0.15'
+      when RUBY_VERSION < '3'
+        gem 'pg', '< 1.6.1'
       else
-        gem 'pg', '!= 1.6.1' # pg-1.6.1-x86_64-linux-musl requires rubygems version >= 3.3.22
+        gem 'pg'
       end
 
       if RUBY_VERSION < '2.0'
