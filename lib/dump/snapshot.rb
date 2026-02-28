@@ -113,14 +113,8 @@ module Dump
     end
 
     def lock
-      lock = File.open(path, 'r')
-      begin
-        if lock.flock(File::LOCK_EX | File::LOCK_NB)
-          yield
-        end
-      ensure
-        lock.flock(File::LOCK_UN)
-        lock.close
+      File.open(path, 'r') do |lock|
+        yield if lock.flock(File::LOCK_EX | File::LOCK_NB)
       end
     rescue Errno::ENOENT
       nil

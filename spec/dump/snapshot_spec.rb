@@ -30,9 +30,7 @@ describe Dump::Snapshot do
 
       @file = double('file')
       expect(@file).to receive(:flock).with(File::LOCK_EX | File::LOCK_NB).and_return(nil)
-      expect(@file).to receive(:flock).with(File::LOCK_UN)
-      expect(@file).to receive(:close)
-      expect(File).to receive(:open).and_return(@file)
+      expect(File).to receive(:open).and_yield(@file)
 
       described_class.new('hello').lock do
         @yield_receiver.fire
@@ -44,9 +42,7 @@ describe Dump::Snapshot do
 
       @file = double('file')
       expect(@file).to receive(:flock).with(File::LOCK_EX | File::LOCK_NB).and_return(true)
-      expect(@file).to receive(:flock).with(File::LOCK_UN)
-      expect(@file).to receive(:close)
-      expect(File).to receive(:open).and_return(@file)
+      expect(File).to receive(:open).and_yield(@file)
 
       described_class.new('hello').lock do
         @yield_receiver.fire
