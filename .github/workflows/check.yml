@@ -35,7 +35,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: password
         options: --health-cmd "mysqladmin ping" --health-interval 10s --health-timeout 5s --health-retries 3
       postgres:
-        image: postgres:9.4
+        image: postgres:9.5
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
