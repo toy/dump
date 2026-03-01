@@ -100,3 +100,10 @@ appgen 'rails' => '~> 5.2.0' if RUBY_VERSION >= '2.3' && RUBY_VERSION < '3.0'
 
 appgen 'rails' => '~> 6.0.0' if RUBY_VERSION >= '2.5' && RUBY_VERSION < '3.1'
 appgen 'rails' => '~> 6.1.0' if RUBY_VERSION >= '2.5'
+
+appgen 'rails' => '~> 7.0.0' if RUBY_VERSION >= '2.7'
+appgen 'rails' => '~> 7.1.0' if RUBY_VERSION >= '2.7'
+appgen 'rails' => '~> 7.2.0' if RUBY_VERSION >= '3.1'
+
+appgen 'rails' => '~> 8.0.0' if RUBY_VERSION >= '3.2'
+appgen 'rails' => '~> 8.1.0' if RUBY_VERSION >= '3.2'

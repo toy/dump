@@ -31,7 +31,7 @@ else
   command = if version < '3'
     "rails _#{version}_ #{app_path}"
   else
-    "rails _#{version}_ new #{app_path} -TSJ --skip-bundle"
+    "rails _#{version}_ new #{app_path} -TSJ --skip-bundle --skip-bootsnap && rm -r #{app_path}/.git"
   end
 
   abort [
