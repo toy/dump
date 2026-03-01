@@ -426,21 +426,21 @@ describe 'cap dump' do
       it 'transfers latest version dump' do
         allow(@cap.dump).to receive(:run_remote).and_return("100.tgz\n200.tgz\n300.tgz\n")
         expect(@cap.dump).to receive(:do_transfer).with(:down, "#{@remote_path}/dump/300.tgz", 'dump/300.tgz')
-        allow(FileUtils).to receive(:mkpath)
+        allow(Dir).to receive(:mkdir)
         @cap.find_and_execute_task('dump:remote:download')
       end
 
       it 'handles extra spaces around file names' do
         allow(@cap.dump).to receive(:run_remote).and_return("\r\n\r\n\r  100.tgz   \r\n\r\n\r  200.tgz   \r\n\r\n\r  300.tgz   \r\n\r\n\r  ")
         expect(@cap.dump).to receive(:do_transfer).with(:down, "#{@remote_path}/dump/300.tgz", 'dump/300.tgz')
-        allow(FileUtils).to receive(:mkpath)
+        allow(Dir).to receive(:mkdir)
         @cap.find_and_execute_task('dump:remote:download')
       end
 
       it 'creates local dump dir' do
         allow(@cap.dump).to receive(:run_remote).and_return("100.tgz\n200.tgz\n300.tgz\n")
         allow(@cap.dump).to receive(:do_transfer)
-        expect(FileUtils).to receive(:mkpath).with('dump')
+        allow(Dir).to receive(:mkdir).with('dump')
         @cap.find_and_execute_task('dump:remote:download')
       end
 

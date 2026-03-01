@@ -32,12 +32,14 @@ describe Writer do
     it 'creates dir for dump' do
       @gzip = double('gzip', :mtime= => nil)
       allow(Zlib::GzipWriter).to receive(:open).and_return(@gzip)
-      expect(FileUtils).to receive(:mkpath).with('/abc/def/ghi', any_args)
+      allow(Dir).to receive(:mkdir).with('/abc')
+      allow(Dir).to receive(:mkdir).with('/abc/def')
+      allow(Dir).to receive(:mkdir).with('/abc/def/ghi')
       described_class.new('/abc/def/ghi/123.tgz').open
     end
 
     it 'sets stream to gzipped tar writer' do
-      allow(FileUtils).to receive(:mkpath)
+      allow(Dir).to receive(:mkdir)
       @gzip = double('gzip')
       @stream = double('stream')
       expect(Zlib::GzipWriter).to receive(:open).with(Pathname('123.tgz')).and_return(@gzip)
