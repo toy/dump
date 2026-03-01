@@ -71,35 +71,10 @@ module Dump
         create_file("#{table}.dump") do |f|
           columns = table_columns(table)
           column_names = columns.map(&:name).sort
-          columns_by_name = columns.index_by(&:name)
+          type_cast = type_caster(columns)
 
           Marshal.dump(column_names, f)
           Progress.step
-
-          type_cast = case
-          when columns.first.respond_to?(:type_cast_from_database)
-            proc do |column_name, value|
-              columns_by_name[column_name].type_cast_from_database(value)
-            end
-          when columns.first.respond_to?(:type_cast)
-            proc do |column_name, value|
-              columns_by_name[column_name].type_cast(value)
-            end
-          when connection.respond_to?(:lookup_cast_type_from_column)
-            proc do |column_name, value|
-              connection.lookup_cast_type_from_column(columns_by_name[column_name]).deserialize(value)
-            end
-          when columns.first.respond_to?(:fetch_cast_type)
-            proc do |column_name, value|
-              columns_by_name[column_name].fetch_cast_type(connection).deserialize(value)
-            end
-          when columns.first.respond_to?(:cast_type)
-            proc do |column_name, value|
-              columns_by_name[column_name].cast_type.deserialize(value)
-            end
-          else
-            fail 'Failed to determine the way to convert values from database input to the appropriate ruby type'
-          end
 
           each_table_row(table, row_count) do |row|
             values = column_names.map do |column_name|
@@ -147,6 +122,37 @@ module Dump
       Dump::Env[:assets].split(Dump::Assets::SPLITTER)
     rescue
       []
+    end
+
+  private
+
+    def type_caster(columns)
+      columns_by_name = columns.index_by(&:name)
+
+      case
+      when columns.first.respond_to?(:type_cast_from_database)
+        proc do |column_name, value|
+          columns_by_name[column_name].type_cast_from_database(value)
+        end
+      when columns.first.respond_to?(:type_cast)
+        proc do |column_name, value|
+          columns_by_name[column_name].type_cast(value)
+        end
+      when connection.respond_to?(:lookup_cast_type_from_column)
+        proc do |column_name, value|
+          connection.lookup_cast_type_from_column(columns_by_name[column_name]).deserialize(value)
+        end
+      when columns.first.respond_to?(:fetch_cast_type)
+        proc do |column_name, value|
+          columns_by_name[column_name].fetch_cast_type(connection).deserialize(value)
+        end
+      when columns.first.respond_to?(:cast_type)
+        proc do |column_name, value|
+          columns_by_name[column_name].cast_type.deserialize(value)
+        end
+      else
+        fail 'Failed to determine the way to convert values from database input to the appropriate ruby type'
+      end
     end
   end
 end
