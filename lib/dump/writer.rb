@@ -89,6 +89,14 @@ module Dump
             proc do |column_name, value|
               connection.lookup_cast_type_from_column(columns_by_name[column_name]).deserialize(value)
             end
+          when columns.first.respond_to?(:fetch_cast_type)
+            proc do |column_name, value|
+              columns_by_name[column_name].fetch_cast_type(connection).deserialize(value)
+            end
+          when columns.first.respond_to?(:cast_type)
+            proc do |column_name, value|
+              columns_by_name[column_name].cast_type.deserialize(value)
+            end
           else
             fail 'Failed to determine the way to convert values from database input to the appropriate ruby type'
           end
