@@ -5,6 +5,31 @@ on:
   schedule:
   - cron: 45 4 * * 4
 jobs:
+  reminder:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '4'
+        bundler-cache: true
+    - run: |
+        curl -fsSL 'https://rubygems.org/api/v1/versions/rails.json' | ruby -rjson -e '
+          next_version = Dir.glob("spec/dummy-*")
+            .map{ Gem::Version.new(_1.split("-")[1] + ".0") }
+            .max
+            .bump
+
+          untested = JSON.load(STDIN)
+            .map{ Gem::Version.new(_1["number"]) }
+            .reject(&:prerelease?)
+            .reject{ _1 < next_version }
+            .sort
+            .map(&:approximate_recommendation)
+            .uniq
+
+          abort "Test versions #{untested.join(", ")}" unless untested.empty?
+        '
   check:
     runs-on: ubuntu-latest
     container: "${{ matrix.container }}"
