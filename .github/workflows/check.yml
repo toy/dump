@@ -8,7 +8,7 @@ jobs:
   reminder:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - uses: ruby/setup-ruby@v1
       with:
         ruby-version: '4'
@@ -67,7 +67,7 @@ jobs:
           POSTGRES_DB: dump_test
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - run: which git || (apt update && apt -y install git)
     - run: git init
     - if: ${{ matrix.container >= 'ruby:1.9' && matrix.container < 'ruby:2.3' }}
