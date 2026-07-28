@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - uses: ruby/setup-ruby@v1
       with:
         ruby-version: '4'
@@ -68,6 +70,8 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - run: which git || (apt update && apt -y install git)
     - run: git init
     - if: ${{ matrix.container >= 'ruby:1.9' && matrix.container < 'ruby:2.3' }}
